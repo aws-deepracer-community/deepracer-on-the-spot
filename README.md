@@ -1,6 +1,17 @@
 # deepracer-templates
 Simple cloudformation template to assist in creating ec2 instances for deep racer learning.
 
+## Two stack, one for S3 storage bucket and EFS filesystem, a second one for an ec2 instance. The ec2 instance mounts the efs at /home/ubunty/efs - base-resources.yaml and instance.yaml
+Supporting scripts: create-base-resources.sh and delete-base-resources.sh
+
+create-base-resources.sh takes mandatory parameters: stack-name, ip address to add to ncls, ncl rule number
+The script also makes assumptions about account structure and figures out which VPC (defaul) to use, and randomly pics a subnet.
+
+delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.
+
+create-instance.sh - takes two mandatory parameters, the name of the base resources stack and the name of the stack used to create an ec2 instance. This script can be execute multiple times, with different instance stack names. All the different instances will share the base resources (efs and s3).
+
+## Single template creates storage bucket and ec2 instance - ec2-and-s3-for-learning.yaml
 
 Example awscli provisioning of the template:
 
