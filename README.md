@@ -2,7 +2,7 @@
 Simple cloudformation template to assist in creating ec2 instances for deep racer learning.
 
 ## Two stack, one for S3 storage bucket and EFS filesystem, a second one for an ec2 instance. The ec2 instance mounts the efs at /home/ubunty/efs - base-resources.yaml and instance.yaml
-Supporting scripts: create-base-resources.hs and delete-base-resources.sh
+Supporting scripts: create-base-resources.sh and delete-base-resources.sh
 
 create-base-resources.sh takes mandatory parameters: stack-name, ip address to add to ncls, ncl rule number
 The script also makes assumptions about account structure and figures out which VPC (defaul) to use, and randomly pics a subnet.
