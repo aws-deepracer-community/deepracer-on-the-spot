@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Setup an EC2 instance for deep racer
+
+Parameters:
+  AMIId:
+    Type: String
+    Default: ami-02fe94dee086c0c37
+  InstanceType:
+    Type: String
+    Default: g4dn.4xlarge
+  SpotPrice:
+    Type: String
+    Default: '0.45'
+  ResourcesStackName:
+    Type: String
+
+Outputs:
+
+  DNS:
+    Value: !GetAtt Instance.PublicDnsName
+
+  Instance:
+    Value: !Ref Instance
+
+Conditions:
+  UseOnDemandInstance: !Equals
+    - !Ref SpotPrice
+    - ''
+
+Resources:
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-launch-template
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name:
+            !ImportValue
+            'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
+        ImageId: !Ref AMIId
+        InstanceType: !Ref InstanceType
+        InstanceMarketOptions: !If [ UseOnDemandInstance, !Ref 'AWS::NoValue', { MarketType: spot, SpotOptions: { MaxPrice: !Ref SpotPrice }} ]
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              VolumeType: gp3
+              VolumeSize: 40
+              DeleteOnTermination: 'true'
+
+  Instance:
+    Type: AWS::EC2::Instance
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            1-append-fstab:
+              command: "bash -c 'cat /tmp/fstabcontent.txt >> /etc/fstab'"
+
+            2-mount-fstab:
+              command: "bash -c 'mount /home/ubuntu/efs'"
+
+          files:
+            /tmp/fstabcontent.txt:
+              content:
+                Fn::Sub:
+                - "${EFS} /home/ubuntu/efs efs _netdev,tls,accesspoint=${EFSAP} 0 0"
+                - EFS:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-EFS"
+                  EFSAP:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-EFSAccessPoint"
+              mode : "000755"
+              owner: root
+              context:
+                EFS:
+                  Fn::Sub
+            /etc/profile.d/my_efs.sh:
+              content:
+                Fn::Sub:
+                - "export MY_EFS=${EFS}"
+                - EFS:
+                        Fn::ImportValue:
+                            !Sub "${ResourcesStackName}-EFS"
+              mode : "000755"
+              owner: root
+              group: root
+            /etc/profile.d/my_bucket.sh:
+              content:
+                Fn::Sub:
+                - "export MY_BUCKET=${BUCKET}"
+                - BUCKET:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-Bucket"
+              mode : "000755"
+              owner: root
+              group: root
+    Properties:
+      SubnetId:
+        !ImportValue
+        'Fn::Sub': '${ResourcesStackName}-EFSSubnet'
+      SecurityGroupIds:
+        - !ImportValue
+          'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          snap install amazon-ssm-agent --classic
+          apt-get update
+          apt-get -y install python3-pip awscli
+          cd /tmp/ && git clone https://github.com/aws/efs-utils && cd efs-utils && ./build-deb.sh && apt-get -y install ./build/amazon-efs-utils*deb > /tmp/efs-utils.log
+          curl -o awscfnboot.tar.gz https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-py3-latest.tar.gz
+          tar -zxf awscfnboot.tar.gz
+          python3 -m pip install ./aws-cfn-bootstrap-2.0 > /tmp/pip.log
+          su - ubuntu -c "mkdir efs"
+          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
+          su - ubuntu -c "git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git && cd deepracer-for-cloud && ./bin/prepare.sh > /tmp/deepracer.log"

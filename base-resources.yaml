@@ -1,0 +1,192 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Setup an EC2 instance for deep racer
+
+Parameters:
+  AMIId:
+    Type: String
+    Default: ami-02fe94dee086c0c37
+  MyIPAddress:
+    Type: String
+  RuleNumber:
+    Type: String
+  NetworkAclId:
+    Type: String
+  VPC:
+    Type: String
+  EFSSubnet:
+    Type: String
+
+Outputs:
+  InstanceProfile:
+    Description: Instance Profile
+    Value: !Ref InstanceProfile
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-InstanceProfile'
+
+  Bucket:
+    Description: S3 Bucket
+    Value: !Ref Bucket
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-Bucket'
+
+  SecurityGroup:
+    Description: Security Group
+    Value: !GetAtt SecurityGroup.GroupId
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-SecurityGroup'
+
+  EFS:
+    Description: Elastic FileSystem
+    Value: !Ref EFS
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-EFS'
+
+  EFSAccessPoint:
+    Description: Elastic FileSystem Access Point
+    Value: !Ref EFSAccessPoint
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-EFSAccessPoint'
+
+  EFSSubnet:
+    Description: Elastic FileSystem Subnet
+    Value: !Ref EFSSubnet
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-EFSSubnet'
+
+Resources:
+  Bucket:
+    Type: 'AWS::S3::Bucket'
+
+  BucketAccessPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              AWS:
+                - !GetAtt InstanceRole.Arn
+            Action:
+              - 's3:GetObject'
+              - 's3:ListBucket'
+              - 's3:PutObject'
+              - 's3:PutObjectAcl'
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref Bucket
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref Bucket
+                  - '/*'
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow access from My IP Address
+
+  SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupName: !Ref SecurityGroup
+      IpProtocol: -1
+      CidrIp: !Sub '${MyIPAddress}/32'
+
+
+  EFSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: EFS SG
+      SecurityGroupIngress:
+        -
+          SourceSecurityGroupId: !GetAtt SecurityGroup.GroupId
+          FromPort: 2049
+          IpProtocol: tcp
+          ToPort: 2049
+
+  EFSMountTarget:
+    Type: AWS::EFS::MountTarget
+    Properties:
+      FileSystemId: !Ref EFS
+      SecurityGroups:
+        - !Ref EFSSecurityGroup
+      SubnetId: !Ref EFSSubnet
+
+  NACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId: !Ref NetworkAclId
+      CidrBlock: !Sub '${MyIPAddress}/32'
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: !Ref RuleNumber
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMFullAccess
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-inline-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - kms:*
+                  - s3:*
+                Resource: '*'
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+      - !Ref InstanceRole
+
+  EFS:
+    Type: AWS::EFS::FileSystem
+    Properties:
+      Encrypted: true
+
+  EFSAccessPoint:
+    Type: AWS::EFS::AccessPoint
+    Properties:
+      FileSystemId: !Ref EFS
+      PosixUser:
+        Uid: '1000'
+        Gid: '1000'
+      RootDirectory:
+        CreationInfo:
+          OwnerGid: '1000'
+          OwnerUid: '1000'
+          Permissions: '0755'
+        Path: '/home/ubuntu/efs'
