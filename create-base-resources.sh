@@ -17,7 +17,7 @@ if [[ "$stackName" == "" || "$ip" == "" || "$ruleN" == "" ]]; then
 fi
 
 vpc=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[*].VpcId' --output text)
-subnetCount=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$vpc --query 'Subnets[*].SubnetId' | wc -l)
+subnetCount=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$vpc --query 'Subnets[*].SubnetId' | grep subnet | wc -l)
 subnetIndex=$(( ( RANDOM % $subnetCount ) ))
 subnetId=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$vpc --query "Subnets[$subnetIndex].SubnetId" --output text)
 nacl=$(aws ec2 describe-network-acls --filters Name=vpc-id,Values=$vpc --query 'NetworkAcls[*].NetworkAclId' --output text)
