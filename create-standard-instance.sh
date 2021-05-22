@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 baseResourcesStackName=$1
 shift
 

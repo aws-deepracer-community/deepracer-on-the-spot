@@ -9,15 +9,16 @@ Parameters:
     Type: String
     Default: g4dn.4xlarge
   BlockDurationMinutes:
-    Type: Number
+    Type: String
     AllowedValues:
+      - ''
       - 60
       - 120
       - 180
       - 240
       - 300
       - 360
-    Default: 360
+    Default: 120
   ResourcesStackName:
     Type: String
 
@@ -30,7 +31,7 @@ Outputs:
     Value: !Ref Instance
 
 Conditions:
-  UseBlockDuration: !Equals
+  NoBlockDuration: !Equals
     - !Ref BlockDurationMinutes
     - ''
 
@@ -49,7 +50,7 @@ Resources:
         InstanceType: !Ref InstanceType
         InstanceMarketOptions:
           MarketType: spot
-          SpotOptions: !If [ UseBlockDuration, { BlockDurationMinutes: !Ref BlockDurationMinutes }, !Ref 'AWS::NoValue' ]
+          SpotOptions: !If [ NoBlockDuration, !Ref 'AWS::NoValue', { BlockDurationMinutes: !Ref BlockDurationMinutes } ]
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:

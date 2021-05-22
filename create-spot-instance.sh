@@ -1,9 +1,21 @@
 #!/bin/bash
 
+set -x
+
 baseResourcesStackName=$1
 shift
 
 stackName=$1
 shift
 
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml
+blockDurationConfig=""
+
+if [[ -n "$DEEPRACER_BLOCK_DURATION" ]]; then
+	blockDurationConfig="BlockDurationMinutes=$DEEPRACER_BLOCK_DURATION"
+fi
+
+if [[ -n "$NO_DEEPRACER_BLOCK_DURATION" ]]; then
+	blockDurationConfig=BlockDurationMinutes=
+fi
+
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml
