@@ -18,4 +18,11 @@ if [[ -n "$NO_DEEPRACER_BLOCK_DURATION" ]]; then
 	blockDurationConfig=BlockDurationMinutes=
 fi
 
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml
+instanceTypeConfig=''
+
+if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
+       instanceTypeConfig="InstanceType=$DEEPRACER_INSTANCE_TYPE"
+fi
+
+
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml

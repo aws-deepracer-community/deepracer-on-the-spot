@@ -8,4 +8,10 @@ shift
 stackName=$1
 shift
 
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ResourcesStackName=$baseResourcesStackName --template-file standard-instance.yaml
+instanceTypeConfig=''
+
+if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
+	instanceTypeConfig="InstanceType=$DEEPRACER_INSTANCE_TYPE"
+fi
+
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName --template-file standard-instance.yaml

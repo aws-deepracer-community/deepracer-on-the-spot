@@ -3,8 +3,8 @@ Description: Setup a standard EC2 instance for deep racer
 
 Parameters:
   AMIId:
-    Type: String
-    Default: ami-02fe94dee086c0c37
+    Type: AWS::EC2::Image::Id
+    Default: ami-04751c628226b9b59
   InstanceType:
     Type: String
     Default: g4dn.4xlarge
@@ -88,9 +88,6 @@ Resources:
               owner: root
               group: root
     Properties:
-      SubnetId:
-        !ImportValue
-        'Fn::Sub': '${ResourcesStackName}-EFSSubnet'
       SecurityGroupIds:
         - !ImportValue
           'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
