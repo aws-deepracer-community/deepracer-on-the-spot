@@ -8,9 +8,16 @@ Parameters:
   InstanceType:
     Type: String
     Default: g4dn.4xlarge
-  SpotPrice:
-    Type: String
-    Default: '0.45'
+  BlockDurationMinutes:
+    Type: Number
+    AllowedValues:
+      - 60
+      - 120
+      - 180
+      - 240
+      - 300
+      - 360
+    Default: 360
   ResourcesStackName:
     Type: String
 
@@ -23,8 +30,8 @@ Outputs:
     Value: !Ref Instance
 
 Conditions:
-  UseOnDemandInstance: !Equals
-    - !Ref SpotPrice
+  UseBlockDuration: !Equals
+    - !Ref BlockDurationMinutes
     - ''
 
 Resources:
@@ -40,7 +47,9 @@ Resources:
             'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
         ImageId: !Ref AMIId
         InstanceType: !Ref InstanceType
-        InstanceMarketOptions: !If [ UseOnDemandInstance, !Ref 'AWS::NoValue', { MarketType: spot, SpotOptions: { MaxPrice: !Ref SpotPrice }} ]
+        InstanceMarketOptions:
+          MarketType: spot
+          SpotOptions: !If [ UseBlockDuration, { BlockDurationMinutes: !Ref BlockDurationMinutes }, !Ref 'AWS::NoValue' ]
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:
