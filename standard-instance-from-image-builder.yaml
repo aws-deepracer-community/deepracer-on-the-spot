@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Setup a standard EC2 instance for deep racer
+
+Parameters:
+  InstanceType:
+    Type: String
+    Default: g4dn.4xlarge
+  ResourcesStackName:
+    Type: String
+
+Outputs:
+
+  DNS:
+    Value: !GetAtt Instance.PublicDnsName
+
+  Instance:
+    Value: !Ref Instance
+
+Resources:
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: !Sub ${AWS::StackName}-launch-template
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Name:
+            !ImportValue
+            'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
+        ImageId: !Sub '{{resolve:ssm:/DeepRacer/Images/${ResourcesStackName}}}'
+        InstanceType: !Ref InstanceType
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              VolumeType: gp3
+              VolumeSize: 40
+              DeleteOnTermination: 'true'
+
+  Instance:
+    Type: AWS::EC2::Instance
+    CreationPolicy:
+      ResourceSignal:
+        Count: '1'
+        Timeout: PT30M
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          commands:
+            1-append-fstab:
+              command: "bash -c 'cat /tmp/fstabcontent.txt >> /etc/fstab'"
+
+            2-mount-fstab:
+              command: "bash -c 'mount /home/ubuntu/efs'"
+
+            3-signal-cfn:
+              command:
+                      !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}'"
+
+          files:
+            /tmp/fstabcontent.txt:
+              content:
+                Fn::Sub:
+                - "${EFS} /home/ubuntu/efs efs _netdev,tls,accesspoint=${EFSAP} 0 0"
+                - EFS:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-EFS"
+                  EFSAP:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-EFSAccessPoint"
+              mode : "000755"
+              owner: root
+            /etc/profile.d/my_efs.sh:
+              content:
+                Fn::Sub:
+                - "export MY_EFS=${EFS}"
+                - EFS:
+                        Fn::ImportValue:
+                            !Sub "${ResourcesStackName}-EFS"
+              mode : "000755"
+              owner: root
+              group: root
+            /etc/profile.d/my_bucket.sh:
+              content:
+                Fn::Sub:
+                - "export MY_BUCKET=${BUCKET}"
+                - BUCKET:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-Bucket"
+              mode : "000755"
+              owner: root
+              group: root
+    Properties:
+      SecurityGroupIds:
+        - !ImportValue
+          'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
