@@ -99,7 +99,7 @@ Resources:
       LifecycleConfiguration:
         Rules:
           - Id: Delete
-            Prefix: imageBuilder
+            Prefix: imagebuilder
             Status: Enabled
             ExpirationInDays: 1
 
