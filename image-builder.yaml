@@ -24,6 +24,7 @@ Resources:
         - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilder
         - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds
         - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AmazonSNSFullAccess
+        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AmazonEC2FullAccess
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -55,8 +56,8 @@ Resources:
               - Fn::Sub:
                   - arn:${AWS::Partition}:s3:::${BUCKET}/*
                   - BUCKET:
-                          Fn::ImportValue:
-                            !Sub '${ResourcesStackName}-Bucket'
+                      Fn::ImportValue:
+                        !Sub '${ResourcesStackName}-Bucket'
 
   # To pass the InstanceRole to an EC2 instance, we need an InstanceProfile.
   # This profile will be used during the image build process.
@@ -84,9 +85,9 @@ Resources:
       Logging:
         S3Logs:
           S3BucketName:
-                  Fn::ImportValue:
-                    !Sub '${ResourcesStackName}-Bucket'
-          S3KeyPrefix: !Join [ "-", [ 'imagebuilder', !Ref "AWS::StackName" ] ]
+            Fn::ImportValue:
+              !Sub '${ResourcesStackName}-Bucket'
+          S3KeyPrefix: !Join ["-", ['imagebuilder', !Ref "AWS::StackName"]]
       # If you would like to keep the instance running after a failed build, set TerminateInstanceOnFailure to false.
       # TerminateInstanceOnFailure: false
       # If you do not have a default VPC or want to use a different VPC, you must specify the IDs of a subnet and one or more
@@ -100,7 +101,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: EFSUtils
-      Version: 0.0.1
+      Version: 0.0.2
       Description: Install the latest EFS Utils.
       ChangeDescription: First version
       Platform: Linux
@@ -157,7 +158,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: CFNInit
-      Version: 0.0.1
+      Version: 0.0.2
       Description: Install the latest CFNInit.
       ChangeDescription: First version
       Platform: Linux
@@ -195,7 +196,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: DeepRacer
-      Version: 0.0.1
+      Version: 0.0.2
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -228,12 +229,161 @@ Resources:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./bin/init.sh -c aws -a gpu'"
 
+  InstallDeepRacerDockerImagesScriptComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: DeepRacerDockerImagesScript
+      Version: 0.0.2
+      Description: Install the latest DeepRacer docker images script.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: InstallDeepRacerDockerImages
+        description: Downloads and Installs deepracer docker images script
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: PullDeepracerDockerImagesScript
+                action: CreateFile
+                inputs:
+                  - path: /home/ubuntu/pull-docker-images.sh
+                    permissions: 775
+                    owner: ubuntu
+                    group: ubuntu
+                    content: |
+                        REGISTRY=https://index.docker.io/v2
+                        REGISTRY_AUTH=https://auth.docker.io
+                        REGISTRY_SERVICE=registry.docker.io
+                        IMAGE_NAME=""
+                        DOCKER_BIN=docker
+                        TAGS_FILTER=""
+                        VERBOSE=0
+                        TAGS_LIMIT=1
+                        ignore_404=0
+
+                        OPTIND=1
+
+                        while getopts "n:f:v" opt; do
+                            case "$opt" in
+                            n)  IMAGE_NAME="$OPTARG"
+                                ;;
+                            f)  TAGS_FILTER="$OPTARG"
+                                ;;
+                            v)  VERBOSE=1
+                                ;;
+                            esac
+                        done
+
+                        shift $((OPTIND-1))
+
+                        [ "${1:-}" = "--" ] && shift
+
+                        if [ -z $IMAGE_NAME ]; then
+                          echo Requires Image Name
+                          exit 1;
+                        else
+                          if [[ $VERBOSE -eq 1 ]]; then
+                             echo Using IMAGE_NAME: $IMAGE_NAME
+                          fi
+                        fi
+
+                        function do_curl_get () {
+                          local URL="$1"
+                          shift
+                          local array=("$@")
+                          HTTP_RESPONSE="$(curl -sSL --write-out "HTTPSTATUS:%{http_code}" \
+                            -H "Content-Type: application/json;charset=UTF-8" \
+                            "${array[@]}" \
+                            -X GET "$URL")"
+                          # echo $HTTP_RESPONSE
+                          HTTP_BODY=$(echo "$HTTP_RESPONSE" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
+                          HTTP_STATUS=$(echo "$HTTP_RESPONSE" | tr -d '\n' | sed -E 's/.*HTTPSTATUS:([0-9]{3})$/\1/')
+                          # Check that the http status is 200
+                          if [[ "$HTTP_STATUS" -ne 200 ]]; then
+                            if [[ "$ignore_404" -eq 0 ]]; then
+                              if [[ "$VERBOSE" -eq 0 ]]; then
+                                echo -e "\\nError $HTTP_STATUS from: $URL\\n"
+                              else
+                                echo -e "\\nError $HTTP_STATUS from: $URL\\nHTTP_BODY: $HTTP_BODY\\n"
+                              fi
+                            fi
+                          fi
+                        }
+
+                        #  Get AUTH token
+                        # This cannot be: ("")
+                        CURL_AUTH=()
+                        CURL_URL="$REGISTRY_AUTH/token?service=${REGISTRY_SERVICE##*(//)}&scope=repository:$IMAGE_NAME:pull"
+                        do_curl_get "$CURL_URL" "${CURL_AUTH[@]}"
+                        AUTH=$(echo "$HTTP_BODY" | jq --raw-output .token)
+
+                        # Get Tags
+                        CURL_AUTH=( -H "Authorization: Bearer $AUTH" )
+                        CURL_URL="$REGISTRY/$IMAGE_NAME/tags/list"
+                        do_curl_get "$CURL_URL" "${CURL_AUTH[@]}"
+                        TAGS_CURL=$(echo "$HTTP_BODY")
+                        TAGS_temp=$(echo "$TAGS_CURL"|jq --arg TAGS_FILTER "$TAGS_FILTER" -r '.tags[]|select(.|endswith($TAGS_FILTER))'|grep -vi windows|sort -r --version-sort)
+
+                        TAG=$(echo "$TAGS_temp"|sed -n 1,"$TAGS_LIMIT"p)
+
+                        docker pull $IMAGE_NAME:$TAG
+
+  ExpandRootVolumeComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: ExapandRootVolume
+      Version: 0.0.2
+      Description: Expand root volume.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: ExpandRootVolume
+        description: Expands root volume
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: ExpandRootVolume
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - |
+                      id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+                      vol_id=$(aws ec2 describe-instances --region us-east-1 --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
+                      aws ec2 modify-volume --size 40 --volume-id $vol_id --region us-east-1
+
+
+  PullDeepracerDockerImagesComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: PullDeepracerDockerImages
+      Version: 0.0.2
+      Description: Pull newest deepracer docker images.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: PullDeepracerDockerImages
+        description: Pull deepracer docker images
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: PullDeepracerDockerImages
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -gpu'"
+                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -cpu-avx2'"
+                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
+                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
+
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-imagerecipe.html
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: UbuntuServerForDeepRacer
-      Version: 0.0.1
+      Version: 0.0.2
       # ${AWS::Partition} returns the partition where you are running the CloudFormation template. For standard AWS regions, the
       # partition is aws. For resources elsewhere, the partition is aws-partitionname. For example, China (Beijing and Ningxia)
       # regions use aws-cn and AWS GovCloud (US) regions are aws-us-gov.
@@ -244,9 +394,15 @@ Resources:
         - ComponentArn:
             Ref: InstallEFSUtilsComponent
         - ComponentArn:
+            Ref: ExpandRootVolumeComponent
+        - ComponentArn:
             Ref: InstallCFNInitComponent
         - ComponentArn:
             Ref: InstallDeepRacerComponent
+        - ComponentArn:
+            Ref: InstallDeepRacerDockerImagesScriptComponent
+        - ComponentArn:
+            Ref: PullDeepracerDockerImagesComponent
 
   UbuntuServerImagePipeline:
     Type: AWS::ImageBuilder::ImagePipeline
@@ -263,9 +419,6 @@ Resources:
       Schedule:
         PipelineExecutionStartCondition: EXPRESSION_MATCH_ONLY
         ScheduleExpression: 'cron(0 0 * * ? *)'
-
-
-
 
   SNSPermissionToInvokeUpdateParameter:
     Type: AWS::Lambda::Permission
@@ -317,8 +470,8 @@ Resources:
       InlineCode: !Sub |
         import json
         import boto3
-        import logging 
-        import os 
+        import logging
+        import os
 
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
@@ -337,7 +490,7 @@ Resources:
                 event_message = record['Sns']['Message']
 
                 message_json = json.loads(event_message)
-                  
+
                 image_state = (message_json['state']['status'])
 
                 if (image_state == 'AVAILABLE'):
@@ -360,7 +513,7 @@ Resources:
                     logger.info('SSM Updated: {}'.format(response))
 
                     #add tags to the SSM parameter
-                    ssm_client.add_tags_to_resource(ResourceType='Parameter', ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image Builder' } ] ) 
+                    ssm_client.add_tags_to_resource(ResourceType='Parameter', ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image Builder' } ] )
             return None
 
       Description: Update SSM Parameter with the latest AMI
@@ -373,15 +526,15 @@ Resources:
             Fn::ImportValue:
               !Sub '${ResourcesStackName}-AMIParameter'
       Policies:
-          - Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ssm:PutParameter
-                  - ssm:AddTagsToResource
-                  - ssm:GetParameters
-                  - ec2:*
-                Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:PutParameter
+                - ssm:AddTagsToResource
+                - ssm:GetParameters
+                - ec2:*
+              Resource: '*'
 
 
   DeleteOldAMIs:
@@ -392,8 +545,8 @@ Resources:
       InlineCode: !Sub |
         import json
         import boto3
-        import logging 
-        import os 
+        import logging
+        import os
 
         logger = logging.getLogger()
         logger.setLevel(logging.INFO)
@@ -439,7 +592,7 @@ Resources:
             ignore_images = [current_image]
             image_from_parameters = get_image_by_parameter()
             if image_from_parameters:
-                ignore_images.append(image_from_parameters) 
+                ignore_images.append(image_from_parameters)
             images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']
             images = list(map(lambda x: x['ImageId'], images))
             images = list(filter(lambda x: x not in ignore_images, images))
@@ -455,7 +608,6 @@ Resources:
                 event_message = record['Sns']['Message']
 
                 message_json = json.loads(event_message)
-                  
                 image_state = (message_json['state']['status'])
 
                 if (image_state == 'AVAILABLE'):
@@ -474,11 +626,10 @@ Resources:
             Fn::ImportValue:
               !Sub '${ResourcesStackName}-AMIParameter'
       Policies:
-      Policies:
-          - Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - ssm:GetParameters
-                  - ec2:*
-                Resource: '*'
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameters
+                - ec2:*
+              Resource: '*'
