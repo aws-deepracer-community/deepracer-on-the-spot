@@ -114,6 +114,8 @@ Resources:
             Principal:
               AWS:
                 - !GetAtt InstanceRole.Arn
+              Service:
+                - deepracer.amazonaws.com
             Action:
               - 's3:GetObject'
               - 's3:ListBucket'
