@@ -40,3 +40,7 @@ The script create-standard-instance-from-image-builder.sh functions like 'create
 ### Spot instance from image builder
 
 The script create-spot-instance-from-image-builder.sh functions like 'create-standard-instance.sh', only difference being that it utilizes the AMI created by the image builder pipeline.
+
+### Adding additional IP addresses to security group ingress and NACLs
+
+The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address> <NACL Rule Number>

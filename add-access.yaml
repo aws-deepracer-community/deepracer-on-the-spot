@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Setup an EC2 instance for deep racer
+
+Parameters:
+  ResourcesStackName:
+    Type: String
+  MyIPAddress:
+    Type: String
+  RuleNumber:
+    Type: String
+
+Resources:
+
+  SecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId:
+        Fn::ImportValue:
+          !Sub '${ResourcesStackName}-SecurityGroup'
+      IpProtocol: -1
+      CidrIp: !Sub '${MyIPAddress}/32'
+
+  NACLEntry:
+    Type: AWS::EC2::NetworkAclEntry
+    Properties:
+      NetworkAclId:
+        Fn::ImportValue:
+          !Sub '${ResourcesStackName}-NetworkAclId'
+      CidrBlock: !Sub '${MyIPAddress}/32'
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: !Ref RuleNumber
