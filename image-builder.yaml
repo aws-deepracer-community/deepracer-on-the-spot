@@ -481,26 +481,55 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: python3.7
-      InlineCode: !Sub "import json\nimport boto3\nimport logging\nimport os\n\nlogger\
-        \ = logging.getLogger()\nlogger.setLevel(logging.INFO)\n\nssm_client = boto3.client('ssm')\n\
-        ec2_client = boto3.client('ec2')\nssm_parameter_name = os.getenv('ParameterPath')\n\
-        \ndef handler(event, context):\n    logger.info('Printing event: {}'.format(event))\n\
-        \    process_sns_event(event)\n    return None\n\ndef process_sns_event(event):\n\
-        \    for record in (event['Records']):\n        event_message = record['Sns']['Message']\n\
-        \n        message_json = json.loads(event_message)\n\n        image_state\
-        \ = (message_json['state']['status'])\n\n        if (image_state == 'AVAILABLE'):\n\
-        \            logger.info('Image is available')\n\n            ami = message_json['outputResources']['amis'][0]\n\
-        \            ec2_client.create_tags(Resources=[ami['image']], Tags=[{'Key':\
-        \ 'Name', 'Value': 'DeepRacer'}, {'Key': 'Stack', 'Value': '${AWS::StackName}'}])\n\
-        \n            recipe_name = message_json['name']\n            logger.info('AMI\
-        \ ID: {}'.format(ami['image']))\n\n            response = ssm_client.put_parameter(\n\
-        \                Name=ssm_parameter_name,\n                Description='Latest\
-        \ AMI ID',\n                Value=ami['image'],\n                Type='String',\n\
-        \                Overwrite=True,\n                Tier='Standard'\n      \
-        \          )\n            logger.info('SSM Updated: {}'.format(response))\n\
-        \n            #add tags to the SSM parameter\n            ssm_client.add_tags_to_resource(ResourceType='Parameter',\
-        \ ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image\
-        \ Builder' } ] )\n    return None\n"
+      InlineCode: !Sub |
+        import json
+        import boto3
+        import logging 
+        import os
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        ssm_client = boto3.client('ssm')
+        ec2_client = boto3.client('ec2')
+        ssm_parameter_name = os.getenv('ParameterPath')
+
+        def handler(event, context):
+            logger.info('Printing event: {}'.format(event))
+            process_sns_event(event)
+            return None
+
+        def process_sns_event(event):
+            for record in (event['Records']):
+                event_message = record['Sns']['Message']
+
+                message_json = json.loads(event_message)
+
+                image_state = (message_json['state']['status'])
+
+                if (image_state == 'AVAILABLE'):
+                    logger.info('Image is available')
+
+                    ami = message_json['outputResources']['amis'][0]
+                    ec2_client.create_tags(Resources=[ami['image']], Tags=[{'Key': 'Name', 'Value': 'DeepRacer'}, {'Key': 'Stack', 'Value': '${AWS::StackName}'}])
+
+                    recipe_name = message_json['name']
+                    logger.info('AMI ID: {}'.format(ami['image']))
+
+                    response = ssm_client.put_parameter(
+                        Name=ssm_parameter_name,
+                        Description='Latest AMI ID',
+                        Value=ami['image'],
+                        Type='String',
+                        Overwrite=True,
+                        Tier='Standard'
+                        )
+                    logger.info('SSM Updated: {}'.format(response))
+
+                    #add tags to the SSM parameter
+                    ssm_client.add_tags_to_resource(ResourceType='Parameter', ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image Builder' } ] )
+            return None
+
       Description: Update SSM Parameter with the latest AMI
       MemorySize: 256
       Timeout: 300
@@ -524,31 +553,80 @@ Resources:
     Properties:
       Handler: index.handler
       Runtime: python3.7
-      InlineCode: !Sub "import json\nimport boto3\nimport logging\nimport os\n\nlogger\
-        \ = logging.getLogger()\nlogger.setLevel(logging.INFO)\n\nssm_client = boto3.client('ssm')\n\
-        ec2_client = boto3.client('ec2')\nssm_parameter_name = os.getenv('ParameterPath')\n\
-        \ndef handler(event, context):\n    logger.info('Printing event: {}'.format(event))\n\
-        \    process_sns_event(event)\n    return None\n\ndef get_image_by_parameter():\n\
-        \    try:\n        return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']\n\
-        \    except:\n        pass\n    return None\n\ndef get_amis_with_my_stack(current_image):\n\
-        \    stack_name = '${AWS::StackName}'\n    filters = [\n        {\n      \
-        \     'Name': 'is-public',\n           'Values': [\n               'false'\n\
-        \           ]\n        },\n        {\n           'Name': 'state',\n      \
-        \     'Values': [\n               'available'\n           ]\n        },\n\
-        \        {\n           'Name': 'tag:Stack',\n           'Values': [\n    \
-        \           '${AWS::StackName}'\n           ]\n        }\n    ]\n    ignore_images\
-        \ = [current_image]\n    image_from_parameters = get_image_by_parameter()\n\
-        \    if image_from_parameters:\n        ignore_images.append(image_from_parameters)\n\
-        \    images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']\n\
-        \    images = list(map(lambda x: x['ImageId'], images))\n    images = list(filter(lambda\
-        \ x: x not in ignore_images, images))\n    for image in images:\n        logger.info('Deregistring\
-        \ Image: {}'.format(image))\n        try:\n            ec2_client.deregister_image(ImageId=image)\n\
-        \        except:\n            pass\n\ndef process_sns_event(event):\n    for\
-        \ record in (event['Records']):\n        event_message = record['Sns']['Message']\n\
-        \n        message_json = json.loads(event_message)\n        image_state =\
-        \ (message_json['state']['status'])\n\n        if (image_state == 'AVAILABLE'):\n\
-        \            current_image = message_json['outputResources']['amis'][0]['image']\n\
-        \            get_amis_with_my_stack(current_image)\n\n    return None\n"
+      InlineCode: !Sub |
+        import json
+        import boto3
+        import logging 
+        import os
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+
+        ssm_client = boto3.client('ssm')
+        ec2_client = boto3.client('ec2')
+        ssm_parameter_name = os.getenv('ParameterPath')
+
+        def handler(event, context):
+            logger.info('Printing event: {}'.format(event))
+            process_sns_event(event)
+            return None
+
+        def get_image_by_parameter():
+            try:
+                return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']
+            except:
+                pass
+            return None
+
+        def get_amis_with_my_stack(current_image):
+            stack_name = '${AWS::StackName}'
+            filters = [
+                {
+                   'Name': 'is-public',
+                   'Values': [
+                       'false'
+                   ]
+                },
+                {
+                   'Name': 'state',
+                   'Values': [
+                       'available'
+                   ]
+                },
+                {
+                   'Name': 'tag:Stack',
+                   'Values': [
+                       '${AWS::StackName}'
+                   ]
+                }
+            ]
+            ignore_images = [current_image]
+            image_from_parameters = get_image_by_parameter()
+            if image_from_parameters:
+                ignore_images.append(image_from_parameters)
+            images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']
+            images = list(map(lambda x: x['ImageId'], images))
+            images = list(filter(lambda x: x not in ignore_images, images))
+            for image in images: 
+                logger.info('Deregistring Image: {}'.format(image))
+                try:
+                    ec2_client.deregister_image(ImageId=image)
+                except:
+                    pass
+
+        def process_sns_event(event):
+            for record in (event['Records']):
+                event_message = record['Sns']['Message']
+
+                message_json = json.loads(event_message)
+                image_state = (message_json['state']['status'])
+
+                if (image_state == 'AVAILABLE'):
+                    current_image = message_json['outputResources']['amis'][0]['image']
+                    get_amis_with_my_stack(current_image)
+
+            return None
+
       Description: Delete old AMIs
       MemorySize: 256
       Timeout: 300
