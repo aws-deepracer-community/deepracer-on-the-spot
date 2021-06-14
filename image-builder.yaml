@@ -1,30 +1,27 @@
-AWSTemplateFormatVersion: 2010-09-09
-Transform: "AWS::Serverless-2016-10-31"
-
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Parameters:
   BuildInstanceType:
     Type: CommaDelimitedList
-    Default: "g4dn.2xlarge"
-    Description: Comma-delimited list of one or more instance types to select from when building the image. Image Builder will select a type based on availability. The supplied default is compatible with the AWS Free Tier.
+    Default: g4dn.2xlarge
+    Description: >-
+      Comma-delimited list of one or more instance types to select from when building
+      the image. Image Builder will select a type based on availability. The supplied
+      default is compatible with the AWS Free Tier.
   ResourcesStackName:
     Type: String
-
 Resources:
-  # By default, AWS Services do not have permission to perform actions on your instances. This grants
-  # AWS Systems Manager (SSM) and EC2 Image Builder the necessary permissions to build an image.
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
-  # https://docs.aws.amazon.com/imagebuilder/latest/userguide/image-builder-setting-up.html
   InstanceRole:
     Type: AWS::IAM::Role
     Metadata:
       Comment: Role to be used by instance during image build.
     Properties:
       ManagedPolicyArns:
-        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
-        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilder
-        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds
-        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AmazonSNSFullAccess
-        - Fn::Sub: arn:${AWS::Partition}:iam::aws:policy/AmazonEC2FullAccess
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilder'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/EC2InstanceProfileForImageBuilderECRContainerBuilds'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonSNSFullAccess'
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/AmazonEC2FullAccess'
       AssumeRolePolicyDocument:
         Statement:
           - Action:
@@ -33,11 +30,8 @@ Resources:
             Principal:
               Service:
                 - ec2.amazonaws.com
-        Version: "2012-10-17"
+        Version: '2012-10-17'
       Path: /executionServiceEC2Role/
-
-  # Policy to allow the instance to write to the S3 bucket (via instance role / instance profile).
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-policy.html
   InstanceRoleLoggingPolicy:
     Type: AWS::IAM::Policy
     Metadata:
@@ -45,63 +39,47 @@ Resources:
     Properties:
       PolicyName: ImageBuilderLogBucketPolicy
       Roles:
-        - Ref: InstanceRole
+        - !Ref 'InstanceRole'
       PolicyDocument:
-        Version: "2012-10-17"
+        Version: '2012-10-17'
         Statement:
           - Action:
               - s3:PutObject
             Effect: Allow
             Resource:
-              - Fn::Sub:
-                  - arn:${AWS::Partition}:s3:::${BUCKET}/*
-                  - BUCKET:
-                      Fn::ImportValue:
-                        !Sub '${ResourcesStackName}-Bucket'
-
-  # To pass the InstanceRole to an EC2 instance, we need an InstanceProfile.
-  # This profile will be used during the image build process.
-  # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html
+              - !Sub
+                - arn:${AWS::Partition}:s3:::${BUCKET}/*
+                - BUCKET: !ImportValue
+                    Fn::Sub: ${ResourcesStackName}-Bucket
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Path: /executionServiceEC2Role/
       Roles:
-        - Ref: InstanceRole
-
-  # Specifies the infrastructure within which to build and test your image.
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-infrastructureconfiguration.html
+        - !Ref 'InstanceRole'
   UbuntuServerImageInfrastructureConfiguration:
     Type: AWS::ImageBuilder::InfrastructureConfiguration
     Properties:
       Name: UbuntuServer20-Image-Infrastructure-Configuration
-      InstanceProfileName:
-        Ref: InstanceProfile
-      # Set of one or more instance types to use when building the instance. Image Builder will select a type
-      # based on availability.
-      InstanceTypes:
-        Ref: BuildInstanceType
-      # Specify an S3 bucket and EC2 Image Builder will save logs to the bucket.
+      InstanceProfileName: !Ref 'InstanceProfile'
+      InstanceTypes: !Ref 'BuildInstanceType'
       Logging:
         S3Logs:
-          S3BucketName:
-            Fn::ImportValue:
-              !Sub '${ResourcesStackName}-Bucket'
-          S3KeyPrefix: !Join ["-", ['imagebuilder', !Ref "AWS::StackName"]]
-      # If you would like to keep the instance running after a failed build, set TerminateInstanceOnFailure to false.
-      # TerminateInstanceOnFailure: false
-      # If you do not have a default VPC or want to use a different VPC, you must specify the IDs of a subnet and one or more
-      # security groups to be associated with the build instance.
+          S3BucketName: !ImportValue
+            Fn::Sub: ${ResourcesStackName}-Bucket
+          S3KeyPrefix: !Join
+            - '-'
+            - - imagebuilder
+              - !Ref 'AWS::StackName'
       SecurityGroupIds:
         - !ImportValue
-          'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
-      SnsTopicArn: !Ref ImageBuilderSNSTopic
-
+          Fn::Sub: ${ResourcesStackName}-SecurityGroup
+      SnsTopicArn: !Ref 'ImageBuilderSNSTopic'
   InstallEFSUtilsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: EFSUtils
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Install the latest EFS Utils.
       ChangeDescription: First version
       Platform: Linux
@@ -117,7 +95,7 @@ Resources:
                 inputs:
                   commands:
                     - "sudo apt-get update"
-                    - "sudo apt-get -y install python3-pip awscli binutils"
+                    - "sudo apt-get -y install python3-pip awscli binutils jq zip"
               - name: InstallFolder
                 action: ExecuteBash
                 inputs:
@@ -153,12 +131,11 @@ Resources:
                   - path: '{{ build.EFSFolder.outputs.stdout }}'
                     owner: ubuntu
                     group: ubuntu
-
   InstallCFNInitComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: CFNInit
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Install the latest CFNInit.
       ChangeDescription: First version
       Platform: Linux
@@ -191,12 +168,11 @@ Resources:
                 inputs:
                   - path: '{{ build.InstallFolder.outputs.stdout }}'
                     force: true
-
   InstallDeepRacerComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: DeepRacer
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -228,12 +204,44 @@ Resources:
                 inputs:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./bin/init.sh -c aws -a gpu'"
+  CreateLogsComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: CcreateLogsScript
+      Version: '0.0.2'
+      Description: Create Logs script.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: CreateLogs
+        description: logs to s3
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: CopyLogs
+                action: CreateFile
+                inputs:
+                  - path: /home/ubuntu/bin/create_logs.sh
+                    permissions: 775
+                    owner: ubuntu
+                    group: ubuntu
+                    content: |
+                        #!/bin/bash
+                        cd $DR_DIR/data/logs
+                        rm *.log *.zip
+                        echo hello;echo hello
+                        for name in $(docker ps --format \{\{.Names}\}); do
+                            docker logs ${name} >& ${name}.log
+                        done
+                        zip robomaker_log deepracer-0_robomaker.1.*.log
+                        aws s3 cp robomaker_log.zip  s3://$DR_LOGS_COPY_S3_BUCKET/
 
   InstallDeepRacerDockerImagesScriptComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: DeepRacerDockerImagesScript
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Install the latest DeepRacer docker images script.
       ChangeDescription: First version
       Platform: Linux
@@ -247,7 +255,7 @@ Resources:
               - name: PullDeepracerDockerImagesScript
                 action: CreateFile
                 inputs:
-                  - path: /home/ubuntu/pull-docker-images.sh
+                  - path: /home/ubuntu/bin/pull-docker-images.sh
                     permissions: 775
                     owner: ubuntu
                     group: ubuntu
@@ -328,12 +336,11 @@ Resources:
                         TAG=$(echo "$TAGS_temp"|sed -n 1,"$TAGS_LIMIT"p)
 
                         docker pull $IMAGE_NAME:$TAG
-
   ExpandRootVolumeComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: ExapandRootVolume
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Expand root volume.
       ChangeDescription: First version
       Platform: Linux
@@ -352,13 +359,11 @@ Resources:
                       id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
                       vol_id=$(aws ec2 describe-instances --region us-east-1 --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
                       aws ec2 modify-volume --size 40 --volume-id $vol_id --region us-east-1
-
-
   PullDeepracerDockerImagesComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: PullDeepracerDockerImages
-      Version: 0.0.2
+      Version: '0.0.2'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
       Platform: Linux
@@ -373,80 +378,90 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -gpu'"
-                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -cpu-avx2'"
-                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
-                    - "bash -c '/home/ubuntu/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
-
-  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-imagerecipe.html
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -gpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -cpu-avx2'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
+  DeepracerS3URIComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: DeepRacerS3URI
+      Version: '0.0.2'
+      Description: Install the latest DeepRacer docker images script.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: !Sub
+        - |
+          name: DeepRacerS3URI
+          description: Creates an envrironment variable for DR_S3_URI
+          schemaVersion: 1.0
+          phases:
+            - name: build
+              steps:
+                - name: DeepRacerS3URI
+                  action: CreateFile
+                  inputs:
+                    - path: /etc/profile.d/s3_uri.sh
+                      permissions: 775
+                      owner: root
+                      group: root
+                      content: |
+                          export DR_S3_URI=${BUCKET}
+                          export DEEPRACER_S3_URI=${BUCKET}
+                          export PATH=/home/ubuntu/bin:$PATH
+        - BUCKET: !ImportValue
+            Fn::Sub: ${ResourcesStackName}-Bucket
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: UbuntuServerForDeepRacer
-      Version: 0.0.2
-      # ${AWS::Partition} returns the partition where you are running the CloudFormation template. For standard AWS regions, the
-      # partition is aws. For resources elsewhere, the partition is aws-partitionname. For example, China (Beijing and Ningxia)
-      # regions use aws-cn and AWS GovCloud (US) regions are aws-us-gov.
-      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html
-      ParentImage:
-        Fn::Sub: arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-18-lts-x86/x.x.x
+      Version: '0.0.2'
+      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-18-lts-x86/x.x.x'
       Components:
-        - ComponentArn:
-            Ref: InstallEFSUtilsComponent
-        - ComponentArn:
-            Ref: ExpandRootVolumeComponent
-        - ComponentArn:
-            Ref: InstallCFNInitComponent
-        - ComponentArn:
-            Ref: InstallDeepRacerComponent
-        - ComponentArn:
-            Ref: InstallDeepRacerDockerImagesScriptComponent
-        - ComponentArn:
-            Ref: PullDeepracerDockerImagesComponent
-
+        - ComponentArn: !Ref 'CreateLogsComponent'
+        - ComponentArn: !Ref 'DeepracerS3URIComponent'
+        - ComponentArn: !Ref 'InstallEFSUtilsComponent'
+        - ComponentArn: !Ref 'ExpandRootVolumeComponent'
+        - ComponentArn: !Ref 'InstallDeepRacerDockerImagesScriptComponent'
+        - ComponentArn: !Ref 'InstallCFNInitComponent'
+        - ComponentArn: !Ref 'InstallDeepRacerComponent'
+        - ComponentArn: !Ref 'PullDeepracerDockerImagesComponent'
   UbuntuServerImagePipeline:
     Type: AWS::ImageBuilder::ImagePipeline
     Properties:
       Description: DeepRacer image build pipeline
-      ImageRecipeArn:
-        Ref: UbuntuServerForDeepRacerImageRecipe
-      InfrastructureConfigurationArn:
-        Ref: UbuntuServerImageInfrastructureConfiguration
+      ImageRecipeArn: !Ref 'UbuntuServerForDeepRacerImageRecipe'
+      InfrastructureConfigurationArn: !Ref 'UbuntuServerImageInfrastructureConfiguration'
       Name: DeepRacerImageBuildPipeline
       Tags:
         BuildStack: !Sub '${AWS::StackName}'
         Name: DeepRacer
       Schedule:
         PipelineExecutionStartCondition: EXPRESSION_MATCH_ONLY
-        ScheduleExpression: 'cron(0 0 * * ? *)'
-
+        ScheduleExpression: cron(0 0 * * ? *)
   SNSPermissionToInvokeUpdateParameter:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt UpdateSSMParameter.Arn
+      FunctionName: !GetAtt 'UpdateSSMParameter.Arn'
       Action: lambda:InvokeFunction
       Principal: sns.amazonaws.com
-      SourceArn: !Ref ImageBuilderSNSTopic
-
+      SourceArn: !Ref 'ImageBuilderSNSTopic'
   SNSPermissionToInvokeDeleteOldAMIs:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt DeleteOldAMIs.Arn
+      FunctionName: !GetAtt 'DeleteOldAMIs.Arn'
       Action: lambda:InvokeFunction
       Principal: sns.amazonaws.com
-      SourceArn: !Ref ImageBuilderSNSTopic
-
-
+      SourceArn: !Ref 'ImageBuilderSNSTopic'
   ImageBuilderSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
-      DisplayName: "Image Builder"
+      DisplayName: Image Builder
       Subscription:
         - Protocol: lambda
-          Endpoint: !GetAtt UpdateSSMParameter.Arn
+          Endpoint: !GetAtt 'UpdateSSMParameter.Arn'
         - Protocol: lambda
-          Endpoint: !GetAtt DeleteOldAMIs.Arn
-
+          Endpoint: !GetAtt 'DeleteOldAMIs.Arn'
   TopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
@@ -460,71 +475,40 @@ Resources:
               - sns:Subscribe
             Resource: '*'
       Topics:
-        - !Ref ImageBuilderSNSTopic
-
+        - !Ref 'ImageBuilderSNSTopic'
   UpdateSSMParameter:
-    Type: "AWS::Serverless::Function"
+    Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
       Runtime: python3.7
-      InlineCode: !Sub |
-        import json
-        import boto3
-        import logging
-        import os
-
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-
-        ssm_client = boto3.client('ssm')
-        ec2_client = boto3.client('ec2')
-        ssm_parameter_name = os.getenv('ParameterPath')
-
-        def handler(event, context):
-            logger.info('Printing event: {}'.format(event))
-            process_sns_event(event)
-            return None
-
-        def process_sns_event(event):
-            for record in (event['Records']):
-                event_message = record['Sns']['Message']
-
-                message_json = json.loads(event_message)
-
-                image_state = (message_json['state']['status'])
-
-                if (image_state == 'AVAILABLE'):
-                    logger.info('Image is available')
-
-                    ami = message_json['outputResources']['amis'][0]
-                    ec2_client.create_tags(Resources=[ami['image']], Tags=[{'Key': 'Name', 'Value': 'DeepRacer'}, {'Key': 'Stack', 'Value': '${AWS::StackName}'}])
-
-                    recipe_name = message_json['name']
-                    logger.info('AMI ID: {}'.format(ami['image']))
-
-                    response = ssm_client.put_parameter(
-                        Name=ssm_parameter_name,
-                        Description='Latest AMI ID',
-                        Value=ami['image'],
-                        Type='String',
-                        Overwrite=True,
-                        Tier='Standard'
-                        )
-                    logger.info('SSM Updated: {}'.format(response))
-
-                    #add tags to the SSM parameter
-                    ssm_client.add_tags_to_resource(ResourceType='Parameter', ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image Builder' } ] )
-            return None
-
+      InlineCode: !Sub "import json\nimport boto3\nimport logging\nimport os\n\nlogger\
+        \ = logging.getLogger()\nlogger.setLevel(logging.INFO)\n\nssm_client = boto3.client('ssm')\n\
+        ec2_client = boto3.client('ec2')\nssm_parameter_name = os.getenv('ParameterPath')\n\
+        \ndef handler(event, context):\n    logger.info('Printing event: {}'.format(event))\n\
+        \    process_sns_event(event)\n    return None\n\ndef process_sns_event(event):\n\
+        \    for record in (event['Records']):\n        event_message = record['Sns']['Message']\n\
+        \n        message_json = json.loads(event_message)\n\n        image_state\
+        \ = (message_json['state']['status'])\n\n        if (image_state == 'AVAILABLE'):\n\
+        \            logger.info('Image is available')\n\n            ami = message_json['outputResources']['amis'][0]\n\
+        \            ec2_client.create_tags(Resources=[ami['image']], Tags=[{'Key':\
+        \ 'Name', 'Value': 'DeepRacer'}, {'Key': 'Stack', 'Value': '${AWS::StackName}'}])\n\
+        \n            recipe_name = message_json['name']\n            logger.info('AMI\
+        \ ID: {}'.format(ami['image']))\n\n            response = ssm_client.put_parameter(\n\
+        \                Name=ssm_parameter_name,\n                Description='Latest\
+        \ AMI ID',\n                Value=ami['image'],\n                Type='String',\n\
+        \                Overwrite=True,\n                Tier='Standard'\n      \
+        \          )\n            logger.info('SSM Updated: {}'.format(response))\n\
+        \n            #add tags to the SSM parameter\n            ssm_client.add_tags_to_resource(ResourceType='Parameter',\
+        \ ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image\
+        \ Builder' } ] )\n    return None\n"
       Description: Update SSM Parameter with the latest AMI
       MemorySize: 256
       Timeout: 300
       AutoPublishAlias: live
       Environment:
         Variables:
-          ParameterPath:
-            Fn::ImportValue:
-              !Sub '${ResourcesStackName}-AMIParameter'
+          ParameterPath: !ImportValue
+            Fn::Sub: ${ResourcesStackName}-AMIParameter
       Policies:
         - Version: '2012-10-17'
           Statement:
@@ -535,96 +519,44 @@ Resources:
                 - ssm:GetParameters
                 - ec2:*
               Resource: '*'
-
-
   DeleteOldAMIs:
-    Type: "AWS::Serverless::Function"
+    Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
       Runtime: python3.7
-      InlineCode: !Sub |
-        import json
-        import boto3
-        import logging
-        import os
-
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-
-        ssm_client = boto3.client('ssm')
-        ec2_client = boto3.client('ec2')
-        ssm_parameter_name = os.getenv('ParameterPath')
-
-        def handler(event, context):
-            logger.info('Printing event: {}'.format(event))
-            process_sns_event(event)
-            return None
-
-        def get_image_by_parameter():
-            try:
-                return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']
-            except:
-                pass
-            return None
-
-        def get_amis_with_my_stack(current_image):
-            stack_name = '${AWS::StackName}'
-            filters = [
-                {
-                   'Name': 'is-public',
-                   'Values': [
-                       'false'
-                   ]
-                },
-                {
-                   'Name': 'state',
-                   'Values': [
-                       'available'
-                   ]
-                },
-                {
-                   'Name': 'tag:Stack',
-                   'Values': [
-                       '${AWS::StackName}'
-                   ]
-                }
-            ]
-            ignore_images = [current_image]
-            image_from_parameters = get_image_by_parameter()
-            if image_from_parameters:
-                ignore_images.append(image_from_parameters)
-            images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']
-            images = list(map(lambda x: x['ImageId'], images))
-            images = list(filter(lambda x: x not in ignore_images, images))
-            for image in images:
-                logger.info('Deregistring Image: {}'.format(image))
-                try:
-                    ec2_client.deregister_image(ImageId=image)
-                except:
-                    pass
-
-        def process_sns_event(event):
-            for record in (event['Records']):
-                event_message = record['Sns']['Message']
-
-                message_json = json.loads(event_message)
-                image_state = (message_json['state']['status'])
-
-                if (image_state == 'AVAILABLE'):
-                    current_image = message_json['outputResources']['amis'][0]['image']
-                    get_amis_with_my_stack(current_image)
-
-            return None
-
+      InlineCode: !Sub "import json\nimport boto3\nimport logging\nimport os\n\nlogger\
+        \ = logging.getLogger()\nlogger.setLevel(logging.INFO)\n\nssm_client = boto3.client('ssm')\n\
+        ec2_client = boto3.client('ec2')\nssm_parameter_name = os.getenv('ParameterPath')\n\
+        \ndef handler(event, context):\n    logger.info('Printing event: {}'.format(event))\n\
+        \    process_sns_event(event)\n    return None\n\ndef get_image_by_parameter():\n\
+        \    try:\n        return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']\n\
+        \    except:\n        pass\n    return None\n\ndef get_amis_with_my_stack(current_image):\n\
+        \    stack_name = '${AWS::StackName}'\n    filters = [\n        {\n      \
+        \     'Name': 'is-public',\n           'Values': [\n               'false'\n\
+        \           ]\n        },\n        {\n           'Name': 'state',\n      \
+        \     'Values': [\n               'available'\n           ]\n        },\n\
+        \        {\n           'Name': 'tag:Stack',\n           'Values': [\n    \
+        \           '${AWS::StackName}'\n           ]\n        }\n    ]\n    ignore_images\
+        \ = [current_image]\n    image_from_parameters = get_image_by_parameter()\n\
+        \    if image_from_parameters:\n        ignore_images.append(image_from_parameters)\n\
+        \    images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']\n\
+        \    images = list(map(lambda x: x['ImageId'], images))\n    images = list(filter(lambda\
+        \ x: x not in ignore_images, images))\n    for image in images:\n        logger.info('Deregistring\
+        \ Image: {}'.format(image))\n        try:\n            ec2_client.deregister_image(ImageId=image)\n\
+        \        except:\n            pass\n\ndef process_sns_event(event):\n    for\
+        \ record in (event['Records']):\n        event_message = record['Sns']['Message']\n\
+        \n        message_json = json.loads(event_message)\n        image_state =\
+        \ (message_json['state']['status'])\n\n        if (image_state == 'AVAILABLE'):\n\
+        \            current_image = message_json['outputResources']['amis'][0]['image']\n\
+        \            get_amis_with_my_stack(current_image)\n\n    return None\n"
       Description: Delete old AMIs
       MemorySize: 256
       Timeout: 300
       AutoPublishAlias: live
       Environment:
         Variables:
-          ParameterPath:
-            Fn::ImportValue:
-              !Sub '${ResourcesStackName}-AMIParameter'
+          ParameterPath: !ImportValue
+            Fn::Sub: ${ResourcesStackName}-AMIParameter
       Policies:
         - Version: '2012-10-17'
           Statement:
