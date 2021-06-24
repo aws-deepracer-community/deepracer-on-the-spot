@@ -73,6 +73,13 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-NetworkAclId'
 
+  InterruptionNotification:
+    Description: Interruption Notification
+    Value: !Ref InterruptionNotification
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-InterruptionNotification'
+
 Conditions:
   HasSubnet0: !Not
     - !Equals [!Ref Subnet0, '']
@@ -278,3 +285,23 @@ Resources:
           OwnerUid: '1000'
           Permissions: '0755'
         Path: '/home/ubuntu/efs'
+
+  InterruptionNotification:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: InterruptionNotification
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Statement:
+          - Sid: AllowServices
+            Effect: Allow
+            Principal: '*'
+            Action:
+              - sns:Publish
+              - sns:Subscribe
+            Resource: '*'
+      Topics:
+        - !Ref 'InterruptionNotification'

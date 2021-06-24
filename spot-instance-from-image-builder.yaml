@@ -108,6 +108,12 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /home/ubuntu/bin/interrupt_spot.sh:
+              content: |
+                date >> /tmp/interrupt.log
+              mode : "000755"
+              owner: ubuntu
+              group: ubuntu
     Properties:
       SecurityGroupIds:
         - !ImportValue
@@ -122,3 +128,97 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
+
+
+  SpotInterruptionHandlerFunction:
+    Type: AWS::Lambda::Function
+    DependsOn:
+    - LambdaFunctionRole
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaFunctionRole.Arn
+      Code:
+        ZipFile: !Sub |
+          import boto3
+          from botocore.exceptions import ClientError
+          import os
+
+          def handler(event, context):
+
+              instance_created_by_this_stack = '${Instance}'
+              instance_id = event['detail']['instance-id']
+              instanceAction = event['detail']['instance-action']
+
+              print("Handling spot instance interruption notification for instance {id}".format(id=instance_id))
+
+              if instance_created_by_this_stack != instance_id:
+                  print("Interrupted instance was not created by this stack.")
+                  return
+
+              ssm_client = boto3.client('ssm')
+              sns_client = boto3.client('sns')
+              try:
+                  response = ssm_client.send_command(
+                      InstanceIds=[instance_id],
+                      DocumentName='AWS-RunShellScript',
+                      Parameters={'commands': ['/home/ubuntu/bin/interrupt_spot.sh']},
+                      CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
+                      TimeoutSeconds=60)
+                  print(f'Running commands on instance {instance_id}. Command id: {id}')
+              except ssm_client.exceptions.InvalidInstanceId:
+                  print("SSM agent not running.")
+              except ClientError as e:
+                  print(e.response['Error']['Message'])
+              notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
+              sns_client.publish(TopicArn=notification_topic, Message=f'Termination notification instance: {instance_id} stack: ${AWS::StackName}')
+      Runtime: python3.7
+      Environment:
+        Variables:
+          INTERRUPTION_NOTIFICATION: !ImportValue
+                                     'Fn::Sub': '${ResourcesStackName}-InterruptionNotification'
+
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: lambdaExecution-SpotInterruptHandlerPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogStream
+            - logs:CreateLogGroup
+            - ssm:*
+            - sns:*
+            Resource: '*'
+
+  CloudWatchEventRule:
+    Type: AWS::Events::Rule
+    DependsOn:
+    - SpotInterruptionHandlerFunction
+    Properties:
+      Description: Events rule for EC2 Spot Instance Interruption Notices
+      EventPattern:
+        detail-type:
+        - EC2 Spot Instance Interruption Warning
+        source:
+        - aws.ec2
+      State: ENABLED
+      Targets:
+        - Arn:
+            Fn::GetAtt:
+            - SpotInterruptionHandlerFunction
+            - Arn
+          Id:
+            Ref: SpotInterruptionHandlerFunction

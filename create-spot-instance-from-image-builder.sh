@@ -25,4 +25,4 @@ if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
 fi
 
 
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance-from-image-builder.yaml
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance-from-image-builder.yaml --capabilities CAPABILITY_IAM
