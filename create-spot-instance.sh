@@ -25,4 +25,6 @@ if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
 fi
 
 
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ${blockDurationConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml
+BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName | jq '.Stacks | .[] | .Outputs | .[] | select(.OutputKey=="Bucket") | .OutputValue' | tr -d '"') 
+aws s3 cp custom-files s3://${BUCKET}/custom_files --recursive
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml --capabilities CAPABILITY_IAM
