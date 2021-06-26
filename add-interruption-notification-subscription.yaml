@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Setup a standard EC2 instance for deep racer
+
+Parameters:
+  ResourcesStackName:
+    Type: String
+  EmailAddress:
+    Type: String
+
+Resources:
+
+  Subscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Ref EmailAddress
+      Protocol: email
+      TopicArn:
+        !ImportValue
+        'Fn::Sub': '${ResourcesStackName}-InterruptionNotification'
