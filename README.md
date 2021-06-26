@@ -39,3 +39,10 @@ The script create-spot-instance.sh functions like 'create-standard-instance.sh',
 ### Adding additional IP addresses to security group ingress and NACLs
 
 The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address> <NACL Rule Number>
+
+### Subscribing email addresses to the 'spot instance interruption notification topic' (the topic is created by the base resources stack)
+
+The script add-interruption-notification-subscription.sh script adds an email address to the 'interruption notification topic.'
+Use: ./add-interruption-notification-subscription.sh <base resources stack name> <stack name> <email address>
+
+Note, it is also possible to interactively create a subscription on the SNS web console. Adding an eamil subscription results in an email, with a confirmation link in it, being sent to the email address. Not published message is forwarded to the email prior to the user having confirmed the subscription (by clicking on the link in the original subscription notification email).
