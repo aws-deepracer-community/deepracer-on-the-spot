@@ -222,6 +222,8 @@ Resources:
           Action:
           - sts:AssumeRole
       Path: "/"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
       Policies:
       - PolicyName: lambdaExecution-SpotInterruptHandlerPolicy
         PolicyDocument:
@@ -229,10 +231,17 @@ Resources:
           Statement:
           - Effect: Allow
             Action:
-            - logs:*
             - ssm:*
             - sns:*
             Resource: '*'
+
+  LambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SpotInterruptionHandlerFunction.Arn
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt CloudWatchEventRule.Arn
 
   CloudWatchEventRule:
     Type: AWS::Events::Rule
