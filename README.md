@@ -38,7 +38,7 @@ The script create-spot-instance.sh functions like 'create-standard-instance.sh',
 
 ### Adding additional IP addresses to security group ingress and NACLs
 
-The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address> <NACL Rule Number>
+The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address>
 
 ### Subscribing email addresses to the 'spot instance interruption notification topic' (the topic is created by the base resources stack)
 
