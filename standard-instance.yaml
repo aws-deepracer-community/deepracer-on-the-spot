@@ -16,6 +16,12 @@ Outputs:
   Instance:
     Value: !Ref Instance
 
+  InstanceIP:
+    Description: The IP of the instance created
+    Value: !GetAtt Instance.PublicIp
+    Export:
+      Name: !Sub "${AWS::StackName}-PublicIp"
+
 Resources:
 
   LaunchTemplate:
@@ -105,7 +111,7 @@ Resources:
                 dr-download-custom-files
                 cp custom_files/*.env .
                 dr-reload
-                nohup /bin/bash -lc 'cd ~/deepracer-for-cloud/; source bin/activate.sh; dr-start-training' &
+                nohup /bin/bash -lc 'cd ~/deepracer-for-cloud/; source bin/activate.sh; dr-start-training -w' &
 
                 mkdir -p /tmp/logs/
                 while [ True ]; do
