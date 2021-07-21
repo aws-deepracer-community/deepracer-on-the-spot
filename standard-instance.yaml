@@ -113,6 +113,7 @@ Resources:
                         docker logs ${name} > /tmp/logs/${name}.log 2>&1
                     done
                     aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive
+                    rm -rf /tmp/logs/*.*
                     set +e
                     dr-upload-model -fw
                     set -e
