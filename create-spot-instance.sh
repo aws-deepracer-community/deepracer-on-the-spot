@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -xa
 
 baseResourcesStackName=$1
 shift
@@ -26,6 +26,9 @@ fi
 
 
 BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName | jq '.Stacks | .[] | .Outputs | .[] | select(.OutputKey=="Bucket") | .OutputValue' | tr -d '"') 
+set +x
+. ./validation.sh
+set -x
 aws s3 cp custom-files s3://${BUCKET}/custom_files --recursive
 aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName --template-file spot-instance.yaml --capabilities CAPABILITY_IAM
 EC2_IP=`aws cloudformation list-exports --query "Exports[?Name=='${stackName}-PublicIp'].Value" --no-paginate --output text`
