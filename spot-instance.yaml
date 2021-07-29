@@ -7,17 +7,6 @@ Parameters:
     Default: g4dn.4xlarge
   ResourcesStackName:
     Type: String
-  BlockDurationMinutes:
-    Type: String
-    AllowedValues:
-      - ''
-      - 60
-      - 120
-      - 180
-      - 240
-      - 300
-      - 360
-    Default: 60
 
 Outputs:
 
@@ -32,11 +21,6 @@ Outputs:
     Value: !GetAtt Instance.PublicIp
     Export:
       Name: !Sub "${AWS::StackName}-PublicIp"
-
-Conditions:
-  NoBlockDuration: !Equals
-    - !Ref BlockDurationMinutes
-    - ''
 
 Resources:
 
@@ -53,7 +37,6 @@ Resources:
         InstanceType: !Ref InstanceType
         InstanceMarketOptions:
           MarketType: spot
-          SpotOptions: !If [ NoBlockDuration, !Ref 'AWS::NoValue', { BlockDurationMinutes: !Ref BlockDurationMinutes } ]
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:
