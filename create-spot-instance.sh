@@ -8,16 +8,6 @@ shift
 stackName=$1
 shift
 
-blockDurationConfig=""
-
-if [[ -n "$DEEPRACER_BLOCK_DURATION" ]]; then
-	blockDurationConfig="BlockDurationMinutes=$DEEPRACER_BLOCK_DURATION"
-fi
-
-if [[ -n "$NO_DEEPRACER_BLOCK_DURATION" ]]; then
-	blockDurationConfig=BlockDurationMinutes=
-fi
-
 instanceTypeConfig=''
 
 if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
