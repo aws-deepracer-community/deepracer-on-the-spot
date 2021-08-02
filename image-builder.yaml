@@ -411,6 +411,33 @@ Resources:
                           export PATH=/home/ubuntu/bin:$PATH
         - BUCKET: !ImportValue
             Fn::Sub: ${ResourcesStackName}-Bucket
+  SafeTerminationComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: SafeTermination
+      Version: '0.0.2'
+      Description: Install script to terminate training and upload model.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: SafeTermination
+        description: terminates training
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: SafeTermination
+                action: CreateFile
+                inputs:
+                  - path: /home/ubuntu/bin/safe_termination.sh
+                    permissions: 775
+                    owner: ubuntu
+                    group: ubuntu
+                    content: |
+                      #!/bin/bash
+                      . /home/ubuntu/deepracer-for-cloud/bin/activate.sh
+                      dr-stop-training
+                      dr-upload-model -bf
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
@@ -420,6 +447,7 @@ Resources:
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
         - ComponentArn: !Ref 'DeepracerS3URIComponent'
+        - ComponentArn: !Ref 'SafeTerminationComponent'
         - ComponentArn: !Ref 'InstallEFSUtilsComponent'
         - ComponentArn: !Ref 'ExpandRootVolumeComponent'
         - ComponentArn: !Ref 'InstallDeepRacerDockerImagesScriptComponent'

@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Setup an EC2 instance for deep racer
+Description: Add access
 
 Parameters:
   ResourcesStackName:
