@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Setup a standard EC2 instance for deep racer
+Description: Setup a spot EC2 instance for deep racer
 
 Parameters:
   InstanceType:
@@ -183,7 +183,7 @@ Resources:
                   response = ssm_client.send_command(
                       InstanceIds=[instance_id],
                       DocumentName='AWS-RunShellScript',
-                      Parameters={'commands': ['/home/ubuntu/bin/interrupt_spot.sh']},
+                      Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/bin/safe_termination.sh']},
                       CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
                       TimeoutSeconds=60)
                   print(f'Running commands on instance {instance_id}. Command id: {id}')

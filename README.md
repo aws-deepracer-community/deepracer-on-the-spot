@@ -36,6 +36,10 @@ create-standard-instance.sh - takes two mandatory parameters, the name of the ba
 
 The script create-spot-instance.sh functions like 'create-standard-instance.sh', only difference being that it utilizes the AMI created by the image builder pipeline. Environment variables can be used to control spot requests, namely block duration, please take of look at the script content, and notice use of environment variables there-in.
 
+### Stopping training
+
+The script stop-instance.sh executes 'safe termination' of training and deletes the cloudformation stack used to create the instance. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter to used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: ./stop-instance.sh my-instance-stack-name
+
 ### Adding additional IP addresses to security group ingress and NACLs
 
 The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address>
