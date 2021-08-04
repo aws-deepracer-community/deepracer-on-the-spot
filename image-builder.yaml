@@ -438,6 +438,8 @@ Resources:
                       . /home/ubuntu/deepracer-for-cloud/bin/activate.sh
                       dr-stop-training
                       dr-upload-model -bf
+                      aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive
+                      rm -rf /tmp/logs/
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
