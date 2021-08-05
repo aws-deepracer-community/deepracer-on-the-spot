@@ -601,6 +601,21 @@ Resources:
             process_sns_event(event)
             return None
 
+        def delete_ebs_snapshots():
+            paginator = ec2_client.get_paginator('describe_snapshots')
+            filters = {'OwnerIds': ['${AWS::AccountId}']}
+            for page in paginator.paginate(**filters):
+                for snapshot in page['Snapshots']:
+                    try:
+                        print('SNAPSHOT')
+                        print(snapshot)
+                        ec2_client.delete_snapshot(SnapshotId=snapshot['SnapshotId'])
+                        print('DELETED EBS SNAPSHOT')
+                        print(snapshot['SnapshotId'])
+                    except Exception as e:
+                        print('EXCEPTION DELETING SNAPSHOT')
+                        print(e)
+
         def get_image_by_parameter():
             try:
                 return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']
@@ -655,11 +670,12 @@ Resources:
                     current_image = message_json['outputResources']['amis'][0]['image']
                     get_amis_with_my_stack(current_image)
 
+                delete_ebs_snapshots()
             return None
 
       Description: Delete old AMIs
       MemorySize: 256
-      Timeout: 300
+      Timeout: 900
       AutoPublishAlias: live
       Environment:
         Variables:
