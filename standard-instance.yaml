@@ -7,6 +7,12 @@ Parameters:
     Default: g4dn.4xlarge
   ResourcesStackName:
     Type: String
+  TimeToLiveInMinutes:
+    Type: Number
+    Description: timeout in minutes after which training is stopped and this stack is deleted
+    Default: 60
+    MinValue: 10
+    MaxValue: 1440 # 24 hours
 
 Outputs:
 
@@ -143,3 +149,34 @@ Resources:
           #!/bin/bash -xe
           /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
 
+  TerminationCronExpression:
+    Type: Custom::TerminationCronExpression
+    DependsOn:
+      - Instance
+    Properties:
+      ServiceToken:
+        !ImportValue
+        'Fn::Sub': '${ResourcesStackName}-FutureTimeCronExpressionLambdaArn'
+      ttl: !Ref TimeToLiveInMinutes
+
+  TerminationTrigger:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: !GetAtt TerminationCronExpression.cron_expression
+      State: ENABLED
+      Targets:
+        - Arn:
+            !ImportValue
+            'Fn::Sub': '${ResourcesStackName}-TerminationLambdaArn'
+          Id: TerminateInstance
+          Input: !Sub '{"instance": "${Instance}", "stack": "${AWS::StackName}"}'
+
+  TerminatePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName:
+        !ImportValue
+        'Fn::Sub': '${ResourcesStackName}-TerminationLambdaArn'
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt TerminationTrigger.Arn

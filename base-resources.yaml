@@ -80,6 +80,20 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-InterruptionNotification'
 
+  FutureTimeCronExpressionLambdaArn:
+    Description: Lambda arn of a function that generates a cloudwatch schedule compatible cron expression for a future time, measured in 'minutes in the future'
+    Value: !GetAtt FutureTimeCronExpressionLambda.Arn
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-FutureTimeCronExpressionLambdaArn'
+
+  TerminationLambdaArn:
+    Description: Lambda arn of a function that safely terminates an instance
+    Value: !GetAtt TerminationLambda.Arn
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-TerminationLambdaArn'
+
 Conditions:
   HasSubnet0: !Not
     - !Equals [!Ref Subnet0, '']
@@ -305,3 +319,151 @@ Resources:
             Resource: '*'
       Topics:
         - !Ref 'InterruptionNotification'
+
+  FutureTimeCronExpressionLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt FutureTimeCronExpressionLambdaRole.Arn
+      Runtime: python3.7
+      Code:
+        ZipFile: |
+          import cfnresponse
+          import datetime
+
+          def handler(event, context):
+              physical_resource_id = 'FutureTimeCronExpression'
+              response_code = cfnresponse.SUCCESS
+              response_data = {'cron_expression': ''}
+              if event.get('RequestType', '') == 'Delete':
+                  if 'ResponseURL' in event:
+                      cfnresponse.send(event, context, response_code, response_data, physical_resource_id)
+                  print(response_data)
+                  return response_data
+
+              try:
+                  ttl = int(event['ResourceProperties']['ttl'])
+              except:
+                  ttl = 60 * 12 # 12 hours
+
+              expires = datetime.datetime.now() + datetime.timedelta(minutes=ttl)
+              cron_expression = f"cron({expires.minute} {expires.hour} {expires.day} {expires.month} ? {expires.year})"
+              print(F"cron expression: {cron_expression}")
+              response_data['cron_expression'] = cron_expression
+              if 'ResponseURL' in event:
+                  cfnresponse.send(event, context, response_code, response_data, physical_resource_id)
+              print(response_data)
+              return response_data
+
+  FutureTimeCronExpressionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  FutureTimeCronExpressionLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt FutureTimeCronExpressionLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: cloudformation.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+
+  TerminationLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt TerminationLambdaRole.Arn
+      Handler: index.handler
+      Runtime: python3.7
+      Timeout: 900
+      Code:
+        ZipFile: !Sub |
+          import json
+          import boto3
+          import logging
+          import os
+          from botocore.exceptions import ClientError
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def execute_safe_termination(instance):
+              ssm_client = boto3.client('ssm')
+              try:
+                  response = ssm_client.send_command(
+                      InstanceIds=[instance],
+                      DocumentName='AWS-RunShellScript',
+                      Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/bin/safe_termination.sh']},
+                      CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
+                      TimeoutSeconds=60)
+                  command_id = response['Command']['CommandId']
+                  print(f'Running commands on instance {instance}. Command id: {command_id}')
+                  waiter = ssm_client.get_waiter('command_executed')
+                  waiter.wait(CommandId=command_id, InstanceId=instance, WaiterConfig={'Delay': 30, 'MaxAttempts': 3})
+              except ssm_client.exceptions.InvalidInstanceId:
+                  print("SSM agent not running.")
+              except ClientError as e:
+                  print(e.response['Error']['Message'])
+
+          def initiate_stack_deletion(stack):
+              cfn_client = boto3.client('cloudformation')
+              cfn_client.delete_stack(StackName=stack)
+
+          def notify(stack, instance):
+              sns_client = boto3.client('sns')
+              topic = '${InterruptionNotification}'
+              sns_client.publish(TopicArn=topic, Message=f'Termination notification instance: {instance} stack: {stack}')
+
+          def handler(event, context):
+              instance = event['instance']
+              stack = event['stack']
+              execute_safe_termination(instance)
+              initiate_stack_deletion(stack)
+              notify(stack, instance)
+              logger.info('Printing event: {}'.format(event))
+              return None
+
+              notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
+
+  TerminationLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-termination-lambda-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssmmessages:CreateControlChannel
+                  - ssmmessages:CreateDataChannel
+                  - ssmmessages:OpenControlChannel
+                  - ssmmessages:OpenDataChannel
+                  - iam:*
+                  - sns:*
+                  - ssm:*
+                  - events:*
+                  - lambda:*
+                  - cloudformation:DeleteStack
+                Resource: '*'
