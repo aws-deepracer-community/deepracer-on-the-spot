@@ -60,7 +60,7 @@ Resources:
   UbuntuServerImageInfrastructureConfiguration:
     Type: AWS::ImageBuilder::InfrastructureConfiguration
     Properties:
-      Name: UbuntuServer20-Image-Infrastructure-Configuration
+      Name: !Sub 'UbuntuServer20-Image-Infrastructure-Configuration-${AWS::StackName}'
       InstanceProfileName: !Ref 'InstanceProfile'
       InstanceTypes: !Ref 'BuildInstanceType'
       Logging:
@@ -78,7 +78,7 @@ Resources:
   InstallEFSUtilsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: EFSUtils
+      Name: !Sub 'EFSUtils-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install the latest EFS Utils.
       ChangeDescription: First version
@@ -134,7 +134,7 @@ Resources:
   InstallCFNInitComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: CFNInit
+      Name: !Sub 'CFNInit-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install the latest CFNInit.
       ChangeDescription: First version
@@ -171,7 +171,7 @@ Resources:
   InstallDeepRacerComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: DeepRacer
+      Name: !Sub 'DeepRacer-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
@@ -207,7 +207,7 @@ Resources:
   CreateLogsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: CcreateLogsScript
+      Name: !Sub 'CreateLogScript-${AWS::StackName}'
       Version: '0.0.2'
       Description: Create Logs script.
       ChangeDescription: First version
@@ -240,7 +240,7 @@ Resources:
   InstallDeepRacerDockerImagesScriptComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: DeepRacerDockerImagesScript
+      Name: !Sub 'DeepRacerDockerImagesScript-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install the latest DeepRacer docker images script.
       ChangeDescription: First version
@@ -339,7 +339,7 @@ Resources:
   ExpandRootVolumeComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: ExapandRootVolume
+      Name: !Sub 'ExpandRootVolume-${AWS::StackName}'
       Version: '0.0.2'
       Description: Expand root volume.
       ChangeDescription: First version
@@ -362,7 +362,7 @@ Resources:
   PullDeepracerDockerImagesComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: PullDeepracerDockerImages
+      Name: !Sub 'PullDeepracerDockerImages-${AWS::StackName}'
       Version: '0.0.2'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
@@ -385,7 +385,7 @@ Resources:
   DeepracerS3URIComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: DeepRacerS3URI
+      Name: !Sub 'DeepRacerS3URI-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install the latest DeepRacer docker images script.
       ChangeDescription: First version
@@ -414,7 +414,7 @@ Resources:
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: SafeTermination
+      Name: !Sub 'SafeTermination-${AWS::StackName}'
       Version: '0.0.2'
       Description: Install script to terminate training and upload model.
       ChangeDescription: First version
@@ -443,7 +443,7 @@ Resources:
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
-      Name: UbuntuServerForDeepRacer
+      Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
       Version: '0.0.2'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-18-lts-x86/x.x.x'
       Components:
@@ -462,7 +462,7 @@ Resources:
       Description: DeepRacer image build pipeline
       ImageRecipeArn: !Ref 'UbuntuServerForDeepRacerImageRecipe'
       InfrastructureConfigurationArn: !Ref 'UbuntuServerImageInfrastructureConfiguration'
-      Name: DeepRacerImageBuildPipeline
+      Name: !Sub 'DeepRacerImageBuildPipeline-${AWS::StackName}'
       Tags:
         BuildStack: !Sub '${AWS::StackName}'
         Name: DeepRacer
