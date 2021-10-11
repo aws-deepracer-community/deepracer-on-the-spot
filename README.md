@@ -30,7 +30,7 @@ Old created AMIs are deleted daily. Current AMI id is written to SSM parameter n
 
 create-standard-instance.sh creates a single on demad ec2 instance. The instance type used is configured as the default in the standard-instance.yaml cloudformation template file.
 
-create-standard-instance.sh - takes two mandatory parameters, the name of the base resources stack and the name of the stack used to create an ec2 instance. This script can be execute multiple times, with different instance stack names. All the different instances will share the base resources (efs and s3).
+create-standard-instance.sh - takes three mandatory parameters, the name of the base resources stack, the name of the stack used to create an ec2 instance, and the time in minutes for the EC2 instance to live. Valid TTL times are 0-1440 minutes. If you set a TTL of 0, the instance will not terminate automatically. This script can be execute multiple times, with different instance stack names. All the different instances will share the base resources (efs and s3).
 
 ### Spot instance from image builder using the AMI created by the image builder pipeline
 
