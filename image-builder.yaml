@@ -187,6 +187,7 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
+                    - "apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub"
                     - "sudo -u ubuntu -i git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git"
               - name: BuildFromCommunityRepo
                 action: ExecuteBash
