@@ -436,9 +436,15 @@ Resources:
                     group: ubuntu
                     content: |
                       #!/bin/bash
+                      touch /home/ubuntu/bin/termination.started
                       . /home/ubuntu/deepracer-for-cloud/bin/activate.sh
+                      # to avoid upload conflict, check if start_training script loop started dr-upload-model within last 30 seconds
+                      start_training_uploading=$(find /home/ubuntu/bin/uploading_best_model.timestamp -mmin -0.5 -type f -print | wc -l)
+                      if [[ $start_training_uploading -ge 1 ]];then
+                        sleep 30
+                      fi
+                      dr-upload-model -bfw
                       dr-stop-training
-                      dr-upload-model -bf
                       aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive
                       rm -rf /tmp/logs/
   UbuntuServerForDeepRacerImageRecipe:
