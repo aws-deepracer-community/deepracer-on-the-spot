@@ -274,26 +274,27 @@ Resources:
                 cp custom_files/*.env .
                 dr-reload
                 # There is a bug where at some times the training fails to start, so we start, stop and start it again to reduce the occurrences of this issue. 
-                nohup /bin/bash -lc 'cd ~/deepracer-for-cloud/; dr-start-training -qw; sleep 90; dr-stop-training; sleep 60; echo y | docker container prune; dr-reload; dr-start-training -qwv' &
+                nohup /bin/bash -lc 'cd ~/deepracer-for-cloud/; dr-start-training -qw; sleep 120; dr-stop-training; sleep 60; echo y | docker container prune; dr-reload; dr-start-training -qwv' &
                 mkdir -p /tmp/logs/
                 # We want to be able to monitor our EC2 training without needing to connect to console, so we upload all needed info to Public_IP:8100/menu.html using this script
                 nohup /bin/bash -lc 'source /home/ubuntu/bin/web_monitoring.sh >/dev/null 2>&1' &
+                sleep 180 > /dev/null
                 while [ True ]; do
                     # if the EC2 started termination process upon interruption notification, this file should exist, hence we leave termination process to manage final uploads without conflict
                     if [[ -f /home/ubuntu/bin/termination.started ]];then
                       break
                     fi
                     # Update variable references before every iteration in case of any change on the config files
-                    dr-reload
+                    source ~/deepracer-for-cloud/bin/activate.sh
                     
                     for name in `docker ps -a --format "{{.Names}}"`; do
                         docker logs ${name} > /tmp/logs/${name}.log 2>&1
                     done
                     # Only upload best Checkpoint if best Checkpoint has changed
                     bestcheckpoint=$(echo n | dr-upload-model -b 2>&1 | grep "checkpoint:")
-                    aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive > 2>&1
+                    aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive
                     rm -rf /tmp/logs/*.* > /dev/null 2>&1
-                    if [ ["$bestcheckpoint" != "$lastbestcheckpoint"] && ["$bestcheckpoint" != ""] ];then
+                    if [ [ "$bestcheckpoint" != "$lastbestcheckpoint" ] && [ "$bestcheckpoint" != "" ] ];then
                       # update file timestamp just to avoid conflict with termination process
                       touch /home/ubuntu/bin/uploading_best_model.timestamp 2>&1
                       dr-upload-model -bfw > /dev/null 2>&1
