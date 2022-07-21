@@ -17,9 +17,20 @@ if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
 	instanceTypeConfig="InstanceType=$DEEPRACER_INSTANCE_TYPE"
 fi
 BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName | jq '.Stacks | .[] | .Outputs | .[] | select(.OutputKey=="Bucket") | .OutputValue' | tr -d '"')
-set +x
+
 . ./validation.sh
-set -x
+
+if [ $?==1 ];then
+    while true; do
+        read -p "Error found in reward_function.py, want to continue anyway?" yn
+        case $yn in
+            [Yy]* ) make install; break;;
+            [Nn]* ) exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+fi
+
 aws s3 cp custom-files s3://${BUCKET}/custom_files --recursive
 aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName TimeToLiveInMinutes=$timeToLiveInMinutes --template-file standard-instance.yaml
 EC2_IP=`aws cloudformation list-exports --query "Exports[?Name=='${stackName}-PublicIp'].Value" --no-paginate --output text`
