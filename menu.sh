@@ -197,7 +197,6 @@ submit_model_to_train()
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-      cd ~/deepracer-templates
       if [ $lifecycle = "standard" ]
       then
         echo ./create-$lifecycle-instance.sh $MY_BASE_RESOURCES_STACK $modelname-$RANDOM $TimeToLiveInMinutes
@@ -212,20 +211,20 @@ submit_model_to_train()
 
 download_custom_files_from_s3()
 {
-    echo -e "\e[1;32m **************LOCAL CURRENT FILES under ~/deepracer-templates/custom-files/  ************************************************* \e[0m"
+    echo -e "\e[1;32m **************LOCAL CURRENT FILES under ./custom-files/  ************************************************* \e[0m"
     echo
-    find  deepracer-templates/custom-files/ -printf '%CY-%Cm-%Cd %CH:%CM:%.2CS \t%s\t%p\n' | sed -s 's/deepracer-templates\/custom-files\///g' | sort
+    find  ./custom-files/ -printf '%CY-%Cm-%Cd %CH:%CM:%.2CS \t%s\t%p\n' | sed -s 's/.\/custom-files\///g' | sort
     echo -e "\e[1;32m **************S3 CURRENT FILES under s3://$MY_BASE_RESOURCES_BUCKET/custom_files/  ************************** \e[0m"
     echo
     aws s3 ls s3://$MY_BASE_RESOURCES_BUCKET/custom_files/ --recursive | sort
     echo -e "\e[1;32m ****************************************************************************************************************************** \e[0m"
     echo
     echo
-    read -p "Do you want to DELETE "~/deepracer-templates/custom-files/" and download current content from "s3://$MY_BASE_RESOURCES_BUCKET/custom_files/" [Y/N]? " -n 1 -r
+    read -p "Do you want to DELETE "$PWD/custom-files/" and download current content from "s3://$MY_BASE_RESOURCES_BUCKET/custom_files/" [Y/N]? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-      rm  ~/deepracer-templates/custom-files/*.*
-      aws s3 cp s3://$MY_BASE_RESOURCES_BUCKET/custom_files/ ~/deepracer-templates/custom-files/ --recursive
+      rm  ./custom-files/*.*
+      aws s3 cp s3://$MY_BASE_RESOURCES_BUCKET/custom_files/ ./custom-files/ --recursive
       echo
       echo -e "\e[1;32m ******** UPDATE COMPLETED *************** \e[0m"
     fi
