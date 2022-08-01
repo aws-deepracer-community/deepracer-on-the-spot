@@ -247,6 +247,7 @@ Resources:
                     docker cp OutputLog.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp sagemaker.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp robomaker.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                    docker cp robomaker1.log $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp TrainingMetrics.json $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp deepracer_checkpoints.json $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp ~/deepracer-for-cloud/run.env $ID:/usr/share/nginx/html/run.env.txt > /dev/null 2>&1
