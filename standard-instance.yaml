@@ -135,7 +135,7 @@ Resources:
                 <h2>Training metrics</h2>
                 <p><a href="TrainingMetrics.json">TrainingMetrics.json</a></p>
                 <p><a href="deepracer_checkpoints.json">deepracer_checkpoints.json</a></p>
-                <p><a href="robomaker_log.zip" download>robomaker_log.zip</a></p>
+                <p><a href="robomaker1.log" download>robomaker1.log</a></p>
 
                 <h2>Training/Evaluation monitoring graphs</h2>
                 <p><a href="Todo.jpg">ToDo</a></p>
