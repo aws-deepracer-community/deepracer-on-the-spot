@@ -135,7 +135,8 @@ Resources:
                 <h2>Training metrics</h2>
                 <p><a href="TrainingMetrics.json">TrainingMetrics.json</a></p>
                 <p><a href="deepracer_checkpoints.json">deepracer_checkpoints.json</a></p>
-                
+                <p><a href="robomaker_log.zip" download>robomaker_log.zip</a></p>
+
                 <h2>Training/Evaluation monitoring graphs</h2>
                 <p><a href="Todo.jpg">ToDo</a></p>
                 
@@ -201,13 +202,17 @@ Resources:
                   echo "=====Memory usage=====" >> $USAGE_OUTPUT
                   cat /proc/meminfo | egrep '(^MemTotal|^MemFree|^SwapTotal|^SwapFree)' >> $USAGE_OUTPUT 2>&1
                   
+                  
                   echo "=====Robomaker Testing result logs (all Workers)=====" >> $USAGE_OUTPUT
                   for name in `docker ps --format "{{.Names}}" | grep obomaker`
                   do
                     docker logs ${name} 2>&1 | egrep '^Testing>' | tail -n 10  >> $USAGE_OUTPUT
+                    docker logs ${name} >& ${name}.log
                   done
-                  
-                  echo "=====Sagemaker training logs=====" >> $USAGE_OUTPUT
+
+                  mv deepracer-0_robomaker.1.*.log robomaker1.log
+
+		  echo  "=====Sagemaker training logs=====" >> $USAGE_OUTPUT
                   docker logs $(dr-find-sagemaker) 2>&1 | egrep '^Training>' | tail -n 10 >> $USAGE_OUTPUT
                   
                   echo "=====Robomaker Top 10 completed laps (all Workers)=====" >> $USAGE_OUTPUT
@@ -242,6 +247,7 @@ Resources:
                     docker cp OutputLog.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp sagemaker.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp robomaker.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                    docker cp robomaker1.log $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp TrainingMetrics.json $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp deepracer_checkpoints.json $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp ~/deepracer-for-cloud/run.env $ID:/usr/share/nginx/html/run.env.txt > /dev/null 2>&1
