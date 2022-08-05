@@ -140,14 +140,9 @@ submit_model_to_train()
       echo
     
       PS3='Choose Maximum Uptime for the Standard Instance (in minutes): '
-      maxTimeToLiveInMinutes=("15" "30" "60" "90" "120" "180" "360" "480" "720" "1440" "Exit")
+      maxTimeToLiveInMinutes=("30" "60" "90" "120" "180" "360" "480" "720" "1440" "Custom value for Maximum Uptime" "Exit")
       select TimeToLiveInMinutes in "${maxTimeToLiveInMinutes[@]}"; do
           case $TimeToLiveInMinutes in
-              "15")
-                  export TimeToLiveInMinutes=$TimeToLiveInMinutes
-                  echo -e "\tMaximum Uptime selected = \e[1;32m $TimeToLiveInMinutes \e[0m"
-                  break
-                  ;;
               "30")
                   export TimeToLiveInMinutes=$TimeToLiveInMinutes
                   echo -e "\tMaximum Uptime selected = \e[1;32m $TimeToLiveInMinutes \e[0m"
@@ -190,6 +185,16 @@ submit_model_to_train()
                   ;;
               "1440")
                   export TimeToLiveInMinutes=$TimeToLiveInMinutes
+                  echo -e "\tMaximum Uptime selected = \e[1;32m $TimeToLiveInMinutes \e[0m"
+                  break
+                  ;;
+              "Custom value for Maximum Uptime")
+                  customtimeentry=
+                  while ! [ "$customtimeentry" =~ ^[0-9]+$ ] || [ "$customtimeentry" -lt 0 ] || [ "$customtimeentry" -gt 1440 ]
+                  do
+                      read -p "Enter Maximum Uptime (in minutes - Min:0 / Max:1440):" $customtimeentry
+                  done
+                  export TimeToLiveInMinutes=$customtimeentry
                   echo -e "\tMaximum Uptime selected = \e[1;32m $TimeToLiveInMinutes \e[0m"
                   break
                   ;;
