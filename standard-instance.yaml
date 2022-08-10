@@ -211,8 +211,8 @@ Resources:
                   done
 
                   mv deepracer-0_robomaker.1.*.log robomaker1.log
-
-		  echo  "=====Sagemaker training logs=====" >> $USAGE_OUTPUT
+                  
+                  echo  "=====Sagemaker training logs=====" >> $USAGE_OUTPUT
                   docker logs $(dr-find-sagemaker) 2>&1 | egrep '^Training>' | tail -n 10 >> $USAGE_OUTPUT
                   
                   echo "=====Robomaker Top 10 completed laps (all Workers)=====" >> $USAGE_OUTPUT
