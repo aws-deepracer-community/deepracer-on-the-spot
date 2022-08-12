@@ -190,9 +190,9 @@ submit_model_to_train()
                   ;;
               "Custom value for Maximum Uptime")
                   customtimeentry=
-                  while ! [ "$customtimeentry" =~ ^[0-9]+$ ] || [ "$customtimeentry" -lt 0 ] || [ "$customtimeentry" -gt 1440 ]
+                  while [[! "$customtimeentry" =~ ^[0-9]+$ ]] || [ "$customtimeentry" -gt 1440 ]
                   do
-                      read -p "Enter Maximum Uptime (in minutes - Min:0 / Max:1440):" $customtimeentry
+                      read -p "Enter Maximum Uptime (in minutes - Min:0 / Max:1440):" customtimeentry
                   done
                   export TimeToLiveInMinutes=$customtimeentry
                   echo -e "\tMaximum Uptime selected = \e[1;32m $TimeToLiveInMinutes \e[0m"
