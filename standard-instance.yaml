@@ -4,7 +4,7 @@ Description: Setup a standard EC2 instance for deep racer
 Parameters:
   InstanceType:
     Type: String
-    Default: g4dn.4xlarge
+    Default: g4dn.2xlarge
   ResourcesStackName:
     Type: String
   TimeToLiveInMinutes:
@@ -13,6 +13,9 @@ Parameters:
     Default: 60
     MinValue: 0
     MaxValue: 1440 # 24 hours
+  AmiId:
+    Type: String
+    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422
 
 Outputs:
 
@@ -39,7 +42,7 @@ Resources:
           Name:
             !ImportValue
             'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
-        ImageId: !Sub '{{resolve:ssm:/DeepRacer/Images/${ResourcesStackName}}}'
+        ImageId: !Ref AmiId
         InstanceType: !Ref InstanceType
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
