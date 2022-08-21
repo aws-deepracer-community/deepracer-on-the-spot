@@ -15,7 +15,7 @@ Parameters:
     MaxValue: 1440 # 24 hours
   AmiId:
     Type: String
-    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422
+    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
 
 Outputs:
 
@@ -100,7 +100,11 @@ Resources:
             /etc/profile.d/my_bucket.sh:
               content:
                 Fn::Sub:
+<<<<<<< HEAD
                 - "export MY_BUCKET=${BUCKET}"
+=======
+                - "export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}"
+>>>>>>> tmp
                 - BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
