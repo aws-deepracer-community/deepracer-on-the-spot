@@ -100,11 +100,7 @@ Resources:
             /etc/profile.d/my_bucket.sh:
               content:
                 Fn::Sub:
-<<<<<<< HEAD
-                - "export MY_BUCKET=${BUCKET}"
-=======
                 - "export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}"
->>>>>>> tmp
                 - BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
