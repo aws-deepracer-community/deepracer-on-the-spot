@@ -101,8 +101,6 @@ Resources:
               content:
                 Fn::Sub:
                 - "export MY_BUCKET=${BUCKET}"
-                - "export DR_S3_URI=${BUCKET}"
-                - "export DEEPRACER_S3_URI=${BUCKET}"
                 - BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
