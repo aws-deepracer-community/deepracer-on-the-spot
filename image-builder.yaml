@@ -416,17 +416,17 @@ Resources:
                       fi
                       dr-upload-model -bfw
                       dr-stop-training
-  DistributionConfigution:
+  DistributionConfiguration:
     Type: 'AWS::ImageBuilder::DistributionConfiguration'
     Properties:
       Name: !Sub 'DistributionConfiguration-${AWS::StackName}'
       Distributions:
-        -Region: 'us-east-1'
-        AmiDistributionConfiguration:
-          Name: 'ami-dist-config-us-east-1'
-          LaunchPermissionConfiguration:
-            UserGroups:
-              - 'all'
+        - Region: 'us-east-1'
+          AmiDistributionConfiguration:
+            Name: 'ami-dist-config-us-east-1 {{ imagebuilder:buildDate }}'
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
@@ -448,6 +448,7 @@ Resources:
       Description: DeepRacer image build pipeline
       ImageRecipeArn: !Ref 'UbuntuServerForDeepRacerImageRecipe'
       InfrastructureConfigurationArn: !Ref 'UbuntuServerImageInfrastructureConfiguration'
+      DistributionConfigurationArn: !Ref 'DistributionConfiguration'
       Name: !Sub 'DeepRacerImageBuildPipeline-${AWS::StackName}'
       Tags:
         BuildStack: !Sub '${AWS::StackName}'
