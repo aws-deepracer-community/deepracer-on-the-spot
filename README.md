@@ -1,22 +1,66 @@
-# deepracer-templates
-Simple cloudformation template to assist in creating ec2 instances for deep racer learning, with automated training start.
+# DeepRacer On The Spot
+Simple cloudformation template to assist in creating ec2 instances for deep racer learning, with automated training start and up to 10X savings over training in console (when using ec2 spot instance).
 
-### Base resources stack
-The base resources stack can be created using the create-base-resources.sh script. Please examine the content of the script to understand how the template is deployed.
-The template provisioned by the create-base-resources.sh script utilizes the base.resources.yaml template file.
+## Create Base Resources
+### create-base-resources.sh
 
-The main purpose of this template is to create an S3 bucket, an EFS filesystem, and EFS Mount Targets on each of the subnets within the default VPC. (The template has a max of 6 subnets, if your VPC has a different number of subnets in the default VPC, please adjust this script accordingly.)
+INPUTS:
+* stackName - name of base resource stack (example 'base')
+* ip - the IP of the machine you are using. This is needed to allowlist your machine's IP to view the agent training and access our menu resources
 
-The script also creates an SNS Topic that has messages published to it in the event of spot instance termination.
+Example:
+`./create-base-resources.sh base 11.111.11.11.1`
 
-The delete-base-resources.sh script can be used to delete the resources created by the create-base-resouces.sh script (and associated template). Please be aware that the resource deletion will fail if the S3 bucket created is not empty.
+The primary purpose of this template is to provide a simple single script to run that sets up all of the prerequisite AWS resources to allow deepracer-for-cloud to run on EC2 instances (https://aws-deepracer-community.github.io/deepracer-for-cloud/). **This should only be ran once per sandbox**. This is accomplished by creating the following:
+* S3 bucket
+* EFS filesystem
+* EFS Mount Targets on each of the subnets within the default VPC. (The template has a max of 6 subnets, if your VPC has a different number of subnets in the default VPC, please adjust this script accordingly.)
+* SNS Topic that has messages published to it in the event of spot instance termination to stop training safely and upload model
 
-delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.
+This bash script utilizes the base.resources.yaml template file to privision the above resources. 
 
+---
 
-### Image Builder
+## Create Standard/Spot Instance
+### create-standard-instance.sh
+### create-spot-instance.sh
 
-As a prerequicite to provisioning deepracer training ec2 instances, an the image builder stack must be provisioned and at least one image must have been created.
+INPUTS:
+* baseResourcesStackName - stackName from create-base-resource.sh if you ever forget this, you can go to cloudformation and see old stacks
+* stackName - name of this stack that will provision an ec2 instance and automatically train deepracer training 
+* timeToLiveInMinutes - how long you want this ec2 instance to run for. after X minutes, the instance will be terminated. Default: 60, Min:0, Max: 1440 . If you want the instance to stay alive forever, set this value to 0 (caution: you will be charged per hour the instance is running, and you will need to stop/terminate the instance on your own). You can also increase the max time in standard-instance.yaml if you wish to have to model train more than 24 hours.
+
+Example:
+`./create-standard-instance.sh base firstmodelbase 30`
+`./create-spot-instance.sh base firstmodelspot 30`
+
+create-standard-instance.sh creates a single on demand ec2 instance. The instance type used is configured as the default in the standard-instance.yaml cloudformation template file.
+create-spot-instance.sh creates a single spot ec2 instance if available. This is a fantastic way to save a lot of money on training DeepRacer models, as training on a g4dn.2xl spot instance can get you 4 workers at $0.22/hour (compared to $3.50/hour for 1 worker in console). 
+
+This script can be execute multiple times (no more limit on only 4 concurrent training models like in console), with different instance stack names. All the different instances will share the base resources (efs and s3).
+
+Both spot and standard instance requests are launched using a daily refreshing AMI that is generated in a source AWS account to always grab the newest docker images for robomaker/sagemaker/coach. If you wish to run your own AMI, use ./create-image-builder.sh to create the daily refreshing pipeline and update your spot/standard instance bash scripts to use your AMI. NOTE: using your own AMI will incur a charge of ~$1/day because an EC2 instance will be created daily to update the AMI.
+
+---
+
+### OTHER COMMANDS:
+
+### Stopping training
+
+The script stop-instance.sh executes 'safe termination' of training and deletes the cloudformation stack used to create the instance. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter to used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: `./stop-instance.sh my-instance-stack-name` . You can also go to cloudformation and manually delete the stack.
+
+### Adding additional IP addresses to security group ingress and NACLs
+
+The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  `./add-access.sh <base resources stack name> <stack name> <IP address>`
+
+### Subscribing email addresses to the 'spot instance interruption notification topic' (the topic is created by the base resources stack)
+
+The script add-interruption-notification-subscription.sh script adds an email address to the 'interruption notification topic.'
+Use: `./add-interruption-notification-subscription.sh <base resources stack name> <stack name> <email address>`
+
+Note, it is also possible to interactively create a subscription on the SNS web console. Adding an email subscription results in an email, with a confirmation link in it, being sent to the email address. Not published message is forwarded to the email prior to the user having confirmed the subscription (by clicking on the link in the original subscription notification email).
+
+## Image Builder
 
 The script create-image-builder.sh creates an EC2 Image Builder Pipeline that creates an new AMI daily. The resources used to create the images include the communit git repositry content for deep racing. The drivers/containers are installed and the image is rebooted. This speeds up the instance creation, as the software is presinstalled. create-image-builder.sh takes two parameters, the resources stack name and a stack name for the image builder provisioned template. The resources created are defined in the image-builder.yaml template.
 
@@ -26,27 +70,7 @@ The image builder logs are written into the s3 bucket provided by the 'base reso
 
 Old created AMIs are deleted daily. Current AMI id is written to SSM parameter named /DeepRacer/Images/$baseResourcesStackName (this value can be changed via a template parameter)
 
-### Standard instance using the AMI created by the image builder pipeline
+## delete-base-resources.sh
 
-create-standard-instance.sh creates a single on demad ec2 instance. The instance type used is configured as the default in the standard-instance.yaml cloudformation template file.
+This script can be used to delete the resources created by the create-base-resouces.sh script (and associated template). Please be aware that the resource deletion will fail if the S3 bucket created is not empty. delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.
 
-create-standard-instance.sh - takes three mandatory parameters, the name of the base resources stack, the name of the stack used to create an ec2 instance, and the time in minutes for the EC2 instance to live. Valid TTL times are 0-1440 minutes. If you set a TTL of 0, the instance will not terminate automatically. This script can be execute multiple times, with different instance stack names. All the different instances will share the base resources (efs and s3).
-
-### Spot instance from image builder using the AMI created by the image builder pipeline
-
-The script create-spot-instance.sh functions like 'create-standard-instance.sh', only difference being that it utilizes the AMI created by the image builder pipeline. Environment variables can be used to control spot requests, namely block duration, please take of look at the script content, and notice use of environment variables there-in.
-
-### Stopping training
-
-The script stop-instance.sh executes 'safe termination' of training and deletes the cloudformation stack used to create the instance. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter to used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: ./stop-instance.sh my-instance-stack-name
-
-### Adding additional IP addresses to security group ingress and NACLs
-
-The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  ./add-access.sh <base resources stack name> <stack name> <IP address>
-
-### Subscribing email addresses to the 'spot instance interruption notification topic' (the topic is created by the base resources stack)
-
-The script add-interruption-notification-subscription.sh script adds an email address to the 'interruption notification topic.'
-Use: ./add-interruption-notification-subscription.sh <base resources stack name> <stack name> <email address>
-
-Note, it is also possible to interactively create a subscription on the SNS web console. Adding an eamil subscription results in an email, with a confirmation link in it, being sent to the email address. Not published message is forwarded to the email prior to the user having confirmed the subscription (by clicking on the link in the original subscription notification email).
