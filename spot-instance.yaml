@@ -4,15 +4,20 @@ Description: Setup a spot EC2 instance for deep racer
 Parameters:
   InstanceType:
     Type: String
-    Default: g4dn.4xlarge
+    Default: g4dn.2xlarge
   ResourcesStackName:
     Type: String
   TimeToLiveInMinutes:
     Type: Number
     Description: timeout in minutes after which training is stopped and this stack is deleted
-    Default: 720
+    Default: 60
     MinValue: 10
     MaxValue: 1440 # 24 hours
+  AmiId:
+    Type: String
+    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
+  BUCKET:
+    Type: String
 
 Outputs:
 
@@ -39,7 +44,7 @@ Resources:
           Name:
             !ImportValue
             'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
-        ImageId: !Sub '{{resolve:ssm:/DeepRacer/Images/${ResourcesStackName}}}'
+        ImageId: !Ref AmiId
         InstanceType: !Ref InstanceType
         InstanceMarketOptions:
           MarketType: spot
@@ -99,7 +104,7 @@ Resources:
             /etc/profile.d/my_bucket.sh:
               content:
                 Fn::Sub:
-                - "export MY_BUCKET=${BUCKET}"
+                - "export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}"
                 - BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
@@ -332,7 +337,11 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
-
+          bash
+          sudo su ubuntu
+          cd /home/ubuntu/deepracer-for-cloud/
+          source bin/activate.sh
+          export DEEPRACER_S3_URI=${BUCKET}
 
   SpotInterruptionHandlerFunction:
     Type: AWS::Lambda::Function

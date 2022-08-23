@@ -383,35 +383,6 @@ Resources:
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -cpu-avx2'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
-  DeepracerS3URIComponent:
-    Type: AWS::ImageBuilder::Component
-    Properties:
-      Name: !Sub 'DeepRacerS3URI-${AWS::StackName}'
-      Version: '0.0.2'
-      Description: Install the latest DeepRacer docker images script.
-      ChangeDescription: First version
-      Platform: Linux
-      Data: !Sub
-        - |
-          name: DeepRacerS3URI
-          description: Creates an envrironment variable for DR_S3_URI
-          schemaVersion: 1.0
-          phases:
-            - name: build
-              steps:
-                - name: DeepRacerS3URI
-                  action: CreateFile
-                  inputs:
-                    - path: /etc/profile.d/s3_uri.sh
-                      permissions: 775
-                      owner: root
-                      group: root
-                      content: |
-                          export DR_S3_URI=${BUCKET}
-                          export DEEPRACER_S3_URI=${BUCKET}
-                          export PATH=/home/ubuntu/bin:$PATH
-        - BUCKET: !ImportValue
-            Fn::Sub: ${ResourcesStackName}-Bucket
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -445,8 +416,17 @@ Resources:
                       fi
                       dr-upload-model -bfw
                       dr-stop-training
-                      aws s3 cp /tmp/logs/ s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_MODEL_PREFIX/logs/ --recursive
-                      rm -rf /tmp/logs/
+  DistributionConfiguration:
+    Type: 'AWS::ImageBuilder::DistributionConfiguration'
+    Properties:
+      Name: !Sub 'DistributionConfiguration-${AWS::StackName}'
+      Distributions:
+        - Region: 'us-east-1'
+          AmiDistributionConfiguration:
+            Name: 'ami-dist-config-us-east-1 {{ imagebuilder:buildDate }}'
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
   UbuntuServerForDeepRacerImageRecipe:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
@@ -455,7 +435,6 @@ Resources:
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-18-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
-        - ComponentArn: !Ref 'DeepracerS3URIComponent'
         - ComponentArn: !Ref 'SafeTerminationComponent'
         - ComponentArn: !Ref 'InstallEFSUtilsComponent'
         - ComponentArn: !Ref 'ExpandRootVolumeComponent'
@@ -469,6 +448,7 @@ Resources:
       Description: DeepRacer image build pipeline
       ImageRecipeArn: !Ref 'UbuntuServerForDeepRacerImageRecipe'
       InfrastructureConfigurationArn: !Ref 'UbuntuServerImageInfrastructureConfiguration'
+      DistributionConfigurationArn: !Ref 'DistributionConfiguration'
       Name: !Sub 'DeepRacerImageBuildPipeline-${AWS::StackName}'
       Tags:
         BuildStack: !Sub '${AWS::StackName}'
