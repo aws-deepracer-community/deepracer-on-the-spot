@@ -1,5 +1,13 @@
 # DeepRacer On The Spot
-Simple cloudformation template to assist in creating ec2 instances for deep racer learning, with automated training start and up to 10X savings over training in console (when using ec2 spot instance).
+Simple cloudformation templates to assist in creating ec2 instances for deep racer learning, with automated training start/end and up to 10X savings over training in console (when using ec2 spot instance). This is a wrapper around LarsLL's deepracer-for-cloud https://aws-deepracer-community.github.io/deepracer-for-cloud/ to make it very easy to start training in the AWS Console and take advantage of all amazing tools the deepracer-for-cloud repo gives you.
+
+Training on an EC2 has many advantages:
+<li>Being able to set up a customized action space
+<li>Train much faster with up to triple the number of workers on a g4dn.2xl instance
+<li>Ability to increment your training
+<li>Improved log analysis tools
+<li>Train as multiple models at once on different EC2 instances
+<li>Reduced cost: $0.22/hour (when using g4dn.2xl spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
 
 ## Create Base Resources
 ### create-base-resources.sh
@@ -74,3 +82,8 @@ Old created AMIs are deleted daily. Current AMI id is written to SSM parameter n
 
 This script can be used to delete the resources created by the create-base-resouces.sh script (and associated template). Please be aware that the resource deletion will fail if the S3 bucket created is not empty. delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.
 
+## Other useful links:
+
+<li>Track names for DR_WORLD_NAME: https://github.com/aws-deepracer-community/deepracer-simapp/tree/master/bundle/deepracer_simulation_environment/share/deepracer_simulation_environment/routes
+<li>Racing types (head to head, time trial, object avoidance) for DR_RACE_TYPE: https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html
+<li>Pull new sagemaker/robomaker docker images: https://github.com/aws-deepracer-community/deepracer-simapp
