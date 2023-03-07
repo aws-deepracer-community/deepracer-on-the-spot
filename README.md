@@ -9,15 +9,21 @@ Training on an EC2 has many advantages:
 <li>Train as multiple models at once on different EC2 instances
 <li>Reduced cost: $0.22/hour (when using g4dn.2xl spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
 
+## Setup
+* Log into AWS console and launch Cloud Shell
+* run `git clone https://github.com/aws-deepracer-community/deepracer-on-the-spot`
+* run `cd deepracer-on-the-spot`
+
 ## Create Base Resources
 ### create-base-resources.sh
 
 INPUTS:
 * stackName - name of base resource stack (example 'base')
-* ip - the IP of the machine you are using. This is needed to allowlist your machine's IP to view the agent training and access our menu resources
+* ip - the IP of the machine you are using. This is needed to allowlist your machine's IPv4 to view the agent training and access our menu resources (can be found here https://www.whatismyip.com/)
 
 Example:
 `./create-base-resources.sh base 11.111.11.11.1`
+**This will run for around 3 minutes.**
 
 The primary purpose of this template is to provide a simple single script to run that sets up all of the prerequisite AWS resources to allow deepracer-for-cloud to run on EC2 instances (https://aws-deepracer-community.github.io/deepracer-for-cloud/). **This should only be ran once per sandbox**. This is accomplished by creating the following:
 * S3 bucket
@@ -41,11 +47,14 @@ INPUTS:
 Example:
 `./create-standard-instance.sh base firstmodelbase 30`
 `./create-spot-instance.sh base firstmodelspot 30`
+**This will run for around 3 minutes. Viewing the training will starts 3-4 minutes after this completes**
+
+Once this script completes, two links will be printed to console that show the visual training of the model and the log links of the training model I.E. ( 3.87.87.207:8080 and http://3.87.87.207:8100/menu.html respectively ). Paste these into your browser and **wait 3-4 minutes for training to begin**. On the visual training page, the link "/racecar/main_camera/zed/rgb/" will look most similar to the DeepRacer Console.
 
 create-standard-instance.sh creates a single on demand ec2 instance. The instance type used is configured as the default in the standard-instance.yaml cloudformation template file.
-create-spot-instance.sh creates a single spot ec2 instance if available. This is a fantastic way to save a lot of money on training DeepRacer models, as training on a g4dn.2xl spot instance can get you 4 workers at $0.22/hour (compared to $3.50/hour for 1 worker in console). 
+create-spot-instance.sh creates a single spot ec2 instance if available. This is a fantastic way to save a lot of money on training DeepRacer models, as training on a g4dn.2xl spot instance can get you 4 workers at $0.22/hour (compared to $3.50/hour for 1 worker in console). Note, deployment may fail if there isn't any spot instances of this size available. Procuring a spot instance is most common outside of US work hours.
 
-This script can be execute multiple times (no more limit on only 4 concurrent training models like in console), with different instance stack names. All the different instances will share the base resources (efs and s3).
+This script can be execute many times (the DeepRacer console limits you to training a max of 4 concurrent models), with different instance stack names. All the different instances will share the base resources (efs and s3).
 
 Both spot and standard instance requests are launched using a daily refreshing AMI that is generated in a source AWS account to always grab the newest docker images for robomaker/sagemaker/coach. If you wish to run your own AMI, use ./create-image-builder.sh to create the daily refreshing pipeline and update your spot/standard instance bash scripts to use your AMI. NOTE: using your own AMI will incur a charge of ~$1/day because an EC2 instance will be created daily to update the AMI.
 
