@@ -358,8 +358,8 @@ Resources:
                   commands:
                     - |
                       id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-                      vol_id=$(aws ec2 describe-instances --region us-east-1 --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
-                      aws ec2 modify-volume --size 40 --volume-id $vol_id --region us-east-1
+                      vol_id=$(aws ec2 describe-instances --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
+                      aws ec2 modify-volume --size 40 --volume-id $vol_id --region $(curl http://169.254.169.254/latest/meta-data/placement/region)
   PullDeepracerDockerImagesComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -421,9 +421,15 @@ Resources:
     Properties:
       Name: !Sub 'DistributionConfiguration-${AWS::StackName}'
       Distributions:
-        - Region: 'us-east-1'
+        - Region: !ImportValue
+            Fn::Sub: ${ResourcesStackName}-Region
           AmiDistributionConfiguration:
-            Name: 'ami-dist-config-us-east-1 {{ imagebuilder:buildDate }}'
+            Name: !Join
+              - '-'
+              - - 'ami-dist-config'
+                - !ImportValue
+                    Fn::Sub: ${ResourcesStackName}-Region
+                - '{{ imagebuilder:buildDate }}'
             LaunchPermissionConfiguration:
               UserGroups:
                 - all
