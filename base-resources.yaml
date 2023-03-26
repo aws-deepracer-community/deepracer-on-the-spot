@@ -31,6 +31,13 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-InstanceProfile'
 
+  Region:
+    Description: Region in use
+    Value: !Ref AWS::Region
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-Region'
+
   Bucket:
     Description: S3 Bucket
     Value: !Ref Bucket
