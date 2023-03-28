@@ -12,16 +12,22 @@ Parameters:
     Type: String
   Subnet0:
     Type: String
+    Default: ''
   Subnet1:
     Type: String
+    Default: ''
   Subnet2:
     Type: String
+    Default: ''
   Subnet3:
     Type: String
+    Default: ''
   Subnet4:
     Type: String
+    Default: ''
   Subnet5:
     Type: String
+    Default: ''
 
 Outputs:
   InstanceProfile:
