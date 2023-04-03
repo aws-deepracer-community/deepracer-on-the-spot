@@ -37,7 +37,5 @@ You should also be able to navigate to the AWS Console > EC2 > Instances and see
 
 | Subject | Details |
 | --- | --- |
-| Standard web based analysis | Once training progresses to 20-30 minutes you will be able to access standard training analysis via the links from the menu.html page.  These pages include graphs of training progress, reward heatmap and the path taken for your best completed laps, along with tables of highest reward, quickest laps etc.  Here are two examples: -  
-![training graph](media/training-graph.png)
-![heatmap](media/heatmap.png)|
+| Standard web based analysis | Once training progresses to 20-30 minutes you will be able to access standard training analysis via the links from the menu.html page.  These pages include graphs of training progress, reward heatmap and the path taken for your best completed laps, along with tables of highest reward, quickest laps etc.  Here are two examples: -  ![training graph](media/training-graph.png)  ![heatmap](media/heatmap.png) |
 | Ad-hoc analysis | A link is provided to the Jupyter notebook running on the Deep Racer analysis container should you wish to customize your analysis during training.  It is recommended to review the 'import_from_s3' Jupyter notebook so you can see how to read the training data directly from S3, or alternatively review the Training_progress notebook so you can see how simulation_agg, df, track and complete_ones that have been exported can be used via the '%store -r' command |
