@@ -156,6 +156,7 @@ Resources:
                 <p><a href="robomaker1.log" download>robomaker1.log</a></p>
 
                 <h2>Training/Evaluation monitoring graphs</h2>
+                <p><a href="Training_and_Evaluation_Overview.html">Training_and_Evaluation_Overview</a></p>
                 <p><a href="Training_progress.html">Training_progress</a></p>
                 <p><a href="Quintiles.html">Quintiles</a></p>
                 <p><a href="Heatmap.html">Reward Heatmap</a></p>
@@ -163,6 +164,18 @@ Resources:
                 <p><a href="Path_for_complete_laps.html">Path_for_complete_laps</a></p>
                 <p><a href="update_to_jupyter_url">Access Jupyter Notebook</a></p>
 
+                </body>
+                </html>
+              mode : "000755"
+              owner: ubuntu
+              group: ubuntu
+            /home/ubuntu/deepracer-for-cloud/Training_and_Evaluation_Overview.html:
+              content: |
+                <!DOCTYPE html>
+                <html>
+                <body>
+                                
+                <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
               mode : "000755"
@@ -356,6 +369,9 @@ Resources:
                     docker exec $ANALYSIS_ID jupyter nbconvert --no-input --to html --execute Path_for_complete_laps.ipynb
                     docker cp $ANALYSIS_ID:/workspace/Path_for_complete_laps.html .
                     docker cp Path_for_complete_laps.html $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                    docker exec $ANALYSIS_ID jupyter nbconvert --no-input --to html --execute Training_and_Evaluation_Overview.ipynb
+                    docker cp $ANALYSIS_ID:/workspace/Training_and_Evaluation_Overview.html .
+                    docker cp Training_and_Evaluation_Overview.html $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                   done
                   
                   # if the EC2 has started the termination process we do not want to upload $USAGE_OUTPUT to S3
@@ -433,9 +449,13 @@ Resources:
 
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
+                DEEPRACER_WORKERS=$(cat system.env | grep DR_WORKERS= | awk -F'=' '{print $2}')
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" import_from_s3.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" import_from_s3.py
                 sed -i "s|DEEPRACER_TRACK|${DEEPRACER_TRACK}|" import_from_s3.py
+                sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" Training_and_Evaluation_Overview.py
+                sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" Training_and_Evaluation_Overview.py
+                sed -i "s|DEEPRACER_WORKERS|${DEEPRACER_WORKERS}|" Training_and_Evaluation_Overview.py
 
                 ANALYSIS_ID=$(docker ps --filter name=deepracer-analysis --format "{{.ID}}")
                 docker cp import_from_s3.py $ANALYSIS_ID:/workspace/
@@ -450,6 +470,8 @@ Resources:
                 docker exec $ANALYSIS_ID jupytext --to notebook Data_tables.py
                 docker cp Path_for_complete_laps.py $ANALYSIS_ID:/workspace/
                 docker exec $ANALYSIS_ID jupytext --to notebook Path_for_complete_laps.py
+                docker cp Training_and_Evaluation_Overview.py $ANALYSIS_ID:/workspace/
+                docker exec $ANALYSIS_ID jupytext --to notebook Training_and_Evaluation_Overview.py
               mode : "000755"
               owner: ubuntu
               group: ubuntu
@@ -830,6 +852,64 @@ Resources:
                 # +
                 episodes_to_plot = complete_ones.nlargest(5,'reward')
                 pu.plot_selected_laps(episodes_to_plot, df, track)
+                # -
+              mode : "000755"
+              owner: ubuntu
+              group: ubuntu
+            /home/ubuntu/deepracer-for-cloud/Training_and_Evaluation_Overview.py:     
+              content: |
+                # ---
+                # jupyter:
+                #   jupytext:
+                #     formats: ipynb,py:light
+                #     text_representation:
+                #       extension: .py
+                #       format_name: light
+                #       format_version: '1.5'
+                #       jupytext_version: 1.14.1
+                #   kernelspec:
+                #     display_name: Python 3 (ipykernel)
+                #     language: python
+                #     name: python3
+                # ---
+
+                # +
+                #Import block to bring in dependencies
+                from deepracer.logs import metrics
+                import matplotlib.pyplot as plt
+                import numpy as np
+
+                # Ignore deprecation warnings we have no power over
+                import warnings
+                warnings.filterwarnings('ignore')
+                # -
+
+                # ## Completion of Training and Evaluation per Iteration
+
+                # +
+                try:
+                  tm = metrics.TrainingMetrics("DEEPRACER_S3_URI")
+                  tm.addRound("DR_LOCAL_S3_MODEL_PREFIX", training_round=1, workers=DEEPRACER_WORKERS)
+                  results = tm.plotProgress(method=['median','mean'], rolling_average=1, figsize=(20,5))
+                except Exception:
+                  print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
+                # -
+
+                # ## Best Lap Progression - is your model gettting faster?
+                
+                # +
+                try:
+                  train=tm.getTraining()
+                  ev=tm.getEvaluation()
+                  train_complete_lr = train[(train['round']>(0)) & (train['complete']==1)]
+                  eval_complete_lr = ev[(ev['round']>(0)) & (ev['complete']==1)]
+                  plt.figure(figsize=(15,5))
+                  plt.title('Best lap progression')
+                  plt.scatter(train_complete_lr['master_iteration'],train_complete_lr['time'],alpha=0.4)
+                  plt.scatter(eval_complete_lr['master_iteration'],eval_complete_lr['time'],alpha=0.4)
+                  plt.show()
+                except Exception:
+                  print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
                 # -
               mode : "000755"
               owner: ubuntu
