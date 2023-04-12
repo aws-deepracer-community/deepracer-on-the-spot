@@ -895,7 +895,7 @@ Resources:
                   print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
                 # -
 
-                # ## Best Lap Progression - is your model gettting faster?
+                # ## Best Lap Progression - is your model getting faster?
                 
                 # +
                 try:
