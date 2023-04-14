@@ -54,6 +54,27 @@ Resources:
               VolumeType: gp3
               VolumeSize: 60
               DeleteOnTermination: 'true'
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash -xe
+            /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
+            bash
+            sudo su ubuntu
+            cd /home/ubuntu/deepracer-for-cloud/
+            source bin/activate.sh
+            export DEEPRACER_S3_URI=${BUCKET}
+        SecurityGroupIds:
+        - !ImportValue
+          'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
+        TagSpecifications:
+        - ResourceType: instance        
+          Tags:
+          - Key: Name
+            Value: !Sub '${AWS::StackName}'
+        - ResourceType: volume      
+          Tags:
+          - Key: Name
+            Value: !Sub '${AWS::StackName}'
 
   Instance:
     Type: AWS::EC2::Instance
@@ -915,24 +936,10 @@ Resources:
               owner: ubuntu
               group: ubuntu
     Properties:
-      SecurityGroupIds:
-        - !ImportValue
-          'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
-      Tags:
-        - Key: Name
-          Value: !Sub '${AWS::StackName}'
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash -xe
-          /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
-          bash
-          sudo su ubuntu
-          cd /home/ubuntu/deepracer-for-cloud/
-          source bin/activate.sh
-          export DEEPRACER_S3_URI=${BUCKET}
+
 
   SpotInterruptionHandlerFunction:
     Type: AWS::Lambda::Function
