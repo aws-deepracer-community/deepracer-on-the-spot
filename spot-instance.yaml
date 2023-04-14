@@ -21,17 +21,8 @@ Parameters:
 
 Outputs:
 
-  DNS:
-    Value: !GetAtt Instance.PublicDnsName
-
   Instance:
     Value: !Ref Instance
-
-  InstanceIP:
-    Description: The IP of the instance created
-    Value: !GetAtt Instance.PublicIp
-    Export:
-      Name: !Sub "${AWS::StackName}-PublicIp"
 
 Resources:
 
@@ -77,7 +68,7 @@ Resources:
             Value: !Sub '${AWS::StackName}'
 
   Instance:
-    Type: AWS::EC2::Instance
+    Type: AWS::AutoScaling::AutoScalingGroup
     CreationPolicy:
       ResourceSignal:
         Count: '1'
@@ -936,9 +927,13 @@ Resources:
               owner: ubuntu
               group: ubuntu
     Properties:
+      AvailabilityZones: !GetAZs
       LaunchTemplate:
         LaunchTemplateId: !Ref LaunchTemplate
         Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MaxSize: '1'
+      MinSize: '0'
+      DesiredCapacity: '1'
 
 
   SpotInterruptionHandlerFunction:

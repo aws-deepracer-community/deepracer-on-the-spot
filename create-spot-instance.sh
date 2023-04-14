@@ -40,7 +40,9 @@ set -x
 
 aws s3 cp custom-files s3://${BUCKET}/custom_files --recursive
 aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET --template-file spot-instance.yaml --capabilities CAPABILITY_IAM
-EC2_IP=`aws cloudformation list-exports --query "Exports[?Name=='${stackName}-PublicIp'].Value" --no-paginate --output text`
+ASG=$(aws cloudformation describe-stacks --stack-name ${stackName} --query "Stacks[].Outputs[].OutputValue" --output text)
+EC2_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
+EC2_IP=$(aws ec2 describe-instances --instance-ids ${EC2_ID} --query 'Reservations[].Instances[].PublicIpAddress[]' --output text)
 echo "Logs will upload every 2 minutes to https://s3.console.aws.amazon.com/s3/buckets/${BUCKET}/${stackName}/logs/"
 echo "Training should start shortly on ${EC2_IP}:8080"
 echo "Once started, you should also be able to monitor training progress through ${EC2_IP}:8100/menu.html"
