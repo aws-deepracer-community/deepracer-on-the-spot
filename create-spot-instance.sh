@@ -38,8 +38,9 @@ fi
 
 set -x
 
-aws s3 cp custom-files s3://${BUCKET}/custom_files --recursive
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET --template-file spot-instance.yaml --capabilities CAPABILITY_IAM
+CUSTOM_FILE_LOCATION=$(cat custom-files/run.env | grep DR_LOCAL_S3_CUSTOM_FILES_PREFIX= | awk -F'=' '{print $2}')
+aws s3 cp custom-files s3://${BUCKET}/${CUSTOM_FILE_LOCATION} --recursive
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$CUSTOM_FILE_LOCATION --template-file spot-instance.yaml --capabilities CAPABILITY_IAM
 ASG=$(aws cloudformation describe-stacks --stack-name ${stackName} --query "Stacks[].Outputs[].OutputValue" --output text)
 EC2_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
 EC2_IP=$(aws ec2 describe-instances --instance-ids ${EC2_ID} --query 'Reservations[].Instances[].PublicIpAddress[]' --output text)

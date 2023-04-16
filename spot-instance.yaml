@@ -18,7 +18,8 @@ Parameters:
     Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
   BUCKET:
     Type: String
-
+  CUSTOMFILELOCATION:
+    Type: String
 Outputs:
 
   Instance:
@@ -54,6 +55,7 @@ Resources:
             cd /home/ubuntu/deepracer-for-cloud/
             source bin/activate.sh
             export DEEPRACER_S3_URI=${BUCKET}
+            export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}"
         SecurityGroupIds:
         - !ImportValue
           'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
@@ -120,6 +122,13 @@ Resources:
                 - BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
+              mode : "000755"
+              owner: root
+              group: root
+            /etc/profile.d/my_custom_files.sh:
+              content:
+                Fn::Sub: |
+                  export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}"
               mode : "000755"
               owner: root
               group: root
@@ -399,10 +408,12 @@ Resources:
               content: |
                 #!/bin/bash
 
+                source /etc/profile.d/my_custom_files.sh
                 cd ~/deepracer-for-cloud
                 sed -i "s/DR_UPLOAD_S3_BUCKET=not-defined/DR_UPLOAD_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_LOCAL_S3_BUCKET=bucket/DR_LOCAL_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_UPLOAD_S3_PREFIX=upload/DR_UPLOAD_S3_PREFIX=$DR_LOCAL_S3_MODEL_PREFIX-upload/" ~/deepracer-for-cloud/run.env
+                sed -i "s|DR_LOCAL_S3_CUSTOM_FILES_PREFIX=custom_files|DR_LOCAL_S3_CUSTOM_FILES_PREFIX=$CUSTOM_FILE_LOCATION|" ~/deepracer-for-cloud/run.env
                 source bin/activate.sh
                 dr-download-custom-files
                 cp custom_files/*.env .
