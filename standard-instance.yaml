@@ -100,6 +100,18 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /etc/profile.d/my_sns_topic.sh:
+              content:
+                Fn::Sub:
+                - "export MY_SNS_TOPIC=${SNS}"
+                - SNS:
+                        Fn::ImportValue:
+                            !Sub "${ResourcesStackName}-InterruptionNotification"
+            /etc/profile.d/my_public_ip.sh:
+              content: "export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+              mode : "000755"
+              owner: root
+              group: root
             /etc/profile.d/my_bucket.sh:
               content:
                 Fn::Sub:
@@ -389,6 +401,7 @@ Resources:
                 #!/bin/bash
 
                 source /etc/profile.d/my_custom_files.sh
+                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 sed -i "s/DR_UPLOAD_S3_BUCKET=not-defined/DR_UPLOAD_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_LOCAL_S3_BUCKET=bucket/DR_LOCAL_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env

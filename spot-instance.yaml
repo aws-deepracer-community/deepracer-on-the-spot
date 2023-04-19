@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Setup a spot EC2 instance for deep racer
+Description: Setup a spot EC2 Autoscaling Group for deep racer
 
 Parameters:
   InstanceType:
@@ -23,7 +23,7 @@ Parameters:
 Outputs:
 
   Instance:
-    Value: !Ref Instance
+    Value: !Ref ASG
 
 Resources:
 
@@ -49,7 +49,7 @@ Resources:
         UserData:
           Fn::Base64: !Sub |
             #!/bin/bash -xe
-            /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}
+            /usr/local/bin/cfn-init --stack ${AWS::StackName} --resource ASG --region ${AWS::Region}
             bash
             sudo su ubuntu
             cd /home/ubuntu/deepracer-for-cloud/
@@ -69,7 +69,7 @@ Resources:
           - Key: Name
             Value: !Sub '${AWS::StackName}'
 
-  Instance:
+  ASG:
     Type: AWS::AutoScaling::AutoScalingGroup
     CreationPolicy:
       ResourceSignal:
@@ -87,7 +87,7 @@ Resources:
 
             3-signal-cfn:
               command:
-                      !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}'"
+                      !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource ASG --region ${AWS::Region}'"
 
             4-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
@@ -115,6 +115,18 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /etc/profile.d/my_sns_topic.sh:
+              content:
+                Fn::Sub:
+                - "export MY_SNS_TOPIC=${SNS}"
+                - SNS:
+                        Fn::ImportValue:
+                            !Sub "${ResourcesStackName}-InterruptionNotification"
+            /etc/profile.d/my_public_ip.sh:
+              content: "export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
+              mode : "000755"
+              owner: root
+              group: root
             /etc/profile.d/my_bucket.sh:
               content:
                 Fn::Sub:
@@ -137,9 +149,29 @@ Resources:
               mode : "000755"
               owner: root
               group: root
-            /home/ubuntu/bin/interrupt_spot.sh:
+            /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh:
               content: |
                 date >> /tmp/interrupt.log
+                sudo su ubuntu
+                INTERRUPT_TIME=$(date '+%Y%m%d-%H%M')
+                cd ~/deepracer-for-cloud
+                source bin/activate.sh
+                source /etc/profile.d/my_bucket.sh
+                dr-reload
+                dr-upload-model -bfw
+                dr-stop-training
+                sed -i '/DR_LOCAL_S3_PRETRAINED/d' ~/deepracer-for-cloud/run.env
+                sed -i -e '$aDR_LOCAL_S3_PRETRAINED=True' ~/deepracer-for-cloud/run.env
+                PRE_TRAINED_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
+                sed -i 's|-continued-.*||' ~/deepracer-for-cloud/run.env
+                TRAINING_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
+                UPLOAD_LOCATION=$(cat run.env | grep DR_UPLOAD_S3_PREFIX= | awk -F'=' '{print $2}')
+                sed -i -e '$aDR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER' ~/deepracer-for-cloud/run.env
+                sed -i "s|DR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER|DR_LOCAL_S3_PRETRAINED_PREFIX=$PRE_TRAINED_LOCATION|" ~/deepracer-for-cloud/run.env
+                sed -i "s|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION-continued-$INTERRUPT_TIME|" ~/deepracer-for-cloud/run.env
+                sed -i "s|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION-continued-$INTERRUPT_TIME|" ~/deepracer-for-cloud/run.env
+                sed -i -e '$aDR_LOCAL_S3_PRETRAINED_CHECKPOINT=last' ~/deepracer-for-cloud/run.env
+                aws s3 cp ~/deepracer-for-cloud/run.env s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_CUSTOM_FILES_PREFIX/
               mode : "000755"
               owner: ubuntu
               group: ubuntu
@@ -407,8 +439,8 @@ Resources:
             /home/ubuntu/bin/start_training.sh:
               content: |
                 #!/bin/bash
-
                 source /etc/profile.d/my_custom_files.sh
+                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 sed -i "s/DR_UPLOAD_S3_BUCKET=not-defined/DR_UPLOAD_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_LOCAL_S3_BUCKET=bucket/DR_LOCAL_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
@@ -962,14 +994,21 @@ Resources:
 
           def handler(event, context):
 
-              instance_created_by_this_stack = '${Instance}'
+              asg_created_by_this_stack = '${ASG}'
+              asg_client = boto3.client('autoscaling')
+              asg_info = asg_client.describe_auto_scaling_groups(
+                  AutoScalingGroupNames=[
+                      '${ASG}',
+                  ],
+              )
+              instance_in_the_asg = asg_info['AutoScalingGroups'][0]['Instances'][0]['InstanceId']
               instance_id = event['detail']['instance-id']
               instanceAction = event['detail']['instance-action']
 
               print("Handling spot instance interruption notification for instance {id}".format(id=instance_id))
 
-              if instance_created_by_this_stack != instance_id:
-                  print("Interrupted instance was not created by this stack.")
+              if instance_in_the_asg != instance_id:
+                  print("Interrupted instance was not created by the ASG in this stack.")
                   return
 
               ssm_client = boto3.client('ssm')
@@ -978,9 +1017,9 @@ Resources:
                   response = ssm_client.send_command(
                       InstanceIds=[instance_id],
                       DocumentName='AWS-RunShellScript',
-                      Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/bin/safe_termination.sh']},
+                      Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh']},
                       CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
-                      TimeoutSeconds=60)
+                      TimeoutSeconds=90)
                   print(f'Running commands on instance {instance_id}. Command id: {id}')
               except ssm_client.exceptions.InvalidInstanceId:
                   print("SSM agent not running.")
@@ -989,11 +1028,12 @@ Resources:
               notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
               sns_client.publish(TopicArn=notification_topic, Message=f'Termination notification instance: {instance_id} stack: ${AWS::StackName}')
       Runtime: python3.7
+      Timeout: 120
       Environment:
         Variables:
           INTERRUPTION_NOTIFICATION: !ImportValue
                                      'Fn::Sub': '${ResourcesStackName}-InterruptionNotification'
-
+      
   LambdaFunctionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -1018,6 +1058,7 @@ Resources:
             Action:
             - ssm:*
             - sns:*
+            - autoscaling:*
             Resource: '*'
 
   LambdaFunctionPermission:
@@ -1051,7 +1092,7 @@ Resources:
   TerminationCronExpression:
     Type: Custom::TerminationCronExpression
     DependsOn:
-      - Instance
+      - ASG
     Properties:
       ServiceToken:
         !ImportValue
@@ -1068,7 +1109,7 @@ Resources:
             !ImportValue
             'Fn::Sub': '${ResourcesStackName}-TerminationLambdaArn'
           Id: TerminateInstance
-          Input: !Sub '{"instance": "${Instance}", "stack": "${AWS::StackName}"}'
+          Input: !Sub '{"instance": "${ASG}", "stack": "${AWS::StackName}"}'
 
   TerminatePermission:
     Type: AWS::Lambda::Permission

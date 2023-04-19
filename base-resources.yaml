@@ -409,8 +409,19 @@ Resources:
           logger = logging.getLogger()
           logger.setLevel(logging.INFO)
 
-          def execute_safe_termination(instance):
+          def execute_safe_termination(INSTANCE):
               ssm_client = boto3.client('ssm')
+              asg_client = boto3.client('autoscaling')
+              instance=INSTANCE
+              try:
+                  asg_info = asg_client.describe_auto_scaling_groups(
+                      AutoScalingGroupNames=[
+                      instance,
+                      ],
+                  )
+                  instance = asg_info['AutoScalingGroups'][0]['Instances'][0]['InstanceId']
+              except:
+                  print("Instance isn't part of an ASG, will execute on individual EC2 instance")
               try:
                   response = ssm_client.send_command(
                       InstanceIds=[instance],
@@ -434,7 +445,7 @@ Resources:
           def notify(stack, instance):
               sns_client = boto3.client('sns')
               topic = '${InterruptionNotification}'
-              sns_client.publish(TopicArn=topic, Message=f'Termination notification instance: {instance} stack: {stack}')
+              sns_client.publish(TopicArn=topic, Message=f'Training has completed for instance: {instance} stack: {stack}')
 
           def handler(event, context):
               instance = event['instance']
