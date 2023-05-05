@@ -6,7 +6,7 @@ This will create your base resources and should be ran once per account.
 
 | Subject | Details |
 | --- | --- |
-| Sandbox access and setup | <ul><li> launch the AWS Console and sign into your account </li><li> once your console has loaded, launch AWS CloudShell by using the search bar or hitting this icon on the top ribbon: ![alt text](cloudshell_icon.JPG) </li></ul>  |
+| Sandbox access and setup | <ul><li> launch the AWS Console and sign into your account </li><li> once your console has loaded, launch AWS CloudShell by using the search bar or hitting this icon on the top ribbon: ![alt text](media/cloudshell_icon.JPG) </li></ul>  |
 | Cloning repo | <ul><li> from CloudShell, clone the repo with this command: `git clone https://github.com/EsaLaine/deepracer-templates/`</li><li> navigate to deepracer-templates directory: `cd deepracer-templates` </li><li> see the files in this directory: `ls`</li> |
 | Create base resources | <ul><li>`./create-base-resources.sh <BASE-STACK-NAME> <YOUR-IP>`</li><li>BASE-STACK-NAME : name of this cloudformation stack you are created (i.e. base)</li> <li>YOUR-IP : IPV4 of the machine you are using to access the ec2 instance (https://whatismyip.host) </li> </ul> |
   
@@ -33,5 +33,9 @@ You should also be able to navigate to the AWS Console > EC2 > Instances and see
 | Adding new IP to base resources stack | `./add-access.sh BASE-STACK-NAME ACCESS-STACK-NAME IP-TO-ADD`<li>BASE-STACK-NAME : same name you selected in the previous section. If you forgot the name, you can check in CloudFormation for stacks that have been created before<li>ACCESS-STACK-NAME : the name of this cloudformation stack (recommended to be "your name-access". i.e. "tyler-access")<li>IP-TO-ADD : IPV4 of the machine you are adding to be able to access the ec2 instance (https://whatismyip.host/). NOT the same IP as create-base-resources.sh. |
 | Connecting to EC2 instance | Navigate to AWS Console > EC2 > Instances > select your instance > Connect on top bar > Session Manager > Connect |
   
-  
-  
+## ANALYSIS DURING TRAINING
+
+| Subject | Details |
+| --- | --- |
+| Standard web based analysis | Once training progresses to 20-30 minutes you will be able to access standard training analysis via the links from the menu.html page.  These pages include graphs of training progress, reward heatmap and the path taken for your best completed laps, along with tables of highest reward, quickest laps etc.  Here are two examples: -  ![training graph](media/training-graph.png)  ![heatmap](media/heatmap.png) |
+| Ad-hoc analysis | A link is provided to the Jupyter notebook running on the Deep Racer analysis container should you wish to customize your analysis during training.  It is recommended to review the 'import_from_s3' Jupyter notebook so you can see how to read the training data directly from S3, or alternatively review the Training_progress notebook so you can see how simulation_agg, df, track and complete_ones that have been exported can be used via the '%store -r' command |
