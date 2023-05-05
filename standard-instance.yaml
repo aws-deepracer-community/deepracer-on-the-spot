@@ -831,6 +831,7 @@ Resources:
                 # Ignore deprecation warnings we have no power over
                 import warnings
                 warnings.filterwarnings('ignore')
+                print("Number of completed laps so far:", len(complete_ones))
                 # -
 
                 # ## Path taken for quickest complete laps
