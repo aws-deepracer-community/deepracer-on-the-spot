@@ -93,6 +93,6 @@ This script can be used to delete the resources created by the create-base-resou
 
 ## Other useful links:
 
-<li>Track names for DR_WORLD_NAME: https://github.com/aws-deepracer-community/deepracer-simapp/tree/master/bundle/deepracer_simulation_environment/share/deepracer_simulation_environment/routes
+<li>Track names for DR_WORLD_NAME: https://github.com/aws-deepracer-community/deepracer-race-data/tree/main/raw_data/tracks
 <li>Racing types (head to head, time trial, object avoidance) for DR_RACE_TYPE: https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html
 <li>Pull new sagemaker/robomaker docker images: https://github.com/aws-deepracer-community/deepracer-simapp
