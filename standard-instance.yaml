@@ -185,8 +185,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>    
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -197,8 +196,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>    
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -209,8 +207,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>  
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -221,8 +218,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>   
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -234,7 +230,6 @@ Resources:
                 <!DOCTYPE html>
                 <html>
                 <body>
-                                
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -245,8 +240,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body> 
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>

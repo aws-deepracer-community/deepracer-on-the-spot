@@ -12,7 +12,7 @@ Parameters:
     Description: timeout in minutes after which training is stopped and this stack is deleted
     Default: 60
     MinValue: 10
-    MaxValue: 1440 # 24 hours
+    MaxValue: 4001 # 24 hours
   AmiId:
     Type: String
     Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
@@ -226,8 +226,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>       
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -238,8 +237,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>    
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -250,8 +248,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -262,8 +259,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -274,8 +270,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -286,8 +281,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>         
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
