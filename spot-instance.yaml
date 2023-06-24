@@ -226,8 +226,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>       
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -238,8 +237,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>    
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -250,8 +248,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -262,8 +259,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -274,8 +270,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>        
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -286,8 +281,7 @@ Resources:
               content: |
                 <!DOCTYPE html>
                 <html>
-                <body>
-                                
+                <body>         
                 <h2>Training analysis is typically available 20-30 minutes into training.  Please refresh in a few minutes. </h2>
                 </body>
                 </html>
@@ -579,7 +573,7 @@ Resources:
                   log = DeepRacerLog(filehandler=fh)
                   log.load_training_trace()
                   df = log.dataframe()
-                  simulation_agg = au.simulation_agg(df)
+                  simulation_agg = au.simulation_agg(df, secondgroup="unique_episode")
                   complete_ones = simulation_agg[simulation_agg['progress']==100]
                   %store df
                   %store simulation_agg
@@ -900,14 +894,14 @@ Resources:
 
                 # +
                 episodes_to_plot = complete_ones.nsmallest(5, 'time')
-                pu.plot_selected_laps(episodes_to_plot, df, track)
+                pu.plot_selected_laps(episodes_to_plot, df, track, section_to_plot="unique_episode")
                 # -
 
                 # ## Path taken for highest rewarded complete laps
                 
                 # +
                 episodes_to_plot = complete_ones.nlargest(5,'reward')
-                pu.plot_selected_laps(episodes_to_plot, df, track)
+                pu.plot_selected_laps(episodes_to_plot, df, track, section_to_plot="unique_episode")
                 # -
               mode : "000755"
               owner: ubuntu
