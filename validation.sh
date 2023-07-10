@@ -4,7 +4,7 @@ if [ $? -eq 1 ]; then echo "error in reward_function.py" && exit 1; fi
 jq -e < custom-files/model_metadata.json
 if [ $? -eq 4 ]; then echo "error in model_metadata.json" && exit 1; fi
 jq -e < custom-files/hyperparameters.json
-if [ $? -eq 4 ]; then echo "error in hyperparameters.hson" && exit 1; fi
+if [ $? -eq 4 ]; then echo "error in hyperparameters.json" && exit 1; fi
 
 #track exists
 source custom-files/run.env
