@@ -462,7 +462,7 @@ Resources:
         Name: DeepRacer
       Schedule:
         PipelineExecutionStartCondition: EXPRESSION_MATCH_ONLY
-        ScheduleExpression: cron(0 0 * * ? *)
+        ScheduleExpression: cron(0 0 1,15 * ? *)
   SNSPermissionToInvokeUpdateParameter:
     Type: AWS::Lambda::Permission
     Properties:
