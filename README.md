@@ -1,5 +1,5 @@
 # DeepRacer On The Spot
-Simple cloudformation templates to assist in creating ec2 instances for deep racer learning, with automated training start/end and up to 10X savings over training in console (when using ec2 spot instance). This is a wrapper around LarsLL's deepracer-for-cloud https://aws-deepracer-community.github.io/deepracer-for-cloud/ to make it very easy to start training in the AWS Console and take advantage of all amazing tools the deepracer-for-cloud repo gives you.
+Simple cloudformation templates to assist in creating ec2 instances for deep racer learning, with automated training start/end and up to 10X savings over training in console (when using ec2 spot instance). This is a wrapper around LarsLL's deepracer-for-cloud https://aws-deepracer-community.github.io/deepracer-for-cloud/ to make it very easy to start training in the AWS Console and take advantage of all amazing tools the deepracer-for-cloud repo gives you. 
 
 Training on an EC2 has many advantages:
 <li>Being able to set up a customized action space
@@ -8,6 +8,16 @@ Training on an EC2 has many advantages:
 <li>Improved log analysis tools
 <li>Train as multiple models at once on different EC2 instances
 <li>Reduced cost: $0.22/hour (when using g4dn.2xl spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
+
+## Training Videos
+Training videos playlist: https://www.youtube.com/playlist?list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Overview: https://www.youtube.com/watch?v=GP7IZ6X5QPU&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Setup and first run: https://www.youtube.com/watch?v=b4GHWZcIB18&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Edit files: https://www.youtube.com/watch?v=EAFR7FSN4Bo&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Update track: https://www.youtube.com/watch?v=XgdRSAeAzHk&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Increment training: https://www.youtube.com/watch?v=9y5wx7fQUgc&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+* Move model to console: https://www.youtube.com/watch?v=Fk0XCoE8M6U&list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
+
 
 ## Setup
 * Log into AWS console and launch Cloud Shell
