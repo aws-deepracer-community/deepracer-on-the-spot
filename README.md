@@ -110,6 +110,6 @@ This script can be used to delete the resources created by the create-base-resou
 ##FAQ
 Exceeded max rules of 20 per network ACL 
 <li>From AWS console, navigate to the VPC service console and select "Your VPCs"</li>
-<li>click the ACL in your VPC that was created by your base resources stack ![image](https://github.com/aws-deepracer-community/deepracer-on-the-spot/assets/26447842/c115f441-e951-40bf-8d03-565039e9e221)</li>
-<li>Select the "inbound rules" tab and you may edit the inbound rules to remove 2-3 rules from this section that are higher on the list and end in port 32 with a non-rounded number. ![image](https://github.com/aws-deepracer-community/deepracer-on-the-spot/assets/26447842/dca42d4a-b873-426a-befd-5af3c93a7e6e) This will remove access from some existing IPs.</li>
+<li>click the ACL in your VPC that was created by your base resources stack ![image](media/vpc.png)</li>
+<li>Select the "inbound rules" tab and you may edit the inbound rules to remove 2-3 rules from this section that are higher on the list and end in port 32 with a non-rounded number. ![image](media/acl_inbound.png) This will remove access from some existing IPs.</li>
 <li>Now run scripts/add-access.sh script from CloudShell to add your IP to this inbound rules list and you should be able to access the instance. </li>
