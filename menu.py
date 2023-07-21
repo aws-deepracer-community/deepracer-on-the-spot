@@ -1,3 +1,4 @@
+
 import json, os
 
 
@@ -93,8 +94,8 @@ def select_option(option):
             process_action_space(option['file'])
         else:
             process_json(option['file'],option['key'],option['dtype'])
-
-
+        
+ 
 
 def process_env(file, variable):
     current_value = read_env_variable(file, variable)
@@ -161,13 +162,13 @@ def run_training(options,pretrained):
     envfile="custom-files/run.env"
     stack=read_env_variable(options[12]['file'], options[12]['key'])
     modelname=read_env_variable(envfile, "DR_LOCAL_S3_MODEL_PREFIX")
-    pre_modelname=read_env_variable(envfile, "DR_LOCAL_S3_PRETRAINED_PREFIX")
+    pre_modelname=read_env_variable(envfile, "DR_LOCAL_S3_PRETRAINED_PREFIX") 
     if pretrained==False:
       i_modelname=input("Pick a name for your model (leave blank to keep current: {}): ".format(modelname))
       if i_modelname!="":
         modelname=i_modelname
       write_env_variable(envfile, "DR_LOCAL_S3_PRETRAINED","False")
-      write_env_variable(envfile, "DR_LOCAL_S3_MODEL_PREFIX",modelname)
+      write_env_variable(envfile, "DR_LOCAL_S3_MODEL_PREFIX",modelname) 
     else:
       i_pre_modelname=input("Insert your pretrained model name (leave blank to select: {}): ".format(modelname))
       if i_pre_modelname=="":
@@ -179,7 +180,7 @@ def run_training(options,pretrained):
       write_env_variable(envfile, "DR_LOCAL_S3_MODEL_PREFIX",modelname)
       write_env_variable(envfile, "DR_LOCAL_S3_PRETRAINED_PREFIX",pre_modelname)
 
-
+      
 
     if stack is None:
       select_option(options[int(13)-1])
@@ -196,13 +197,25 @@ def run_training(options,pretrained):
     os.system("./create-{}-instance.sh {} {} {}".format(standarspot,stack,modelname,wait))
 
 
-# Función para mostrar el menú
+def set_new_reward():
+    print("Enter/Paste your reward function code (Press Enter then Control + D when done)")
+    contents = []
+    while True:
+        try:
+            line = input()
+        except EOFError:
+            break
+        contents.append(line + '\n')
+    with open('custom-files/reward_function.py', 'w') as the_file:
+        the_file.write(''.join(contents))
+    print("Reward Function updated")
+
+# Function to show menu
 def show_menu():
     while True:
       print(" ")
-      print("\n--- AWS Console (CLI Version) ---")
-      print(" ")
-      print("---Configuration---")
+      print("\n--- MENU ---")
+
       options = [
           {"option": "1", "label": "Modify Model Name","file": "custom-files/run.env", "key": "DR_LOCAL_S3_MODEL_PREFIX", "dtype" : "string"},
           {"option": "2", "label": "Modify Car Name","file": "custom-files/run.env", "key": "DR_CAR_NAME", "dtype" : "string"},
@@ -218,7 +231,7 @@ def show_menu():
           {"option": "12", "label": "Modify Action Space", "file": "custom-files/model_metadata.json", "key": "action_space", "dtype" : "array"},
           {"option": "13", "label": "Modify Stack", "file": "custom-files/run.env", "key": "STACK", "dtype" : "string"}
       ]
-
+      
 
       for option in options:
           if '.env' in option['file']:
@@ -228,12 +241,11 @@ def show_menu():
           else:
               current_value = ""
           print("{} {} {}".format(str(option['option']).ljust(2), str(option['label']).ljust(40), "("+str(option['key'])+'=\033[93m'+ str(current_value))+"\033[0m)")
-
-      print("14. Add IP Access")
-      print(" ")
-      print("---Train---")
-      print("15. Run New Training")
-      print("16. Continue a Training")
+          
+      print("14. Set new Reward Function")
+      print("15. Add IP Access")
+      print("16. Run New Training")
+      print("17. Continue a Training")
       print("0. Salir")
       print(" ")
       choice = input("Pick a menu item: ")
@@ -241,25 +253,28 @@ def show_menu():
       if choice == "0":
         break
       elif choice == "14":
-        add_ip(options)
+        set_new_reward()
         break
       elif choice == "15":
-        run_training(options,False)
+        add_ip(options)
         break
       elif choice == "16":
+        run_training(options,False)
+        break
+      elif choice == "17":
         run_training(options,True)
         break
-
+              
       else:
         select_option(options[int(choice)-1])
+ 
 
-
-# Ejecutar el menú
+# Execute Menu
 def menu():
 
         show_menu()
 
 
 
-# Ejecutar el menú
+
 menu()
