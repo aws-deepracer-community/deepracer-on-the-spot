@@ -2,7 +2,7 @@
 import json, os
 
 
-# Funciones para archivos de configuración tipo env
+# ENV Config files functions
 
 def write_env_variable(file, variable, value):
     with open(file, "r") as f:
@@ -214,7 +214,9 @@ def set_new_reward():
 def show_menu():
     while True:
       print(" ")
-      print("\n--- MENU ---")
+      print("\n--- AWS Console (CLI Version) ---")
+      print(" ")
+      print("---Configuration---")
 
       options = [
           {"option": "1", "label": "Modify Model Name","file": "custom-files/run.env", "key": "DR_LOCAL_S3_MODEL_PREFIX", "dtype" : "string"},
@@ -242,11 +244,13 @@ def show_menu():
               current_value = ""
           print("{} {} {}".format(str(option['option']).ljust(2), str(option['label']).ljust(40), "("+str(option['key'])+'=\033[93m'+ str(current_value))+"\033[0m)")
           
-      print("14. Set new Reward Function")
-      print("15. Add IP Access")
-      print("16. Run New Training")
-      print("17. Continue a Training")
-      print("0. Salir")
+      print("14 Set new Reward Function")
+      print("15 Add IP Access")
+      print(" ")
+      print("---Train---")      
+      print("16 Run New Training")
+      print("17 Continue a Training")
+      print("0 QUIT")
       print(" ")
       choice = input("Pick a menu item: ")
 
