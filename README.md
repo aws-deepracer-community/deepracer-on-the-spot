@@ -44,7 +44,6 @@ The primary purpose of this template is to provide a simple single script to run
 This bash script utilizes the base.resources.yaml template file to provision the above resources. 
 
 ---
-
 ## Create Standard/Spot Instance
 ### create-standard-instance.sh
 ### create-spot-instance.sh
@@ -69,6 +68,13 @@ This script can be executed many times (the DeepRacer console limits you to trai
 Both spot and standard instance requests are launched using a daily refreshing AMI that is generated in a source AWS account to always grab the newest docker images for robomaker/sagemaker/coach. If you wish to run your own AMI, or run in a region other than us-east-1, use ./create-image-builder.sh to create the daily refreshing pipeline and update your spot/standard instance bash scripts to use your AMI. NOTE: using your own AMI will incur a charge of ~$1/day because an EC2 instance will be created daily to update the AMI.
 
 ---
+### MENU
+You can also use the menu.sh to start training, modify config files, and run scripts.
+
+Simply run:
+`./menu.sh` or `python3 menu.py`
+
+![menu showing how to start deepracer on the spot](media/menu.png)
 
 ### OTHER COMMANDS:
 
