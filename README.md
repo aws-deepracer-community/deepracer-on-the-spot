@@ -106,3 +106,10 @@ This script can be used to delete the resources created by the create-base-resou
 <li>Track names for DR_WORLD_NAME: https://github.com/aws-deepracer-community/deepracer-race-data/tree/main/raw_data/tracks
 <li>Racing types (head to head, time trial, object avoidance) for DR_RACE_TYPE: https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html
 <li>Pull new sagemaker/robomaker docker images: https://github.com/aws-deepracer-community/deepracer-simapp
+
+## FAQ
+Exceeded max rules of 20 per network ACL 
+<li>From AWS console, navigate to the VPC service console and select "Your VPCs"</li>
+<li>click the ACL in your VPC that was created by your base resources stack </li> 
+<li>Select the "inbound rules" tab and you may edit the inbound rules to remove 2-3 rules from this section that are higher on the list and end in port 32 with a non-rounded number. This will remove access from some existing IPs.</li>
+<li>Now run scripts/add-access.sh script from CloudShell to add your IP to this inbound rules list and you should be able to access the instance. </li>
