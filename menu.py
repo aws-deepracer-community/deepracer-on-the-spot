@@ -185,7 +185,7 @@ def run_training(pretrained):
     print()
     standarspot=menu_picker("Select EC2 type: ",[  "spot", "standard" ],False)
     print()
-    machinetype=menu_picker("Pick HW configuration: ",[  "g4dn.2xlarge (RECOMMENDED. any larger will be more expensive)", "g4dn.4xlarge", "g4dn.8xlarge", "g4dn.12xlarge", "g5.2xlarge", "g5.4xlarge", "g5.8xlarge", "g5.12xlarge" ],True)
+    machinetype=menu_picker("Pick HW configuration (Recommended is g4dn.2xlarge, any larger will be more expensive): ",[  "g4dn.2xlarge", "g4dn.4xlarge", "g4dn.8xlarge", "g4dn.12xlarge", "g5.2xlarge", "g5.4xlarge", "g5.8xlarge", "g5.12xlarge" ],True)
     print()
     stack=read_env_variable(OPTIONS['13']['file'], OPTIONS['13']['key'])
     print()
