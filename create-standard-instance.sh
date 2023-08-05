@@ -29,7 +29,7 @@ if [[ $? -ne 0 ]]; then
         echo -e "\e[1;33m  ##########  Error found in reward_function.py, want to continue anyway? \e[0m"
         read -p "[y / n]: " yn
         case $yn in
-            [Yy]* ) make install; break;;
+            [Yy]* ) break;;
             [Nn]* ) exit;;
             * ) echo "Please answer yes or no.";;
         esac
