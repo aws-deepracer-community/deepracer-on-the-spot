@@ -41,7 +41,7 @@ def write_json_value(file, key, value,dtype):
     else:
         data[key] = value
     with open(file, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2)
 
 
 def read_json_value(file, key):
@@ -62,7 +62,7 @@ def bulk_add_array_values(file, key, values):
     if key in data and isinstance(data[key], list):
         data[key].extend(values)
     with open(file, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2)
 
 
 def clear_action_space(file):
@@ -71,7 +71,7 @@ def clear_action_space(file):
     if "action_space" in data:
         data["action_space"] = []
     with open(file, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2)
 
 
 def clear_array(file, key):
@@ -80,7 +80,7 @@ def clear_array(file, key):
     if key in data:
         data[key] = []
     with open(file, "w") as f:
-        json.dump(data, f, indent=4)
+        json.dump(data, f, indent=2)
 
 
 # Función para seleccionar una opción del menú
