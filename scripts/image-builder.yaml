@@ -504,7 +504,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
-      Runtime: python3.7
+      Runtime: python3.11
       InlineCode: !Sub |
         import json
         import boto3
@@ -576,7 +576,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
-      Runtime: python3.7
+      Runtime: python3.11
       InlineCode: !Sub |
         import json
         import boto3

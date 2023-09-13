@@ -1022,7 +1022,7 @@ Resources:
                   print(e.response['Error']['Message'])
               notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
               sns_client.publish(TopicArn=notification_topic, Message=f'Termination notification instance: {instance_id} stack: ${AWS::StackName}')
-      Runtime: python3.7
+      Runtime: python3.11
       Timeout: 120
       Environment:
         Variables:
