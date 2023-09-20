@@ -338,7 +338,7 @@ Resources:
     Properties:
       Handler: index.handler
       Role: !GetAtt FutureTimeCronExpressionLambdaRole.Arn
-      Runtime: python3.7
+      Runtime: python3.11
       Code:
         ZipFile: |
           import cfnresponse
@@ -396,7 +396,7 @@ Resources:
     Properties:
       Role: !GetAtt TerminationLambdaRole.Arn
       Handler: index.handler
-      Runtime: python3.7
+      Runtime: python3.11
       Timeout: 900
       Code:
         ZipFile: !Sub |
