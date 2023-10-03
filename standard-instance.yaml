@@ -405,6 +405,29 @@ Resources:
                 dr-download-custom-files
                 cp custom_files/*.env .
                 dr-reload
+                # Setup required config if using OpenGL training
+                if [[ $DR_HOST_X == True ]];then
+                  distribution=$(. /etc/os-release;echo $ID$VERSION_ID | sed 's/\.//')
+                  sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64/3bf863cc.pub
+                  sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/$distribution/x86_64/7fa2af80.pub
+                  echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
+                  echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda_learn.list
+                  sudo apt update && sudo apt install -y nvidia-driver-470-server cuda-minimal-build-11-4 --no-install-recommends -o Dpkg::Options::="--force-overwrite"
+                  distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+                  curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+                  curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+                  sudo apt-get update && sudo apt-get install -y --no-install-recommends nvidia-docker2 nvidia-container-toolkit nvidia-container-runtime xserver-xorg-dev xutils-dev
+                  ./utils/setup-xorg.sh
+                  ./utils/start-xorg.sh
+                  sleep 15
+                  export DISPLAY=$DR_DISPLAY
+                  sudo nohup xinit /usr/bin/jwm -- /usr/lib/xorg/Xorg $DISPLAY -config $DR_DIR/tmp/xorg.conf > $DR_DIR/tmp/xorg.log 2>&1 & sleep 1
+                  nohup xrandr -s 1400x900
+                  nohup x11vnc -bg -forever -no6 -nopw -rfbport 5901 -rfbportv6 -1 -display WAIT$DISPLAY & sleep 1
+                  xauth generate $DISPLAY
+                  export XAUTHORITY=~/.Xauthority
+                  sudo DISPLAY=:$DISPLAY XAUTHORITY=$(ps aux | grep "X.*\-auth" | grep -v grep | sed -n 's/.*-auth \([^ ]\+\).*/\1/p') xhost +
+                fi
                 # There is a bug where at some times the training fails to start, so we start, stop and start it again to reduce the occurrences of this issue. 
                 nohup /bin/bash -lc 'cd ~/deepracer-for-cloud/; dr-start-training -qw; sleep 120; dr-stop-training; sleep 60; echo y | docker container prune; dr-reload; dr-start-training -qwv' &
                 mkdir -p /tmp/logs/

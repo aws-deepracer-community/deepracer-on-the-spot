@@ -13,3 +13,34 @@
 * `stack_size`: Default is `1`.
 * `term_cond_avg_score`: Values between `35000.0` and `100000.0`.
 * `term_cond_max_episodes`: Default is `100000`.
+
+# Model Metadata Values
+
+* 'action_space_type': 'continuous' or 'discrete'.
+* 'action_space': See model_metadata_sac.json for a 'continuous' example or model_metadata.json for a discrete example.
+* 'version': '5'
+* 'training_algorithm': 'sac' or 'clipped_ppo'
+* 'neural_network': 'DEEP_CONVOLUTIONAL_NETWORK_SHALLOW' or 'DEEP_CONVOLUTIONAL_NETWORK'
+* 'sensor':  a list containing 'FRONT_FACING_CAMERA' or 'STEREO_CAMERAS' and optionally 'LIDAR'
+
+# reward function
+
+* Populate this file with your code examples can be found online, e.g. [AWS examples](https://docs.aws.amazon.com/deepracer/latest/developerguide/deepracer-reward-function-examples.html)
+
+# run.env values
+
+* [Consult DeepRacer for Cloud Documentation](https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html)
+
+# system.env values
+
+* [Consult DeepRacer for Cloud Documentation](https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html)
+
+The following should be changed to enable OpenGL training with GPUs, to reduce CPU load: -
+
+* Set DR_GUI_ENABLE=True
+* Set DR_DOCKER_STYLE=compose
+* Set DR_HOST_X=True
+* Ensure Robomaker and Sagemaker are running on gpu containers, e.g. DR_ROBOMAKER_IMAGE=5.1.0-gpu and DR_SAGEMAKER_IMAGE=5.1.0-gpu or newer
+* Uncomment out DR_SAGEMAKER_CUDA_DEVICES=0
+* Uncomment out DR_ROBOMAKER_CUDA_DEVICES=0
+* Uncomment out DR_DISPLAY=:0
