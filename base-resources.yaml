@@ -491,3 +491,81 @@ Resources:
                   - lambda:*
                   - cloudformation:DeleteStack
                 Resource: '*'
+
+  QuotaLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt QuotaLambdaRole.Arn
+      Handler: index.handler
+      Runtime: python3.11
+      Timeout: 30
+      Code:
+        ZipFile: !Sub |
+          import boto3
+          import logging
+          import cfnresponse
+          from botocore.exceptions import ClientError
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+          client = boto3.client('service-quotas')
+
+          def handler(event, context):
+              if event['RequestType'] == 'Create':
+                try:
+                  spot_response = client.request_service_quota_increase(
+                      ServiceCode='ec2',
+                      QuotaCode='L-3819A6DF',
+                      DesiredValue=16
+                  )
+                  ondemand_response = client.request_service_quota_increase(
+                      ServiceCode='ec2',
+                      QuotaCode='L-DB2E81BA',
+                      DesiredValue=16
+                  )
+                  logger.info('Printing event: {}'.format(spot_response))
+                  logger.info('Printing event: {}'.format(ondemand_response))
+                  responseData = {}
+                  responseData['Data'] = str(spot_response) + ", " +str(ondemand_response)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+                except ClientError as e:
+                  responseData = {}
+                  responseData['Data'] = e.response['Error']['Message']
+                  print(e.response['Error']['Message'])
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+              else:
+                responseData = {}
+                responseData['Data'] = 'Event not a create event, nothing to do'
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+
+  QuotaLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-quota-lambda-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - servicequotas:*
+                Resource: '*'
+
+  QuotaInvoke:
+      Type: AWS::CloudFormation::CustomResource
+      Version: "1.0"
+      Properties:
+        ServiceToken: !GetAtt QuotaLambda.Arn
+        FunctionName: !Ref QuotaLambda

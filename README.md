@@ -7,7 +7,13 @@ Training on an EC2 has many advantages:
 <li>Ability to increment your training
 <li>Improved log analysis tools
 <li>Train as multiple models at once on different EC2 instances
-<li>Reduced cost: $0.22/hour (when using g4dn.2xl spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
+<li>Reduced cost: $0.22/hour (when using g4dn.2xlarge spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
+
+## Architectural Overview
+
+The below dirgam provides an overview of the architecture of DeepRacer on the Spot: -
+
+![diagram showing an overview of deepracer on the spot](media/architecture.png)
 
 ## Training Videos
 Training videos playlist: https://www.youtube.com/playlist?list=PL9qmHoKq77dTFS59WjHciNb0a0n0dE8iF
@@ -35,11 +41,12 @@ Example:
 `./create-base-resources.sh base 11.111.11.11.1`
 **This will run for around 3 minutes.**
 
-The primary purpose of this template is to provide a simple single script to run that sets up all of the prerequisite AWS resources to allow deepracer-for-cloud to run on EC2 instances (https://aws-deepracer-community.github.io/deepracer-for-cloud/). **This should only be ran once per sandbox**. This is accomplished by creating the following:
+The primary purpose of this template is to provide a simple single script to run that sets up all of the prerequisite AWS resources to allow deepracer-for-cloud to run on EC2 instances (https://aws-deepracer-community.github.io/deepracer-for-cloud/). **This should only be ran once per sandbox per region**. This is accomplished by creating the following:
 * S3 bucket
 * EFS filesystem
 * EFS Mount Targets on each of the subnets within the default VPC. (The template has a max of 6 subnets and automatically detects the number of subnets in the default VPC.)
 * SNS Topic that has messages published to it in the event of spot instance termination to stop training safely and upload model
+* EC2 quota limit increases to be able to run 2 x g4dn.2xlarge spot or on demand instances (See FAQs if AWS query the rationale for the quota request)
 
 This bash script utilizes the base.resources.yaml template file to provision the above resources. 
 
@@ -126,3 +133,4 @@ If you have an issue with training, the best first place to check is CloudFormat
 | Import model from console to DOTS | <li>From DeepRacer Console, select the model you wish to move to DOTS. In the "Actions" dropdown, select "copy to s3", "create a new bucket", and include the "model" and "logs". Copy the s3 location it will be copied to and hit submit.</li><li>Launch CloudShell and copy this model to your base stack S3 bucket using this command and substitute in your bucket names and model names:  `aws s3 cp "s3://aws-deepracer-assets-b9436ddf-db0a-4f63/my-deepracer-console-model-name/Mon, 17 Jul 2023 17:53:33 GMT/" "s3://my-base-bucket/my-new-model-name" --recursive` </li><li>Your model can now be trained on top of in DOTS by setting the `DR_LOCAL_S3_PRETRAINED_PREFIX` variable to the name of your model. </li> |
 | How do I train continuous/SAC instead of discrete action space? | <li>Rename the two example files in custom-files directory "hyperparameters_sac.json" to "hyperparameters.json" and "model_metadata_sac.json" to "model_metadata.json" </li> |
 | What if multiple people use the same AWS sandbox? | <li>CloudShell sessions are unique to each user, and each user can clone this repo and create one base-resource stack and as many trainings as they desire. To share models amongst the same account, copy the model from one s3 bucket to the other. </li> |
+| Quota increase hasn't been assigned | AWS quota increases are handled by AWS support staff, only the request is programmatic.  It's likely the AWS Support team will respond to your request by asking for further information.  It is recommended you respond with 'I'm utilizing this account to participate in AWS DeepRacer.  In the DeepRacer console training for DeepRacer costs $3.50/hour.  In order to reduce my AWS bill I want to use DeepRacer on the Spot, an AWS DeepRacer community developed solution - https://github.com/aws-deepracer-community/deepracer-on-the-spot, which will allow me to training at up to 1/10th the cost of the console. In order to do this I need access to g4dn spot and on demand instances, as per my request.  Therefore please kindly increase my quota.'.  You may want to preempt the question and add this text to the support ticket straight away, unfortunately the code cannot do this for you as API access to update support tickets is only available to AWS Premium Support customers (which starts at $15k/month).  |
