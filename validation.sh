@@ -29,7 +29,7 @@ then
     echo "DR_SAGEMAKER_IMAGE=5.1.0-gpu, or latest version"
     echo "DR_ROBOMAKER_IMAGE=5.1.0-gpu, or latest version"
     echo "DR_SAGEMAKER_CUDA_DEVICES=0"
-    echo "DR_SAGEMAKER_CUDA_DEVICES=0"
+    echo "DR_ROBOMAKER_CUDA_DEVICES=0"
     echo "DR_DISPLAY=:0"
     exit 1
   fi
