@@ -513,16 +513,30 @@ Resources:
           def handler(event, context):
               if event['RequestType'] == 'Create':
                 try:
-                  spot_response = client.request_service_quota_increase(
+                  existing_spot_quota = client.get_service_quota(
                       ServiceCode='ec2',
-                      QuotaCode='L-3819A6DF',
-                      DesiredValue=16
+                      QuotaCode='L-3819A6DF'
                   )
-                  ondemand_response = client.request_service_quota_increase(
+                  if existing_spot_quota['Quota']['Value'] < 16:
+                    spot_response = client.request_service_quota_increase(
+                        ServiceCode='ec2',
+                        QuotaCode='L-3819A6DF',
+                        DesiredValue=16
+                    )
+                  else:
+                    spot_response="Existing spot quota is already sufficient"
+                  existing_ondemand_quota = client.get_service_quota(
                       ServiceCode='ec2',
-                      QuotaCode='L-DB2E81BA',
-                      DesiredValue=16
+                      QuotaCode='L-DB2E81BA'
                   )
+                  if existing_ondemand_quota['Quota']['Value'] < 16:
+                    ondemand_response = client.request_service_quota_increase(
+                        ServiceCode='ec2',
+                        QuotaCode='L-DB2E81BA',
+                        DesiredValue=16
+                    )
+                  else:
+                    ondemand_response="Existing on-demand quota is already sufficient"
                   logger.info('Printing event: {}'.format(spot_response))
                   logger.info('Printing event: {}'.format(ondemand_response))
                   responseData = {}
