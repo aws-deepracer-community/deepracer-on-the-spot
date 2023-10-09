@@ -14,6 +14,27 @@ if ! [[ ${tracks[*]} =~ "$DR_WORLD_NAME" ]]; then
   exit 1 
 fi
 
+#validate OpenGL settings
+source custom-files/system.env
+if [ $DR_HOST_X == True ]
+then
+  if [ $DR_GUI_ENABLE != True ] || [[ $DR_ROBOMAKER_IMAGE != *"gpu"* ]] || [[ $DR_SAGEMAKER_IMAGE != *"gpu"* ]] || [[ $DR_SAGEMAKER_CUDA_DEVICES != 0 ]] || [[ $DR_ROBOMAKER_CUDA_DEVICES != 0 ]] || [ $DR_DOCKER_STYLE != compose ] || [[ $DR_DISPLAY != ':0' ]]
+  then
+    echo "Incorrect settings for OpenGL, please update system.env"
+    echo "either set DR_HOST_X=False to disabled OpenGL GPU training"
+    echo ""
+    echo "or apply the following settings in system.env..."
+    echo ""
+    echo "DR_GUI_ENABLE=True"
+    echo "DR_SAGEMAKER_IMAGE=5.1.0-gpu, or latest version"
+    echo "DR_ROBOMAKER_IMAGE=5.1.0-gpu, or latest version"
+    echo "DR_SAGEMAKER_CUDA_DEVICES=0"
+    echo "DR_ROBOMAKER_CUDA_DEVICES=0"
+    echo "DR_DISPLAY=:0"
+    exit 1
+  fi
+fi
+
 #race type exists
 allowedracetypes='"TIME_TRIAL" "OBJECT_AVOIDANCE" "HEAD_TO_BOT"'
 if ! [[ ${allowedracetypes[*]} =~ "$DR_RACE_TYPE" ]]; then
@@ -30,7 +51,7 @@ fi
 
 #check if model already exists
 if [[ $(aws s3 ls s3://${BUCKET}/${DR_LOCAL_S3_MODEL_PREFIX} | head) ]]; then
-  echo "model ${DR_LOCAL_S3_MODEL_PREFIX} alread exists in ${BUCKET}. Change the model name DR_LOCAL_S3_MODEL_PREFIX in run.env"
+  echo "Model ${DR_LOCAL_S3_MODEL_PREFIX} already exists in ${BUCKET}. Change the model name DR_LOCAL_S3_MODEL_PREFIX in run.env"
   exit 1 
 fi
 #check if pretrained model exists in bucket
