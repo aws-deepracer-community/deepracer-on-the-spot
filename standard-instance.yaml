@@ -809,6 +809,13 @@ Resources:
                 complete_ones.nsmallest(10, 'time')
                 # -
 
+                # ## Ten fastest complete laps from the start/finish line in training
+
+                # +
+                complete_ones_from_start = complete_ones[complete_ones['start_at']==1]
+                complete_ones_from_start.nsmallest(10, 'time')
+                # -
+
                 # ## Ten fastest incomplete laps in the training
 
                 # +
@@ -937,6 +944,7 @@ Resources:
                   ev=tm.getEvaluation()
                   train_complete_lr = train[(train['round']>(0)) & (train['complete']==1)]
                   eval_complete_lr = ev[(ev['round']>(0)) & (ev['complete']==1)]
+                  rolling_lap = tm.plotProgress(method=['min','mean'],rolling_average=15, figsize=(20,5), series=[('eval_time','Evaluation','orange'),('train_time','Training','blue')], title="Laptime for completed laps over last 15 episodes ({}).", ylabel="Laptime", completedLapsOnly=True, grid=True)
                   plt.figure(figsize=(15,5))
                   plt.title('Best lap progression')
                   plt.scatter(train_complete_lr['master_iteration'],train_complete_lr['time'],alpha=0.4)
