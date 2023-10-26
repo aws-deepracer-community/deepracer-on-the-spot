@@ -787,6 +787,15 @@ Resources:
                 except Exception:
                   print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
                 # -
+
+                # ## Waypoint Map
+
+                # +
+                try:
+                  pu.plot_trackpoints(track)
+                except Exception:
+                  print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
+                # -
               mode : "000755"
               owner: ubuntu
               group: ubuntu
