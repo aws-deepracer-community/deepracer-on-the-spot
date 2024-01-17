@@ -967,6 +967,7 @@ Resources:
                 from deepracer.logs import metrics
                 import matplotlib.pyplot as plt
                 import numpy as np
+                import pandas as pd
 
                 # Ignore deprecation warnings we have no power over
                 import warnings
@@ -1000,6 +1001,18 @@ Resources:
                   plt.show()
                 except Exception:
                   print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
+                # -
+
+                # ## Training and Evaluation Percentiles
+
+                # +
+                eval_percentiles = ["Evaluation", eval_complete_lr['time'].quantile(0.01), eval_complete_lr['time'].quantile(0.1), eval_complete_lr['time'].quantile(0.25), eval_complete_lr['time'].quantile(0.5), eval_complete_lr['time'].quantile(0.75)]
+                train_percentiles = ["Training", train_complete_lr['time'].quantile(0.01), train_complete_lr['time'].quantile(0.1), train_complete_lr['time'].quantile(0.25), train_complete_lr['time'].quantile(0.5), train_complete_lr['time'].quantile(0.75)]
+                percentile = pd.DataFrame(columns=['Description', '1st Percentile', '10th Percentile', '25th Percentile', '50th Percentile', '75th Percentile'])
+                percentile.loc[0] = eval_percentiles
+                percentile.loc[1] = train_percentiles
+                percentile.style \
+                  .format(precision=3)
                 # -
               mode : "000755"
               owner: ubuntu
