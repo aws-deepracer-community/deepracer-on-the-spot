@@ -37,6 +37,13 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-InstanceProfile'
 
+  DeepRacerServiceRole:
+    Description: DeepRacer Service Role
+    Value: !GetAtt DeepRacerServiceRole.Arn
+    Export:
+      Name:
+        !Sub '${AWS::StackName}-DeepRacerServiceRole'
+
   Region:
     Description: Region in use
     Value: !Ref AWS::Region
@@ -287,12 +294,58 @@ Resources:
                   - kms:*
                   - s3:*
                 Resource: '*'
+              - Effect: Allow
+                Action:
+                  - iam:passRole
+                Resource: !GetAtt DeepRacerServiceRole.Arn
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
       - !Ref InstanceRole
+
+  DeepRacerServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - deepracer.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: !Sub '${AWS::StackName}-inline-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListAllMyBuckets
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - s3:GetBucketPolicy
+                  - s3:PutBucketPolicy
+                  - s3:ListBucket
+                  - s3:GetBucketAcl
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:GetObjectAcl
+                  - s3:GetBucketLocation
+                Resource:
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref Bucket
+                  - !Join
+                    - ''
+                    - - 'arn:aws:s3:::'
+                      - !Ref Bucket
+                      - '/*'
 
   EFS:
     Type: AWS::EFS::FileSystem

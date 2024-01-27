@@ -7,6 +7,8 @@ Parameters:
     Default: g4dn.2xlarge
   ResourcesStackName:
     Type: String
+  DeepRacerImportName:
+    Type: String
   TimeToLiveInMinutes:
     Type: Number
     Description: timeout in minutes after which training is stopped and this stack is deleted
@@ -134,6 +136,16 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /home/ubuntu/deepracer-for-cloud/import_model.sh: 
+              content:
+                Fn::Sub:
+                - sudo aws deepracer import-model --name '${DeepRacerImportName}' --description "$DR_WORLD_NAME imported from s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX by DeepRacer on the Spot" --model-artifacts-s3-path s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX  --role-arn ${DR_IMPORT_ROLENAME} --type REINFORCEMENT_LEARNING --region us-east-1
+                - DR_IMPORT_ROLENAME:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-DeepRacerServiceRole"
+              mode : "000755"
+              owner: root
+              group: root 
             /home/ubuntu/bin/menu.html:
               content: |
                 <!DOCTYPE html>

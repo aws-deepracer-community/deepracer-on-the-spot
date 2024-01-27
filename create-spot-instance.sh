@@ -20,6 +20,24 @@ BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName
 amiId=$(aws ec2 describe-images --owners 747447086422 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
 set +xa
 
+#validate stack name meets DeepRacer import constraints
+stackNameLength=$(expr length "$stackName")
+if grep '^[-0-9a-zA-Z]*$' <<<$stackName;
+then
+  if [ $stackNameLength -le 64 ];
+    then 
+        echo "Stack name ok for automatic deepracer import"
+  else 
+    echo ""
+    echo "Stack name is not acceptable for deepracer import. Must be 64 characters or less."
+    exit 1
+  fi
+else 
+echo ""
+echo "Stack name is not acceptable for deepracer import. Valid characters: A-Z, a-z, 0-9, and hypens (-). No spaces or underscores (_)."
+exit 1
+fi
+
 chmod +x ./validation.sh
 
 ./validation.sh
@@ -40,10 +58,11 @@ set -x
 
 CUSTOM_FILE_LOCATION=$(cat custom-files/run.env | grep DR_LOCAL_S3_CUSTOM_FILES_PREFIX= | awk -F'=' '{print $2}')
 aws s3 cp custom-files s3://${BUCKET}/${CUSTOM_FILE_LOCATION} --recursive
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$CUSTOM_FILE_LOCATION --template-file spot-instance.yaml --capabilities CAPABILITY_IAM --s3-bucket $BUCKET --s3-prefix cf_templates
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName DeepRacerImportName=$stackName Name= TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$CUSTOM_FILE_LOCATION --template-file spot-instance.yaml --capabilities CAPABILITY_IAM --s3-bucket $BUCKET --s3-prefix cf_templates
 ASG=$(aws cloudformation describe-stacks --stack-name ${stackName} --query "Stacks[].Outputs[].OutputValue" --output text)
 EC2_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
 EC2_IP=$(aws ec2 describe-instances --instance-ids ${EC2_ID} --query 'Reservations[].Instances[].PublicIpAddress[]' --output text)
 echo "Logs will upload every 2 minutes to https://s3.console.aws.amazon.com/s3/buckets/${BUCKET}/${stackName}/logs/"
 echo "Training should start shortly on ${EC2_IP}:8080"
 echo "Once started, you should also be able to monitor training progress through ${EC2_IP}:8100/menu.html"
+echo "Once training is finished, you should see your imported model $stackName in the DeepRacer console"
