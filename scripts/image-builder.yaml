@@ -172,7 +172,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.3'
+      Version: '0.0.4'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -189,6 +189,9 @@ Resources:
                   commands:
                     - "apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub"
                     - "sudo -u ubuntu -i git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git"
+                    - "pip3 install --upgrade awscli"
+                    - "pip3 install deepracer-utils"
+                    - "python3 -m deepracer install-cli"
               - name: BuildFromCommunityRepo
                 action: ExecuteBash
                 inputs:
@@ -388,7 +391,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'SafeTermination-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.3'
       Description: Install script to terminate training and upload model.
       ChangeDescription: First version
       Platform: Linux
@@ -410,12 +413,14 @@ Resources:
                       #!/bin/bash
                       touch /home/ubuntu/bin/termination.started
                       . /home/ubuntu/deepracer-for-cloud/bin/activate.sh
+                      source /etc/profile.d/my_bucket.sh
                       # to avoid upload conflict, check if start_training script loop started dr-upload-model within last 30 seconds
                       start_training_uploading=$(find /home/ubuntu/bin/uploading_best_model.timestamp -mmin -0.5 -type f -print | wc -l)
                       if [[ $start_training_uploading -ge 1 ]];then
                         sleep 30
                       fi
                       dr-upload-model -bfw
+                      . /home/ubuntu/deepracer-for-cloud/import_model.sh
                       dr-stop-training
   DistributionConfiguration:
     Type: 'AWS::ImageBuilder::DistributionConfiguration'
@@ -438,7 +443,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.3'
+      Version: '0.0.4'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
