@@ -172,7 +172,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.3'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -187,7 +187,7 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub"
+                    - "apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub"
                     - "sudo -u ubuntu -i git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git"
               - name: BuildFromCommunityRepo
                 action: ExecuteBash
@@ -438,8 +438,8 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.2'
-      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-18-lts-x86/x.x.x'
+      Version: '0.0.3'
+      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
         - ComponentArn: !Ref 'SafeTerminationComponent'

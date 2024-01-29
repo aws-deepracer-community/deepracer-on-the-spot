@@ -110,6 +110,8 @@ The image builder logs are written into the s3 bucket provided by the 'base reso
 
 Old created AMIs are deleted daily. Current AMI id is written to SSM parameter named /DeepRacer/Images/$baseResourcesStackName (this value can be changed via a template parameter)
 
+To use cd into scripts directory and run `./create-image-builder.sh <base resources stack name> <stack name>`
+
 ## delete-base-resources.sh
 
 This script can be used to delete the resources created by the create-base-resources.sh script (and associated template). Please be aware that the resource deletion will fail if the S3 bucket created is not empty. delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.

@@ -380,7 +380,7 @@ Resources:
                   docker logs $(dr-find-robomaker) 2>&1 | tail -n 1000 > robomaker.txt
                   aws s3 cp s3://$DR_LOCAL_S3_BUCKET/$DR_LOCAL_S3_MODEL_PREFIX/metrics/TrainingMetrics.json . > /dev/null 2>&1
                   aws s3 cp s3://$DR_LOCAL_S3_BUCKET/$DR_LOCAL_S3_MODEL_PREFIX/model/deepracer_checkpoints.json . > /dev/null 2>&1
-                  for ID  in `docker ps --filter name=viewer_proxy --format "{{.ID}}"`
+                  for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
                   do
                     docker cp $USAGE_OUTPUT $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp nvidia-smi.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
