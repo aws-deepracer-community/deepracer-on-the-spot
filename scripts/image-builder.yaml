@@ -500,8 +500,9 @@ Resources:
             Type: COUNT
             Value: 1
       ResourceSelection:
-        TagMap:
-          Name: DeepRacer
+        Recipes:
+          - Name: !GetAtt ['UbuntuServerForDeepRacerImageRecipe', "Name"]
+            SemanticVersion: !Select [2, !Split ['/', !Ref 'UbuntuServerForDeepRacerImageRecipe']]
       ResourceType: AMI_IMAGE
       Status: ENABLED
       Tags: 
