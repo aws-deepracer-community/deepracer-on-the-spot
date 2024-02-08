@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
 Parameters:
   BuildInstanceType:
     Type: CommaDelimitedList
@@ -448,10 +450,10 @@ Resources:
           AmiDistributionConfiguration:
             Name: !Join
               - '-'
-              - - 'ami-dist-config'
-                - !ImportValue
-                    Fn::Sub: ${ResourcesStackName}-Region
+              - - 'deepracer-ami-dist-config'
                 - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
             LaunchPermissionConfiguration:
               UserGroups:
                 - all
