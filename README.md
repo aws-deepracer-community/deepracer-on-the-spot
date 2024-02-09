@@ -109,7 +109,7 @@ The image builder pipeline is invoked at mid-night on the 1st of the month. To a
 
 The image builder logs are written into the s3 bucket provided by the 'base resources'. The logs are subject to s3 lifecycle expiration.
 
-Old created AMIs are deleted daily. Current AMI id is written to SSM parameter named /DeepRacer/Images/$baseResourcesStackName (this value can be changed via a template parameter)
+Old created AMIs are deleted daily by the Image builder lifecycle policy.
 
 To use cd into scripts directory and run `./create-image-builder.sh <base resources stack name> <stack name>`
 

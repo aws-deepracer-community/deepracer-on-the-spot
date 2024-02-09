@@ -79,13 +79,6 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-EFSAccessPoint'
 
-  AMIParameter:
-    Description: SSM Parameter path containing latest created Deepracer AMI
-    Value: !Sub /DeepRacer/Images/${AWS::StackName}
-    Export:
-      Name:
-        !Sub '${AWS::StackName}-AMIParameter'
-
   NetworkAclId:
     Description: Network ACL Id
     Value: !Ref NetworkAclId
