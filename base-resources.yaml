@@ -620,6 +620,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2FullAccess
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/IAMFullAccess
       Policies:
         - PolicyName: !Sub '${AWS::StackName}-quota-lambda-policy'
           PolicyDocument:
