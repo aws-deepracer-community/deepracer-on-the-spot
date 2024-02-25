@@ -1,13 +1,14 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
+Transform: 
+  - AWS::Serverless-2016-10-31
+  - AWS::LanguageExtensions
 Parameters:
   BuildInstanceType:
     Type: CommaDelimitedList
     Default: g4dn.2xlarge
     Description: >-
       Comma-delimited list of one or more instance types to select from when building
-      the image. Image Builder will select a type based on availability. The supplied
-      default is compatible with the AWS Free Tier.
+      the image. Image Builder will select a type based on availability.
   ResourcesStackName:
     Type: String
 Resources:
@@ -32,6 +33,23 @@ Resources:
                 - ec2.amazonaws.com
         Version: '2012-10-17'
       Path: /executionServiceEC2Role/
+  ImageBuilderRole:
+    Type: AWS::IAM::Role
+    Metadata:
+      Comment: Role to be used by instance during image build.
+    Properties:
+      ManagedPolicyArns:
+        - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/EC2ImageBuilderLifecycleExecutionPolicy'
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - imagebuilder.amazonaws.com
+        Version: '2012-10-17'
+      Path: /executionServiceImageBuilderRole/
   InstanceRoleLoggingPolicy:
     Type: AWS::IAM::Policy
     Metadata:
@@ -432,10 +450,10 @@ Resources:
           AmiDistributionConfiguration:
             Name: !Join
               - '-'
-              - - 'ami-dist-config'
-                - !ImportValue
-                    Fn::Sub: ${ResourcesStackName}-Region
+              - - 'deepracer-ami-dist-config'
                 - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
             LaunchPermissionConfiguration:
               UserGroups:
                 - all
@@ -467,30 +485,34 @@ Resources:
         Name: DeepRacer
       Schedule:
         PipelineExecutionStartCondition: EXPRESSION_MATCH_ONLY
-        ScheduleExpression: cron(0 0 * * ? *)
-  SNSPermissionToInvokeUpdateParameter:
-    Type: AWS::Lambda::Permission
+        ScheduleExpression: cron(0 0 1 * ? *)
+  DistributionLifecycle:
+    Type: AWS::ImageBuilder::LifecyclePolicy
     Properties:
-      FunctionName: !GetAtt 'UpdateSSMParameter.Arn'
-      Action: lambda:InvokeFunction
-      Principal: sns.amazonaws.com
-      SourceArn: !Ref 'ImageBuilderSNSTopic'
-  SNSPermissionToInvokeDeleteOldAMIs:
-    Type: AWS::Lambda::Permission
-    Properties:
-      FunctionName: !GetAtt 'DeleteOldAMIs.Arn'
-      Action: lambda:InvokeFunction
-      Principal: sns.amazonaws.com
-      SourceArn: !Ref 'ImageBuilderSNSTopic'
+      Description: Pipeline lifecycle to clean up old images
+      ExecutionRole: !GetAtt ['ImageBuilderRole', "Arn"]
+      Name: DeleteOldAMIs
+      PolicyDetails: 
+        - Action: 
+            Type: DELETE
+            IncludeResources: 
+              Amis: True
+              Snapshots: True
+          Filter: 
+            Type: COUNT
+            Value: 1
+      ResourceSelection:
+        Recipes:
+          - Name: !GetAtt ['UbuntuServerForDeepRacerImageRecipe', "Name"]
+            SemanticVersion: !Select [2, !Split ['/', !Ref 'UbuntuServerForDeepRacerImageRecipe']]
+      ResourceType: AMI_IMAGE
+      Status: ENABLED
+      Tags: 
+        Name: DeleteOldAMIs
   ImageBuilderSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
       DisplayName: Image Builder
-      Subscription:
-        - Protocol: lambda
-          Endpoint: !GetAtt 'UpdateSSMParameter.Arn'
-        - Protocol: lambda
-          Endpoint: !GetAtt 'DeleteOldAMIs.Arn'
   TopicPolicy:
     Type: AWS::SNS::TopicPolicy
     Properties:
@@ -505,186 +527,3 @@ Resources:
             Resource: '*'
       Topics:
         - !Ref 'ImageBuilderSNSTopic'
-  UpdateSSMParameter:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: index.handler
-      Runtime: python3.11
-      InlineCode: !Sub |
-        import json
-        import boto3
-        import logging 
-        import os
-
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-
-        ssm_client = boto3.client('ssm')
-        ec2_client = boto3.client('ec2')
-        ssm_parameter_name = os.getenv('ParameterPath')
-
-        def handler(event, context):
-            logger.info('Printing event: {}'.format(event))
-            process_sns_event(event)
-            return None
-
-        def process_sns_event(event):
-            for record in (event['Records']):
-                event_message = record['Sns']['Message']
-
-                message_json = json.loads(event_message)
-
-                image_state = (message_json['state']['status'])
-
-                if (image_state == 'AVAILABLE'):
-                    logger.info('Image is available')
-
-                    ami = message_json['outputResources']['amis'][0]
-                    ec2_client.create_tags(Resources=[ami['image']], Tags=[{'Key': 'Name', 'Value': 'DeepRacer'}, {'Key': 'Stack', 'Value': '${AWS::StackName}'}])
-
-                    recipe_name = message_json['name']
-                    logger.info('AMI ID: {}'.format(ami['image']))
-
-                    response = ssm_client.put_parameter(
-                        Name=ssm_parameter_name,
-                        Description='Latest AMI ID',
-                        Value=ami['image'],
-                        Type='String',
-                        Overwrite=True,
-                        Tier='Standard'
-                        )
-                    logger.info('SSM Updated: {}'.format(response))
-
-                    #add tags to the SSM parameter
-                    ssm_client.add_tags_to_resource(ResourceType='Parameter', ResourceId=ssm_parameter_name, Tags=[ { 'Key': 'Source', 'Value': 'Image Builder' } ] )
-            return None
-
-      Description: Update SSM Parameter with the latest AMI
-      MemorySize: 256
-      Timeout: 300
-      AutoPublishAlias: live
-      Environment:
-        Variables:
-          ParameterPath: !ImportValue
-            Fn::Sub: ${ResourcesStackName}-AMIParameter
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - ssm:PutParameter
-                - ssm:AddTagsToResource
-                - ssm:GetParameters
-                - ec2:*
-              Resource: '*'
-  DeleteOldAMIs:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: index.handler
-      Runtime: python3.11
-      InlineCode: !Sub |
-        import json
-        import boto3
-        import logging 
-        import os
-
-        logger = logging.getLogger()
-        logger.setLevel(logging.INFO)
-
-        ssm_client = boto3.client('ssm')
-        ec2_client = boto3.client('ec2')
-        ssm_parameter_name = os.getenv('ParameterPath')
-
-        def handler(event, context):
-            logger.info('Printing event: {}'.format(event))
-            process_sns_event(event)
-            return None
-
-        def delete_ebs_snapshots():
-            paginator = ec2_client.get_paginator('describe_snapshots')
-            filters = {'OwnerIds': ['${AWS::AccountId}']}
-            for page in paginator.paginate(**filters):
-                for snapshot in page['Snapshots']:
-                    try:
-                        print('SNAPSHOT')
-                        print(snapshot)
-                        ec2_client.delete_snapshot(SnapshotId=snapshot['SnapshotId'])
-                        print('DELETED EBS SNAPSHOT')
-                        print(snapshot['SnapshotId'])
-                    except Exception as e:
-                        print('EXCEPTION DELETING SNAPSHOT')
-                        print(e)
-
-        def get_image_by_parameter():
-            try:
-                return ssm_client.get_parameter(Name=ssm_parameter_name)['Parameter']['Value']
-            except:
-                pass
-            return None
-
-        def get_amis_with_my_stack(current_image):
-            stack_name = '${AWS::StackName}'
-            filters = [
-                {
-                   'Name': 'is-public',
-                   'Values': [
-                       'false'
-                   ]
-                },
-                {
-                   'Name': 'state',
-                   'Values': [
-                       'available'
-                   ]
-                },
-                {
-                   'Name': 'tag:Stack',
-                   'Values': [
-                       '${AWS::StackName}'
-                   ]
-                }
-            ]
-            ignore_images = [current_image]
-            image_from_parameters = get_image_by_parameter()
-            if image_from_parameters:
-                ignore_images.append(image_from_parameters)
-            images = ec2_client.describe_images(Filters=filters, Owners=['${AWS::AccountId}'])['Images']
-            images = list(map(lambda x: x['ImageId'], images))
-            images = list(filter(lambda x: x not in ignore_images, images))
-            for image in images: 
-                logger.info('Deregistring Image: {}'.format(image))
-                try:
-                    ec2_client.deregister_image(ImageId=image)
-                except:
-                    pass
-
-        def process_sns_event(event):
-            for record in (event['Records']):
-                event_message = record['Sns']['Message']
-
-                message_json = json.loads(event_message)
-                image_state = (message_json['state']['status'])
-
-                if (image_state == 'AVAILABLE'):
-                    current_image = message_json['outputResources']['amis'][0]['image']
-                    get_amis_with_my_stack(current_image)
-
-                delete_ebs_snapshots()
-            return None
-
-      Description: Delete old AMIs
-      MemorySize: 256
-      Timeout: 900
-      AutoPublishAlias: live
-      Environment:
-        Variables:
-          ParameterPath: !ImportValue
-            Fn::Sub: ${ResourcesStackName}-AMIParameter
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - ssm:GetParameters
-                - ec2:*
-              Resource: '*'
