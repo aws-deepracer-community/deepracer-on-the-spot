@@ -193,8 +193,8 @@ Resources:
                 <html>
                 <body>
 
-                <h2>Watch Live Video Feed</h2>
-                <p><a href="update_to_video_url">Output</a></p>
+                <h2>Video Feed</h2>
+                <p><a href="update_to_video_url">Watch Live Video</a></p>
                                 
                 <h2>All logs summary in one view</h2>
                 <p><a href="output.txt">Output</a></p>
