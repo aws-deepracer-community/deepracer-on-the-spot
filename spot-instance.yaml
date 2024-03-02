@@ -194,7 +194,7 @@ Resources:
                 <body>
 
                 <h2>Video Feed</h2>
-                <p><a href="?robo=all&camera=kvs_stream&quality=75&width=480">Watch Live Video</a></p>
+                <p><a href="/?robo=all&camera=kvs_stream&quality=75&width=480">Watch Live Video</a></p>
                                 
                 <h2>All logs summary in one view</h2>
                 <p><a href="output.txt">Output</a></p>
