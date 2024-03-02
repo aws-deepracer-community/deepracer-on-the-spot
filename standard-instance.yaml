@@ -151,6 +151,9 @@ Resources:
                 <!DOCTYPE html>
                 <html>
                 <body>
+
+                <h2>Watch Live Video Feed</h2>
+                <p><a href="update_to_video_url">Output</a></p>
                                 
                 <h2>All logs summary in one view</h2>
                 <p><a href="output.txt">Output</a></p>
@@ -397,7 +400,7 @@ Resources:
                   if [[ ! -f /home/ubuntu/bin/termination.started ]];then
                     cp $USAGE_OUTPUT /tmp/logs/ > /dev/null 2>&1
                   fi
-                  sleep 60
+                  sleep 300
                 done
               mode : "000755"
               owner: ubuntu
@@ -490,8 +493,10 @@ Resources:
                 PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 
                 JUPYTER_URL=http://$PUBLIC_IP:8888/?$TOKEN
+                VIDEO_URL=http://$PUBLIC_IP:8100/?robo=all&camera=kvs_stream&quality=75&width=480
 
                 sudo sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" /home/ubuntu/bin/menu.html
+                sudo sed -i "s|update_to_video_url|${VIDEO_URL}|" /home/ubuntu/bin/menu.html
 
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
