@@ -610,6 +610,9 @@ Resources:
                     df = log.dataframe()
                     simulation_agg = au.simulation_agg(df, secondgroup="unique_episode")
                     complete_ones = simulation_agg[simulation_agg['progress'] == 100]
+                    %store df
+                    %store simulation_agg
+                    %store complete_ones
                 except Exception:
                     print(
                         "Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
