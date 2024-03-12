@@ -407,7 +407,7 @@ Resources:
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/bin/start_training.sh:
-              contnet: |
+              content: |
                 
                 #!/bin/bash
                 source /etc/profile.d/my_custom_files.sh
