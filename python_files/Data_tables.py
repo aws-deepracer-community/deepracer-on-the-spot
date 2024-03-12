@@ -19,8 +19,6 @@
 from IPython import get_ipython
 
 get_ipython().run_line_magic('store', '-r simulation_agg')
-get_ipython().run_line_magic('store', '-r df')
-get_ipython().run_line_magic('store', '-r track')
 get_ipython().run_line_magic('store', '-r complete_ones')
 
 # Ignore deprecation warnings we have no power over

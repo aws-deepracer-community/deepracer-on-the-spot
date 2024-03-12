@@ -19,6 +19,7 @@
 # Ignore deprecation warnings we have no power over
 import warnings
 
+from IPython import get_ipython
 from deepracer.logs import \
     AnalysisUtils as au, \
     DeepRacerLog, \
@@ -46,6 +47,7 @@ except Exception:
 tu = TrackIO()
 try:
     track: Track = tu.load_track("DEEPRACER_TRACK")
+    get_ipython().run_line_magic('store', 'track')
 except Exception:
     print(
         "Track not currently included in the solution.  Copy track into the tracks folder or check you're using the latest deepracer-analysis image.")
