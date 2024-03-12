@@ -147,7 +147,7 @@ Resources:
               owner: root
               group: root
             /home/ubuntu/bin/menu.html:
-              file: html_files/menu.html
+              source: html_files/menu.html
               mode: "000755"
               owner: ubuntu
               group: ubuntu
@@ -218,52 +218,52 @@ Resources:
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/bin/web_monitoring.sh:
-              file: scripts/web_monitoring.sh
+              source: scripts/web_monitoring.sh
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/bin/start_training.sh:
-              file: scripts/start_training.sh
+              source: scripts/start_training.sh
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/bin/start_analysis.sh:
-              file: scripts/start_analysis.sh
+              source: scripts/start_analysis.sh
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/import_from_s3.py:
-              file: python_files/import_from_s3.py
+              source: python_files/import_from_s3.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Training_progress.py:
-              file: python_files/Training_progress.py
+              source: python_files/Training_progress.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Quintiles.py:
-              file: python_files/Quintiles.py
+              source: python_files/Quintiles.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Heatmap.py:
-              file: python_files/Heatmap.py
+              source: python_files/Heatmap.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Data_tables.py:
-              file: python_files/Data_tables.py
+              source: python_files/Data_tables.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Path_for_complete_laps.py:
-              file: python_files/Path_for_complete_laps.py
+              source: python_files/Path_for_complete_laps.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
             /home/ubuntu/deepracer-for-cloud/Training_and_Evaluation_Overview.py:
-              file: python_files/Training_and_Evaluation_Overview.py
+              source: python_files/Training_and_Evaluation_Overview.py
               mode: "000755"
               owner: ubuntu
               group: ubuntu
