@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: 
+Transform:
   - AWS::Serverless-2016-10-31
   - AWS::LanguageExtensions
 Parameters:
@@ -490,24 +490,24 @@ Resources:
     Type: AWS::ImageBuilder::LifecyclePolicy
     Properties:
       Description: Pipeline lifecycle to clean up old images
-      ExecutionRole: !GetAtt ['ImageBuilderRole', "Arn"]
+      ExecutionRole: !GetAtt [ 'ImageBuilderRole', "Arn" ]
       Name: DeleteOldAMIs
-      PolicyDetails: 
-        - Action: 
+      PolicyDetails:
+        - Action:
             Type: DELETE
-            IncludeResources: 
+            IncludeResources:
               Amis: True
               Snapshots: True
-          Filter: 
+          Filter:
             Type: COUNT
             Value: 1
       ResourceSelection:
         Recipes:
-          - Name: !GetAtt ['UbuntuServerForDeepRacerImageRecipe', "Name"]
-            SemanticVersion: !Select [2, !Split ['/', !Ref 'UbuntuServerForDeepRacerImageRecipe']]
+          - Name: !GetAtt [ 'UbuntuServerForDeepRacerImageRecipe', "Name" ]
+            SemanticVersion: !Select [ 2, !Split [ '/', !Ref 'UbuntuServerForDeepRacerImageRecipe' ] ]
       ResourceType: AMI_IMAGE
       Status: ENABLED
-      Tags: 
+      Tags:
         Name: DeleteOldAMIs
   ImageBuilderSNSTopic:
     Type: AWS::SNS::Topic

@@ -109,22 +109,22 @@ Outputs:
 
 Conditions:
   HasSubnet0: !Not
-    - !Equals [!Ref Subnet0, '']
+    - !Equals [ !Ref Subnet0, '' ]
 
   HasSubnet1: !Not
-    - !Equals [!Ref Subnet1, '']
+    - !Equals [ !Ref Subnet1, '' ]
 
   HasSubnet2: !Not
-    - !Equals [!Ref Subnet2, '']
+    - !Equals [ !Ref Subnet2, '' ]
 
   HasSubnet3: !Not
-    - !Equals [!Ref Subnet3, '']
+    - !Equals [ !Ref Subnet3, '' ]
 
   HasSubnet4: !Not
-    - !Equals [!Ref Subnet4, '']
+    - !Equals [ !Ref Subnet4, '' ]
 
   HasSubnet5: !Not
-    - !Equals [!Ref Subnet5, '']
+    - !Equals [ !Ref Subnet5, '' ]
 
 Resources:
   Bucket:
@@ -185,8 +185,7 @@ Resources:
       VpcId: !Ref VPC
       GroupDescription: EFS SG
       SecurityGroupIngress:
-        -
-          SourceSecurityGroupId: !GetAtt SecurityGroup.GroupId
+        - SourceSecurityGroupId: !GetAtt SecurityGroup.GroupId
           FromPort: 2049
           IpProtocol: tcp
           ToPort: 2049
@@ -296,7 +295,7 @@ Resources:
     Type: AWS::IAM::InstanceProfile
     Properties:
       Roles:
-      - !Ref InstanceRole
+        - !Ref InstanceRole
 
   DeepRacerServiceRole:
     Type: AWS::IAM::Role
@@ -625,8 +624,8 @@ Resources:
                 Resource: '*'
 
   QuotaInvoke:
-      Type: AWS::CloudFormation::CustomResource
-      Version: "1.0"
-      Properties:
-        ServiceToken: !GetAtt QuotaLambda.Arn
-        FunctionName: !Ref QuotaLambda
+    Type: AWS::CloudFormation::CustomResource
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt QuotaLambda.Arn
+      FunctionName: !Ref QuotaLambda
