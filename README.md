@@ -88,7 +88,7 @@ Simply run:
 
 ### Stopping training
 
-The script stop-instance.sh executes 'safe termination' of training and deletes the cloudformation stack used to create the instance. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter to used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: `./stop-instance.sh my-instance-stack-name` . You can also go to cloudformation and manually delete the stack.
+The script stop-training.sh executes 'safe termination' of training by updated the CloudFroamtion stack to gracefully complete the training in 2 minutes time from when the script is ran. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: `./stop-instance.sh my-instance-stack-name` . You can also go to cloudformation and manually delete the stack, but if you do that you wont' get graceful termination (i.e. upload of model to DeepRacer Console or S3 upload to your 'upload' bucket)
 
 ### Adding additional IP addresses to security group ingress and NACLs
 
@@ -103,7 +103,9 @@ Note, it is also possible to interactively create a subscription on the SNS web 
 
 ## Image Builder
 
-The script create-image-builder.sh creates an EC2 Image Builder Pipeline that creates an new AMI on the 1st of each month. The resources used to create the images include the community git repository content for deep racing. The drivers/containers are installed and the image is rebooted. This speeds up the instance creation, as the software is preinstalled. create-image-builder.sh takes two parameters, the resources stack name and a stack name for the image builder provisioned template. The resources created are defined in the image-builder.yaml template.
+The script create-image-builder.sh creates an EC2 Image Builder Pipeline that creates a new AMI on the 1st of each month. The resources used to create the images include the community git repository content for deep racing. The drivers/containers are installed and the image is rebooted. This speeds up the instance creation, as the software is preinstalled. create-image-builder.sh takes two parameters, the resources stack name and a stack name for the image builder provisioned template. The resources created are defined in the image-builder.yaml template.
+
+Before running this script please ensure you're using the latest version of the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#getting-started-install-instructions), as this is required to unblock public AMI sharing, otherwise you won't be able to use the image that is created for your training.
 
 The image builder pipeline is invoked at mid-night on the 1st of the month. To avoid waiting for the first AMI to be created, the pipeline can be invoked interactively after it has been created by the provisioned template.  Alternatively to avoid the costs of a monthly build (approx $1/region/month where you deploy Image Builder) after deployment you could modify the Image Builder pipeline to run manually in the console, and then trigger it when you want a new build (note - due to Docker cert issues AMIs must be less than 3 months old, otherwise containers don't start, so you should trigger a build at least every 3 months).  Once you are using your own AMIs you must replace the standard AWS Account number (747447086422) in `create-spot-instance.sh` and `create-standard-instance.sh` with your own AWS Account number that hosts the AMIs, otherwise you'll likely get an error as no AMI will be found.
 
