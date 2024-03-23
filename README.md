@@ -140,11 +140,7 @@ Simply run:
 
 ### Stopping training
 
-The script stop-instance.sh executes 'safe termination' of training and deletes the cloudformation stack used to create
-the instance. This command works for both standard and spot instances. The scripts takes one parameter, the name of the
-stack used to create the instance (this is the same as the second parameter to used to create the instance with either
-create-standard-instance.sh or create-spot-instance.sh commands). For
-example: `./stop-instance.sh my-instance-stack-name` . You can also go to cloudformation and manually delete the stack.
+The script stop-training.sh executes 'safe termination' of training by updated the CloudFroamtion stack to gracefully complete the training in 2 minutes time from when the script is ran. This command works for both standard and spot instances. The scripts takes one parameter, the name of the stack used to create the instance (this is the same as the second parameter used to create the instance with either create-standard-instance.sh or create-spot-instance.sh commands). For example: `./stop-instance.sh my-instance-stack-name` . You can also go to cloudformation and manually delete the stack, but if you do that you won't get graceful termination (i.e. upload of model to DeepRacer Console or S3 upload to your 'upload' bucket)
 
 ### Adding additional IP addresses to security group ingress and NACLs
 
