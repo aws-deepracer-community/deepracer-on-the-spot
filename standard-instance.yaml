@@ -180,7 +180,7 @@ Resources:
                 <h2>Training metrics</h2>
                 <p><a href="TrainingMetrics.json">TrainingMetrics.json</a></p>
                 <p><a href="deepracer_checkpoints.json">deepracer_checkpoints.json</a></p>
-                <p><a href="robomaker1.log" download>robomaker1.log</a></p>
+                <p><a download href="robomaker1.log">robomaker1.log</a></p>
 
                 <h2>Training/Evaluation monitoring graphs</h2>
                 <p><a href="Training_and_Evaluation_Overview.html">Training_and_Evaluation_Overview</a></p>
@@ -970,7 +970,15 @@ Resources:
                   ev=tm.getEvaluation()
                   train_complete_lr = train[(train['round']>(0)) & (train['complete']==1)]
                   eval_complete_lr = ev[(ev['round']>(0)) & (ev['complete']==1)]
-                  rolling_lap = tm.plotProgress(method=['min','mean'],rolling_average=15, figsize=(20,5), series=[('eval_time','Evaluation','orange'),('train_time','Training','blue')], title="Laptime for completed laps over last 15 episodes ({}).", ylabel="Laptime", completedLapsOnly=True, grid=True)
+                  series = []
+                  if not train_complete_lr.empty:
+                      series.append(('train_time', 'Training', 'blue'))
+                  if not eval_complete_lr.empty:
+                      series.append(('eval_time', 'Evaluation', 'orange'))
+                  rolling_lap = tm.plotProgress(method=['min', 'mean'], rolling_average=15, figsize=(20, 5),
+                                                series=series,
+                                                title="Laptime for completed laps over last 15 episodes ({}).", ylabel="Laptime",
+                                                completedLapsOnly=True, grid=True)                  
                   plt.figure(figsize=(15,5))
                   plt.title('Best lap progression')
                   plt.scatter(train_complete_lr['master_iteration'],train_complete_lr['time'],alpha=0.4)
@@ -983,9 +991,15 @@ Resources:
                 # ## Complete Lap Training and Evaluation Percentiles - All
 
                 # +
-                eval_percentiles = ["Evaluation", eval_complete_lr['time'].quantile(0.01), eval_complete_lr['time'].quantile(0.1), eval_complete_lr['time'].quantile(0.25), eval_complete_lr['time'].quantile(0.5), eval_complete_lr['time'].quantile(0.75)]
-                train_percentiles = ["Training", train_complete_lr['time'].quantile(0.01), train_complete_lr['time'].quantile(0.1), train_complete_lr['time'].quantile(0.25), train_complete_lr['time'].quantile(0.5), train_complete_lr['time'].quantile(0.75)]
-                percentile = pd.DataFrame(columns=['Description', '1st Percentile', '10th Percentile', '25th Percentile', '50th Percentile', '75th Percentile'])
+                eval_percentiles = ["Evaluation", eval_complete_lr['time'].quantile(0.01), eval_complete_lr['time'].quantile(0.1),
+                                    eval_complete_lr['time'].quantile(0.25), eval_complete_lr['time'].quantile(0.5),
+                                    eval_complete_lr['time'].quantile(0.75)]
+                train_percentiles = ["Training", train_complete_lr['time'].quantile(0.01), train_complete_lr['time'].quantile(0.1),
+                                     train_complete_lr['time'].quantile(0.25), train_complete_lr['time'].quantile(0.5),
+                                     train_complete_lr['time'].quantile(0.75)]
+                percentile = pd.DataFrame(
+                    columns=['Description', '1st Percentile', '10th Percentile', '25th Percentile', '50th Percentile',
+                             '75th Percentile'])
                 percentile.loc[0] = eval_percentiles
                 percentile.loc[1] = train_percentiles
                 percentile.style \
@@ -997,9 +1011,15 @@ Resources:
                 # +
                 train_complete_lr2=train_complete_lr.nlargest(40,['start_time'])
                 eval_complete_lr2=eval_complete_lr.nlargest(20,['start_time'])
-                eval_percentiles2 = ["Evaluation", eval_complete_lr2['time'].quantile(0.01), eval_complete_lr2['time'].quantile(0.1), eval_complete_lr2['time'].quantile(0.25), eval_complete_lr2['time'].quantile(0.5), eval_complete_lr2['time'].quantile(0.75)]
-                train_percentiles2 = ["Training", train_complete_lr2['time'].quantile(0.01), train_complete_lr2['time'].quantile(0.1), train_complete_lr2['time'].quantile(0.25), train_complete_lr2['time'].quantile(0.5), train_complete_lr2['time'].quantile(0.75)]
-                percentile2 = pd.DataFrame(columns=['Description', '1st Percentile', '10th Percentile', '25th Percentile', '50th Percentile', '75th Percentile'])
+                eval_percentiles2 = ["Evaluation", eval_complete_lr2['time'].quantile(0.01), eval_complete_lr2['time'].quantile(0.1),
+                                     eval_complete_lr2['time'].quantile(0.25), eval_complete_lr2['time'].quantile(0.5),
+                                     eval_complete_lr2['time'].quantile(0.75)]
+                train_percentiles2 = ["Training", train_complete_lr2['time'].quantile(0.01), train_complete_lr2['time'].quantile(0.1),
+                                      train_complete_lr2['time'].quantile(0.25), train_complete_lr2['time'].quantile(0.5),
+                                      train_complete_lr2['time'].quantile(0.75)]
+                percentile2 = pd.DataFrame(
+                    columns=['Description', '1st Percentile', '10th Percentile', '25th Percentile', '50th Percentile',
+                             '75th Percentile'])
                 percentile2.loc[0] = eval_percentiles2
                 percentile2.loc[1] = train_percentiles2
                 percentile2.style \
