@@ -489,17 +489,6 @@ Resources:
             LaunchPermissionConfiguration:
               UserGroups:
                 - all
-        - Region: us-west-1
-          AmiDistributionConfiguration:
-            Name: !Join
-              - '-'
-              - - 'deepracer-ami-dist-config'
-                - '{{ imagebuilder:buildDate }}'
-            AmiTags:
-              Name: DeepRacer
-            LaunchPermissionConfiguration:
-              UserGroups:
-                - all
         - Region: us-east-1
           AmiDistributionConfiguration:
             Name: !Join
@@ -512,28 +501,6 @@ Resources:
               UserGroups:
                 - all
         - Region: us-east-2
-          AmiDistributionConfiguration:
-            Name: !Join
-              - '-'
-              - - 'deepracer-ami-dist-config'
-                - '{{ imagebuilder:buildDate }}'
-            AmiTags:
-              Name: DeepRacer
-            LaunchPermissionConfiguration:
-              UserGroups:
-                - all
-        - Region: ap-southeast-1
-          AmiDistributionConfiguration:
-            Name: !Join
-              - '-'
-              - - 'deepracer-ami-dist-config'
-                - '{{ imagebuilder:buildDate }}'
-            AmiTags:
-              Name: DeepRacer
-            LaunchPermissionConfiguration:
-              UserGroups:
-                - all
-        - Region: ap-southeast-2
           AmiDistributionConfiguration:
             Name: !Join
               - '-'
@@ -566,17 +533,6 @@ Resources:
             LaunchPermissionConfiguration:
               UserGroups:
                 - all
-        - Region: eu-west-2
-          AmiDistributionConfiguration:
-            Name: !Join
-              - '-'
-              - - 'deepracer-ami-dist-config'
-                - '{{ imagebuilder:buildDate }}'
-            AmiTags:
-              Name: DeepRacer
-            LaunchPermissionConfiguration:
-              UserGroups:
-                - all
         - Region: eu-west-3
           AmiDistributionConfiguration:
             Name: !Join
@@ -589,6 +545,28 @@ Resources:
               UserGroups:
                 - all
         - Region: sa-east-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: ap-southeast-3
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: eu-south-1
           AmiDistributionConfiguration:
             Name: !Join
               - '-'
