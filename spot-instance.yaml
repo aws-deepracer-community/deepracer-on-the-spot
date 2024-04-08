@@ -452,6 +452,8 @@ Resources:
                 aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 git pull
+                sed -i '/DR_AWS_APP_REGION=/d' /home/ubuntu/deepracer-for-cloud/system.env
+                sed -i -e '$aDR_AWS_APP_REGION=$DEEPRACER_REGION' /home/ubuntu/deepracer-for-cloud/system.env
                 sed -i "s/DR_UPLOAD_S3_BUCKET=not-defined/DR_UPLOAD_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_LOCAL_S3_BUCKET=bucket/DR_LOCAL_S3_BUCKET=$DEEPRACER_S3_URI/" ~/deepracer-for-cloud/system.env
                 sed -i "s/DR_UPLOAD_S3_PREFIX=upload/DR_UPLOAD_S3_PREFIX=$DR_LOCAL_S3_MODEL_PREFIX-upload/" ~/deepracer-for-cloud/run.env
