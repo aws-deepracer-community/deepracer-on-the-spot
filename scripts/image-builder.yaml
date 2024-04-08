@@ -190,7 +190,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.5'
+      Version: '0.0.4'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -226,8 +226,6 @@ Resources:
                 inputs:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./bin/init.sh -c aws -a gpu'"
-                    - sed -i '/DR_AWS_APP_REGION=/d' ~/deepracer-for-cloud/system.env
-                    - sed -i -e '$aDR_AWS_APP_REGION=$DEEPRACER_REGION' ~/deepracer-for-cloud/system.env
   CreateLogsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -387,7 +385,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PullDeepracerDockerImages-${AWS::StackName}'
-      Version: '0.0.3'
+      Version: '0.0.2'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
       Platform: Linux
@@ -463,7 +461,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.5'
+      Version: '0.0.4'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
