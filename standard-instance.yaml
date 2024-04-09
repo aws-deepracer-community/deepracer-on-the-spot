@@ -430,7 +430,7 @@ Resources:
                   sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/$distribution/x86_64/7fa2af80.pub
                   echo "deb http://developer.download.nvidia.com/compute/cuda/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda.list
                   echo "deb http://developer.download.nvidia.com/compute/machine-learning/repos/$distribution/x86_64 /" | sudo tee /etc/apt/sources.list.d/cuda_learn.list
-                  sudo apt update && sudo apt install -y nvidia-driver-470-server cuda-minimal-build-11-4 --no-install-recommends -o Dpkg::Options::="--force-overwrite"
+                  sudo apt install -y nvidia-driver-525-server --no-install-recommends -o Dpkg::Options::="--force-overwrite"
                   distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
                   curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
                   curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
@@ -501,9 +501,11 @@ Resources:
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
                 DEEPRACER_WORKERS=$(cat system.env | grep DR_WORKERS= | awk -F'=' '{print $2}')
+                S3_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region) 
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" import_from_s3.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" import_from_s3.py
                 sed -i "s|DEEPRACER_TRACK|${DEEPRACER_TRACK}|" import_from_s3.py
+                sed -i "s|S3_REGION|${S3_REGION}|" import_from_s3.py
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" Training_and_Evaluation_Overview.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" Training_and_Evaluation_Overview.py
                 sed -i "s|DEEPRACER_WORKERS|${DEEPRACER_WORKERS}|" Training_and_Evaluation_Overview.py
@@ -568,7 +570,7 @@ Resources:
                 # +
                 #Get logs from S3
                 fh = S3FileHandler(bucket="DEEPRACER_S3_URI",
-                                    prefix="DR_LOCAL_S3_MODEL_PREFIX")
+                                    prefix="DR_LOCAL_S3_MODEL_PREFIX", region="S3_REGION")
 
                 #Attempt to load logs but catch error if training not yet far enough advanced
                 try:
