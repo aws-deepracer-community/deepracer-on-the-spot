@@ -81,42 +81,14 @@ Resources:
       AWS::CloudFormation::Init:
         config:
           commands:
-            1-append-fstab:
-              command: "bash -c 'cat /tmp/fstabcontent.txt >> /etc/fstab'"
-
-            2-mount-fstab:
-              command: "bash -c 'mount /home/ubuntu/efs'"
-
-            3-signal-cfn:
+            1-signal-cfn:
               command:
                       !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource ASG --region ${AWS::Region}'"
 
-            4-start-train:
+            2-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
 
           files:
-            /tmp/fstabcontent.txt:
-              content:
-                Fn::Sub:
-                - "${EFS} /home/ubuntu/efs efs _netdev,tls,accesspoint=${EFSAP} 0 0"
-                - EFS:
-                       Fn::ImportValue:
-                           !Sub "${ResourcesStackName}-EFS"
-                  EFSAP:
-                       Fn::ImportValue:
-                           !Sub "${ResourcesStackName}-EFSAccessPoint"
-              mode : "000755"
-              owner: root
-            /etc/profile.d/my_efs.sh:
-              content:
-                Fn::Sub:
-                - "export MY_EFS=${EFS}"
-                - EFS:
-                        Fn::ImportValue:
-                            !Sub "${ResourcesStackName}-EFS"
-              mode : "000755"
-              owner: root
-              group: root
             /etc/profile.d/my_sns_topic.sh:
               content:
                 Fn::Sub:
@@ -449,6 +421,7 @@ Resources:
               content: |
                 #!/bin/bash
                 source /etc/profile.d/my_custom_files.sh
+                source /etc/profile.d/my_sns_topic.sh
                 aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 git pull
