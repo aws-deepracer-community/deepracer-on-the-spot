@@ -66,42 +66,14 @@ Resources:
       AWS::CloudFormation::Init:
         config:
           commands:
-            1-append-fstab:
-              command: "bash -c 'cat /tmp/fstabcontent.txt >> /etc/fstab'"
-
-            2-mount-fstab:
-              command: "bash -c 'mount /home/ubuntu/efs'"
-
-            3-signal-cfn:
+            1-signal-cfn:
               command:
                       !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}'"
-            
-            4-start-train:
+
+            2-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
-            
+
           files:
-            /tmp/fstabcontent.txt:
-              content:
-                Fn::Sub:
-                - "${EFS} /home/ubuntu/efs efs _netdev,tls,accesspoint=${EFSAP} 0 0"
-                - EFS:
-                       Fn::ImportValue:
-                           !Sub "${ResourcesStackName}-EFS"
-                  EFSAP:
-                       Fn::ImportValue:
-                           !Sub "${ResourcesStackName}-EFSAccessPoint"
-              mode : "000755"
-              owner: root
-            /etc/profile.d/my_efs.sh:
-              content:
-                Fn::Sub:
-                - "export MY_EFS=${EFS}"
-                - EFS:
-                        Fn::ImportValue:
-                            !Sub "${ResourcesStackName}-EFS"
-              mode : "000755"
-              owner: root
-              group: root
             /etc/profile.d/my_sns_topic.sh:
               content:
                 Fn::Sub:
@@ -501,9 +473,11 @@ Resources:
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
                 DEEPRACER_WORKERS=$(cat system.env | grep DR_WORKERS= | awk -F'=' '{print $2}')
+                S3_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region) 
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" import_from_s3.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" import_from_s3.py
                 sed -i "s|DEEPRACER_TRACK|${DEEPRACER_TRACK}|" import_from_s3.py
+                sed -i "s|S3_REGION|${S3_REGION}|" import_from_s3.py
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" Training_and_Evaluation_Overview.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" Training_and_Evaluation_Overview.py
                 sed -i "s|DEEPRACER_WORKERS|${DEEPRACER_WORKERS}|" Training_and_Evaluation_Overview.py
@@ -568,7 +542,7 @@ Resources:
                 # +
                 #Get logs from S3
                 fh = S3FileHandler(bucket="DEEPRACER_S3_URI",
-                                    prefix="DR_LOCAL_S3_MODEL_PREFIX")
+                                    prefix="DR_LOCAL_S3_MODEL_PREFIX", region="S3_REGION")
 
                 #Attempt to load logs but catch error if training not yet far enough advanced
                 try:
