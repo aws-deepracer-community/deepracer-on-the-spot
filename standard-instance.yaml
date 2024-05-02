@@ -68,7 +68,7 @@ Resources:
           commands:
             1-signal-cfn:
               command:
-                      !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource ASG --region ${AWS::Region}'"
+                      !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource Instance --region ${AWS::Region}'"
 
             2-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
