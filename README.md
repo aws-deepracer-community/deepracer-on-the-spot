@@ -11,7 +11,7 @@ Training on an EC2 has many advantages:
 
 ## Architectural Overview
 
-The below dirgam provides an overview of the architecture of DeepRacer on the Spot: -
+The below diagram provides an overview of the architecture of DeepRacer on the Spot: -
 
 ![diagram showing an overview of deepracer on the spot](media/architecture.png)
 
