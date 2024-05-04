@@ -155,6 +155,7 @@ Resources:
                 <p><a download href="robomaker1.log">robomaker1.log</a></p>
 
                 <h2>Training/Evaluation monitoring graphs</h2>
+                <p><a href="update_to_grafana_url">Live Grafana Dashboard</a></p>
                 <p><a href="Training_and_Evaluation_Overview.html">Training_and_Evaluation_Overview</a></p>
                 <p><a href="Training_progress.html">Training_progress</a></p>
                 <p><a href="Quintiles.html">Quintiles</a></p>
@@ -382,6 +383,7 @@ Resources:
                 #!/bin/bash
 
                 source /etc/profile.d/my_custom_files.sh
+                source /etc/profile.d/my_sns_topic.sh
                 aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 git pull
@@ -456,6 +458,8 @@ Resources:
 
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
+                sudo sed -i '/# Grafana options/a GF_AUTH_ANONYMOUS_ENABLED=true' docker/metrics/configuration.env
+                dr-start-metrics
 
                 docker run -d -p 8888:8888 --name deepracer-analysis awsdeepracercommunity/deepracer-analysis:cpu
                 
@@ -467,8 +471,10 @@ Resources:
                 PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
 
                 JUPYTER_URL=http://$PUBLIC_IP:8888/?$TOKEN
+                GRAFANA_URL="http://$PUBLIC_IP:3000/d/adke0lwv5zwg0e/deepracer-training-template?orgId=1&refresh=10s"
 
                 sudo sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" /home/ubuntu/bin/menu.html
+                sudo sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" /home/ubuntu/bin/menu.html
 
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
