@@ -78,7 +78,7 @@ Resources:
   UbuntuServerImageInfrastructureConfiguration:
     Type: AWS::ImageBuilder::InfrastructureConfiguration
     Properties:
-      Name: !Sub 'UbuntuServer20-Image-Infrastructure-Configuration-${AWS::StackName}'
+      Name: !Sub 'UbuntuServer22-Image-Infrastructure-Configuration-${AWS::StackName}'
       InstanceProfileName: !Ref 'InstanceProfile'
       InstanceTypes: !Ref 'BuildInstanceType'
       Logging:
@@ -461,8 +461,8 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.4'
-      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/x.x.x'
+      Version: '0.0.5'
+      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
         - ComponentArn: !Ref 'SafeTerminationComponent'
