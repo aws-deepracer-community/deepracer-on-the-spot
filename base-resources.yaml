@@ -8,26 +8,6 @@ Parameters:
     Type: String
   NetworkAclId:
     Type: String
-  VPC:
-    Type: String
-  Subnet0:
-    Type: String
-    Default: ''
-  Subnet1:
-    Type: String
-    Default: ''
-  Subnet2:
-    Type: String
-    Default: ''
-  Subnet3:
-    Type: String
-    Default: ''
-  Subnet4:
-    Type: String
-    Default: ''
-  Subnet5:
-    Type: String
-    Default: ''
 
 Outputs:
   InstanceProfile:
@@ -65,20 +45,6 @@ Outputs:
       Name:
         !Sub '${AWS::StackName}-SecurityGroup'
 
-  EFS:
-    Description: Elastic FileSystem
-    Value: !Ref EFS
-    Export:
-      Name:
-        !Sub '${AWS::StackName}-EFS'
-
-  EFSAccessPoint:
-    Description: Elastic FileSystem Access Point
-    Value: !Ref EFSAccessPoint
-    Export:
-      Name:
-        !Sub '${AWS::StackName}-EFSAccessPoint'
-
   NetworkAclId:
     Description: Network ACL Id
     Value: !Ref NetworkAclId
@@ -106,25 +72,6 @@ Outputs:
     Export:
       Name:
         !Sub '${AWS::StackName}-TerminationLambdaArn'
-
-Conditions:
-  HasSubnet0: !Not
-    - !Equals [!Ref Subnet0, '']
-
-  HasSubnet1: !Not
-    - !Equals [!Ref Subnet1, '']
-
-  HasSubnet2: !Not
-    - !Equals [!Ref Subnet2, '']
-
-  HasSubnet3: !Not
-    - !Equals [!Ref Subnet3, '']
-
-  HasSubnet4: !Not
-    - !Equals [!Ref Subnet4, '']
-
-  HasSubnet5: !Not
-    - !Equals [!Ref Subnet5, '']
 
 Resources:
   Bucket:
@@ -178,73 +125,6 @@ Resources:
       IpProtocol: -1
       CidrIp: !Sub '${MyIPAddress}/32'
 
-
-  EFSSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !Ref VPC
-      GroupDescription: EFS SG
-      SecurityGroupIngress:
-        -
-          SourceSecurityGroupId: !GetAtt SecurityGroup.GroupId
-          FromPort: 2049
-          IpProtocol: tcp
-          ToPort: 2049
-
-  EFSMountTarget0:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet0
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet0
-
-  EFSMountTarget1:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet1
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet1
-
-  EFSMountTarget2:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet2
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet2
-
-  EFSMountTarget3:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet3
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet3
-
-  EFSMountTarget4:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet4
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet4
-
-  EFSMountTarget5:
-    Type: AWS::EFS::MountTarget
-    Condition: HasSubnet5
-    Properties:
-      FileSystemId: !Ref EFS
-      SecurityGroups:
-        - !Ref EFSSecurityGroup
-      SubnetId: !Ref Subnet5
-
   NACLEntry:
     Type: AWS::EC2::NetworkAclEntry
     Properties:
@@ -268,7 +148,6 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonEC2FullAccess
-        - arn:aws:iam::aws:policy/AmazonElasticFileSystemFullAccess
         - arn:aws:iam::aws:policy/AmazonSSMFullAccess
       Policies:
         - PolicyName: !Sub '${AWS::StackName}-inline-policy'
@@ -339,25 +218,6 @@ Resources:
                     - - 'arn:aws:s3:::'
                       - !Ref Bucket
                       - '/*'
-
-  EFS:
-    Type: AWS::EFS::FileSystem
-    Properties:
-      Encrypted: true
-
-  EFSAccessPoint:
-    Type: AWS::EFS::AccessPoint
-    Properties:
-      FileSystemId: !Ref EFS
-      PosixUser:
-        Uid: '1000'
-        Gid: '1000'
-      RootDirectory:
-        CreationInfo:
-          OwnerGid: '1000'
-          OwnerUid: '1000'
-          Permissions: '0755'
-        Path: '/home/ubuntu/efs'
 
   InterruptionNotification:
     Type: AWS::SNS::Topic
@@ -590,9 +450,9 @@ Resources:
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
                 except ClientError as e:
                   responseData = {}
-                  responseData['Data'] = e.response['Error']['Message']
+                  responseData['Data'] = e.response['Error']['Message'] + ".  Likely you have an existing quota request in process, check AWS Support console."
                   print(e.response['Error']['Message'])
-                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
               else:
                 responseData = {}
                 responseData['Data'] = 'Event not a create event, nothing to do'
