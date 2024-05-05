@@ -93,62 +93,6 @@ Resources:
         - !ImportValue
           Fn::Sub: ${ResourcesStackName}-SecurityGroup
       SnsTopicArn: !Ref 'ImageBuilderSNSTopic'
-  InstallEFSUtilsComponent:
-    Type: AWS::ImageBuilder::Component
-    Properties:
-      Name: !Sub 'EFSUtils-${AWS::StackName}'
-      Version: '0.0.2'
-      Description: Install the latest EFS Utils.
-      ChangeDescription: First version
-      Platform: Linux
-      Data: |
-        name: InstallEFSUtils
-        description: Downloads and Installs EFS Utils
-        schemaVersion: 1.0
-        phases:
-          - name: build
-            steps:
-              - name: Apt
-                action: ExecuteBash
-                inputs:
-                  commands:
-                    - "sudo apt-get update"
-                    - "sudo apt-get -y install python3-pip awscli binutils jq zip"
-              - name: InstallFolder
-                action: ExecuteBash
-                inputs:
-                  commands:
-                    - echo "$HOME/install"
-              - name: CreateInstallFolder
-                action: CreateFolder
-                inputs:
-                  - path: '{{ build.InstallFolder.outputs.stdout }}'
-              - name: EFSUtils
-                action: ExecuteBash
-                inputs:
-                  commands:
-                    - "cd {{ build.InstallFolder.outputs.stdout }}"
-                    - "git clone https://github.com/aws/efs-utils"
-                    - "cd efs-utils"
-                    - "sudo bash ./build-deb.sh"
-                    - "sudo apt-get -y install ./build/amazon-efs-utils*.deb"
-                    - "sudo -u ubuntu -i mkdir -p efs"
-              - name: Cleanup
-                action: DeleteFolder
-                inputs:
-                  - path: '{{ build.InstallFolder.outputs.stdout }}'
-                    force: true
-              - name: EFSFolder
-                action: ExecuteBash
-                inputs:
-                  commands:
-                    - echo "/home/ubuntu/efs"
-              - name: CreateUbuntuUserEFSFolder
-                action: CreateFolder
-                inputs:
-                  - path: '{{ build.EFSFolder.outputs.stdout }}'
-                    owner: ubuntu
-                    group: ubuntu
   InstallCFNInitComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -190,7 +134,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.4'
+      Version: '0.0.5'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -205,8 +149,13 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu2004/x86_64/7fa2af80.pub"
-                    - "sudo -u ubuntu -i git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git"
+                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu && git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git'"
+                    - "sudo apt install unzip -y"
+                    - "curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip"
+                    - "unzip awscliv2.zip"
+                    - "sudo ./aws/install"
+                    - "rm aws -rf"
+                    - "rm awscliv2.zip -f"
                     - "pip3 install --upgrade awscli"
                     - "pip3 install deepracer-utils"
                     - "python3 -m deepracer install-cli"
@@ -226,6 +175,8 @@ Resources:
                 inputs:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./bin/init.sh -c aws -a gpu'"
+                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && source bin/activate.sh'"
+                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./utils/setup-xorg.sh'"
   CreateLogsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -258,7 +209,6 @@ Resources:
                         done
                         zip robomaker_log deepracer-0_robomaker.1.*.log
                         aws s3 cp robomaker_log.zip  s3://$DR_LOGS_COPY_S3_BUCKET/
-
   InstallDeepRacerDockerImagesScriptComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -380,7 +330,7 @@ Resources:
                     - |
                       id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
                       vol_id=$(aws ec2 describe-instances --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
-                      aws ec2 modify-volume --size 40 --volume-id $vol_id --region $(curl http://169.254.169.254/latest/meta-data/placement/region)
+                      aws ec2 modify-volume --size 60 --volume-id $vol_id --region $(curl http://169.254.169.254/latest/meta-data/placement/region)
   PullDeepracerDockerImagesComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -405,6 +355,10 @@ Resources:
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n telegraf -v -f 1.18-alpine'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n influxdb -v -f 1.8-alpine'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n grafana -v -f grafana:10.4.2'"
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -461,12 +415,11 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.4'
-      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/x.x.x'
+      Version: '0.0.5'
+      ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'CreateLogsComponent'
         - ComponentArn: !Ref 'SafeTerminationComponent'
-        - ComponentArn: !Ref 'InstallEFSUtilsComponent'
         - ComponentArn: !Ref 'ExpandRootVolumeComponent'
         - ComponentArn: !Ref 'InstallDeepRacerDockerImagesScriptComponent'
         - ComponentArn: !Ref 'InstallCFNInitComponent'
