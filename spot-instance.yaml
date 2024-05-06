@@ -116,27 +116,15 @@ Resources:
               group: root 
             /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh:
               content: |
-                date >> /tmp/interrupt.log
                 sudo su ubuntu
-                INTERRUPT_TIME=$(date '+%Y%m%d-%H%M')
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
                 source etc/profile.d/dots_vars.sh
                 dr-reload
                 dr-upload-model -bfw
                 dr-stop-training
-                sed -i '/DR_LOCAL_S3_PRETRAINED/d' ~/deepracer-for-cloud/run.env
-                sed -i -e '$aDR_LOCAL_S3_PRETRAINED=True' ~/deepracer-for-cloud/run.env
-                PRE_TRAINED_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
-                sed -i 's|-continued-.*||' ~/deepracer-for-cloud/run.env
-                TRAINING_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
-                UPLOAD_LOCATION=$(cat run.env | grep DR_UPLOAD_S3_PREFIX= | awk -F'=' '{print $2}')
-                sed -i -e '$aDR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER' ~/deepracer-for-cloud/run.env
-                sed -i "s|DR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER|DR_LOCAL_S3_PRETRAINED_PREFIX=$PRE_TRAINED_LOCATION|" ~/deepracer-for-cloud/run.env
-                sed -i "s|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION-continued-$INTERRUPT_TIME|" ~/deepracer-for-cloud/run.env
-                sed -i "s|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION-continued-$INTERRUPT_TIME|" ~/deepracer-for-cloud/run.env
-                sed -i -e '$aDR_LOCAL_S3_PRETRAINED_CHECKPOINT=last' ~/deepracer-for-cloud/run.env
-                aws s3 cp ~/deepracer-for-cloud/run.env s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_CUSTOM_FILES_PREFIX/
+                dr-increment-training
+                dr-upload-custom-files
               mode : "000755"
               owner: ubuntu
               group: ubuntu
@@ -146,8 +134,11 @@ Resources:
                 <html>
                 <body>
 
-                <h2>Video Feed</h2>
-                <p><a href="/?robo=all&camera=kvs_stream&quality=75&width=480">Watch Live Video</a></p>
+                <h2>Video Feeds</h2>
+                <p><a href="/?robo=all&camera=kvs_stream&quality=75&width=480">Live KVS Stream</a></p>
+                <p><a href="/?robo=all&camera=camera&quality=75&width=480">Live Camera</a></p>
+                <p><a href="/?robo=all&camera=main_camera&quality=75&width=480">Live Main Camera</a></p>
+                <p><a href="/?robo=all&camera=sub_camera&quality=75&width=480">Live Sub Camera</a></p>
                                 
                 <h2>All logs summary in one view</h2>
                 <p><a href="output.txt">Output</a></p>
@@ -159,6 +150,9 @@ Resources:
                 
                 <h2>Nvidia GPU status</h2>
                 <p><a href="nvidia-smi.txt">nvidia-smi (command output)</a></p>
+
+                <h2>Storage Capacity</h2>
+                <p><a href="df.txt">df output (command output)</a></p>
                 
                 <h2>Custom logs (last 1000 lines)</h2>
                 <p><a href="OutputLog.txt">OutputLog</a></p>
@@ -260,7 +254,6 @@ Resources:
             /home/ubuntu/bin/web_monitoring.sh:
               content: |
                 #!/bin/bash
-                
                 /home/ubuntu/bin/start_analysis.sh
                 USAGE_OUTPUT=output.txt
                 cd ~/deepracer-for-cloud
@@ -297,6 +290,10 @@ Resources:
                   echo "=====GPU performance=====" >> $USAGE_OUTPUT
                   nvidia-smi > nvidia-smi.txt 2>&1
                   grep Default nvidia-smi.txt >> $USAGE_OUTPUT  2>&1
+
+                  echo "=====Storage Availability=====" >> $USAGE_OUTPUT
+                  df > df.txt 2>&1
+                  cat df.txt >> $USAGE_OUTPUT  2>&1
                   
                   echo "=====Docker containers status=====" >> $USAGE_OUTPUT
                   docker ps -a > dockerstatus.txt  2>&1
