@@ -30,6 +30,7 @@
 # run.env values
 
 * [Consult DeepRacer for Cloud Documentation](https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html)
+* `DR_REGULAR_UPLOAD`: DeepRacer on the Spot specific var.  Integer defining the number of minutes between regular uploads to your upload s3 location to get model checkpoints throughout your training.  Default is `0` (disabled).
 
 # system.env values
 

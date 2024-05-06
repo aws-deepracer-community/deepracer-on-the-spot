@@ -115,6 +115,23 @@ Resources:
               mode : "000755"
               owner: root
               group: root 
+            /home/ubuntu/deepracer-for-cloud/regular_upload.sh: 
+              content: |
+                sudo su ubuntu
+                cd ~/deepracer-for-cloud
+                source bin/activate.sh
+                source /etc/profile.d/dots_vars.sh
+                dr-reload
+                export AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
+                while [ true ]
+                do
+                  UPLOAD_INTERVAL=$((60*$1))
+                  sleep UPLOAD_INTERVAL
+                  dr-upload-model -bf
+                done
+              mode : "000755"
+              owner: root
+              group: root 
             /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh:
               content: |
                 sudo su ubuntu
@@ -424,6 +441,9 @@ Resources:
                 # We want to be able to monitor our EC2 training without needing to connect to console, so we upload all needed info to Public_IP:8100/menu.html using this script
                 nohup /bin/bash -lc 'source /home/ubuntu/bin/web_monitoring.sh >/dev/null 2>&1' &
                 sleep 180 > /dev/null
+                if [[ $DR_REGULAR_UPLOAD > 0 ]];then
+                  ./regular_upload.sh $DR_REGULAR_UPLOAD &
+                fi
                 while [ True ]; do
                     # if the EC2 started termination process upon interruption notification, this file should exist, hence we leave termination process to manage final uploads without conflict
                     if [[ -f /home/ubuntu/bin/termination.started ]];then
