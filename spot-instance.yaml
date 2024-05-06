@@ -84,42 +84,24 @@ Resources:
             1-signal-cfn:
               command:
                       !Sub "bash -c '/usr/local/bin/cfn-signal -s true -e 0 --stack ${AWS::StackName} --resource ASG --region ${AWS::Region}'"
-
             2-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
-
           files:
-            /etc/profile.d/my_sns_topic.sh:
+            etc/profile.d/dots_vars.sh:
               content:
                 Fn::Sub:
-                - "export MY_SNS_TOPIC=${SNS}"
+                - |
+                  export MY_SNS_TOPIC=${SNS}
+                  export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
+                  export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}
+                  export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}
+                  export DEEPRACER_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
                 - SNS:
-                        Fn::ImportValue:
-                            !Sub "${ResourcesStackName}-InterruptionNotification"
-            /etc/profile.d/my_public_ip.sh:
-              content: "export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)"
-              mode : "000755"
-              owner: root
-              group: root
-            /etc/profile.d/my_bucket.sh:
-              content:
-                Fn::Sub:
-                - "export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}"
-                - BUCKET:
+                    Fn::ImportValue:
+                        !Sub "${ResourcesStackName}-InterruptionNotification"
+                  BUCKET:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-Bucket"
-              mode : "000755"
-              owner: root
-              group: root
-            /etc/profile.d/my_custom_files.sh:
-              content:
-                Fn::Sub: |
-                  export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}"
-              mode : "000755"
-              owner: root
-              group: root
-            /etc/profile.d/my_region.sh:
-              content: "export DEEPRACER_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)"
               mode : "000755"
               owner: root
               group: root
@@ -140,7 +122,7 @@ Resources:
                 INTERRUPT_TIME=$(date '+%Y%m%d-%H%M')
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
-                source /etc/profile.d/my_bucket.sh
+                source etc/profile.d/dots_vars.sh
                 dr-reload
                 dr-upload-model -bfw
                 dr-stop-training
@@ -421,8 +403,7 @@ Resources:
             /home/ubuntu/bin/start_training.sh:
               content: |
                 #!/bin/bash
-                source /etc/profile.d/my_custom_files.sh
-                source /etc/profile.d/my_sns_topic.sh
+                source etc/profile.d/dots_vars.sh
                 aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated on a new instance.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 git pull
