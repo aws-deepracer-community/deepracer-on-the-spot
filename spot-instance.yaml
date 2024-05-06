@@ -56,8 +56,7 @@ Resources:
             sudo su ubuntu
             cd /home/ubuntu/deepracer-for-cloud/
             source bin/activate.sh
-            export DEEPRACER_S3_URI=${BUCKET}
-            export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}"
+            source etc/profile.d/dots_vars.sh
         SecurityGroupIds:
         - !ImportValue
           'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
