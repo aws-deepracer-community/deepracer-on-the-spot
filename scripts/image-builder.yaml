@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Description: Create Image Builder Pipeline to bake AMIs for DeepRacer on the Spot
 Transform: 
   - AWS::Serverless-2016-10-31
   - AWS::LanguageExtensions

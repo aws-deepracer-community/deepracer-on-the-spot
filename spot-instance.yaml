@@ -151,7 +151,7 @@ Resources:
                 dr-upload-model -bf
                 dr-stop-training
                 if [[ $DR_CONTINUE_ON_SPOT_INTERRUPTION == False ]];then
-                  aws sns publish --topic-arn $MY_SNS_TOPIC --message "Due to Spot instance interruption training for $STACK_NAME in region $DEEPRACER_REGION has been cancelled.  If you want training to restart on Spot interruption in future set DR_CONTINUE_ON_SPOT_INTERRUPTION=True in run.env." --region $DEEPRACER_REGION
+                  aws sns publish --topic-arn $MY_SNS_TOPIC --message "Due to Spot instance interruption, training for $STACK_NAME in region $DEEPRACER_REGION has been cancelled.  If you want training to restart on Spot interruption in future set DR_CONTINUE_ON_SPOT_INTERRUPTION=True in run.env." --region $DEEPRACER_REGION
                   aws cloudformation delete-stack --stack-name $STACK_NAME --region $DEEPRACER_REGION
                 else
                   sed -i '/DR_LOCAL_S3_PRETRAINED/d' ~/deepracer-for-cloud/run.env
