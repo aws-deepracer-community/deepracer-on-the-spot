@@ -165,11 +165,24 @@ Resources:
                 Action:
                   - kms:*
                   - s3:*
+                  - sns:*
+                  - ssm:*
+                  - events:DeleteRule
+                  - events:RemoveTargets
+                  - lambda:RemovePermission
+                  - lambda:DeleteFunction
+                  - lambda:InvokeFunction
                 Resource: '*'
               - Effect: Allow
                 Action:
+                  - cloudformation:DeleteStack
+                Resource: 
+                  - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*"
+              - Effect: Allow
+                Action:
                   - iam:passRole
-                Resource: !GetAtt DeepRacerServiceRole.Arn
+                Resource: 
+                  - !GetAtt DeepRacerServiceRole.Arn
 
   InstanceProfile:
     Type: AWS::IAM::InstanceProfile

@@ -56,7 +56,7 @@ Resources:
             sudo su ubuntu
             cd /home/ubuntu/deepracer-for-cloud/
             source bin/activate.sh
-            source etc/profile.d/dots_vars.sh
+            source /etc/profile.d/dots_vars.sh
         SecurityGroupIds:
         - !ImportValue
           'Fn::Sub': '${ResourcesStackName}-SecurityGroup'
@@ -86,14 +86,14 @@ Resources:
             2-start-train:
               command: "su -l ubuntu bash -c '/home/ubuntu/bin/start_training.sh'"
           files:
-            etc/profile.d/dots_vars.sh:
+            /etc/profile.d/dots_vars.sh:
               content:
                 Fn::Sub:
                 - |
                   export MY_SNS_TOPIC=${SNS}
                   export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
                   export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}
-                  export CUSTOM_FILE_LOCATION="${CUSTOMFILELOCATION}
+                  export CUSTOM_FILE_LOCATION=${CUSTOMFILELOCATION}
                   export DEEPRACER_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
                   export STACK_NAME=${AWS::StackName}
                 - SNS:
@@ -123,26 +123,52 @@ Resources:
                 source /etc/profile.d/dots_vars.sh
                 dr-reload
                 export AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
+                UPLOAD_INTERVAL=$((60*$DR_REGULAR_UPLOAD))
                 while [ true ]
                 do
-                  UPLOAD_INTERVAL=$((60*$1))
-                  sleep UPLOAD_INTERVAL
-                  dr-upload-model -bf
+                  sleep $UPLOAD_INTERVAL
+                  dr-upload-model -f
                 done
               mode : "000755"
               owner: root
               group: root 
             /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh:
               content: |
+                incrementModel()
+                {
+                  [[ ${1} =~ ^(.*[^0-9])?([0-9]+)$ ]]  && \
+                    [[ ${#BASH_REMATCH[1]} -gt 0 ]] && \
+                      printf "%s%0${#BASH_REMATCH[2]}d" "${BASH_REMATCH[1]}" "$((10#${BASH_REMATCH[2]} + 1 ))" || \
+                      printf "${1}-1" || \
+                    printf "${1}"
+                }
+                date >> /tmp/interrupt.log
                 sudo su ubuntu
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
-                source etc/profile.d/dots_vars.sh
+                source /etc/profile.d/dots_vars.sh
                 dr-reload
-                dr-upload-model -bfw
+                dr-upload-model -bf
                 dr-stop-training
-                dr-increment-training
-                dr-upload-custom-files
+                if [[ $DR_CONTINUE_ON_SPOT_INTERRUPTION == False ]];then
+                  aws sns publish --topic-arn $MY_SNS_TOPIC --message "Due to Spot instance interruption training for $STACK_NAME in region $DEEPRACER_REGION has been cancelled.  If you want training to restart on Spot interruption in future set DR_CONTINUE_ON_SPOT_INTERRUPTION=True in run.env." --region $DEEPRACER_REGION
+                  aws cloudformation delete-stack --stack-name $STACK_NAME --region $DEEPRACER_REGION
+                else
+                  sed -i '/DR_LOCAL_S3_PRETRAINED/d' ~/deepracer-for-cloud/run.env
+                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED=True' ~/deepracer-for-cloud/run.env
+                  PRE_TRAINED_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
+                  sed -i 's|-continued-.*||' ~/deepracer-for-cloud/run.env
+                  TRAINING_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
+                  NEW_TRAINING_LOCATION=$(incrementModel $TRAINING_LOCATION)
+                  UPLOAD_LOCATION=$(cat run.env | grep DR_UPLOAD_S3_PREFIX= | awk -F'=' '{print $2}')
+                  NEW_UPLOAD_LOCATION=$(incrementModel $UPLOAD_LOCATION)
+                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER' ~/deepracer-for-cloud/run.env
+                  sed -i "s|DR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER|DR_LOCAL_S3_PRETRAINED_PREFIX=$PRE_TRAINED_LOCATION|" ~/deepracer-for-cloud/run.env
+                  sed -i "s|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION|DR_LOCAL_S3_MODEL_PREFIX=$NEW_TRAINING_LOCATION|" ~/deepracer-for-cloud/run.env
+                  sed -i "s|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION|DR_UPLOAD_S3_PREFIX=$NEW_UPLOAD_LOCATION|" ~/deepracer-for-cloud/run.env
+                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED_CHECKPOINT=last' ~/deepracer-for-cloud/run.env
+                  aws s3 cp ~/deepracer-for-cloud/run.env s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_CUSTOM_FILES_PREFIX/
+                fi
               mode : "000755"
               owner: ubuntu
               group: ubuntu
@@ -337,6 +363,7 @@ Resources:
                   done
 
                   mv deepracer-0_robomaker.1.*.log robomaker1.log
+                  mv deepracer-0-robomaker-1.log robomaker1.log
 
                   echo "=====Sagemaker training logs=====" >> $USAGE_OUTPUT
                   docker logs $(dr-find-sagemaker) 2>&1 | egrep '^Training>' | tail -n 10 >> $USAGE_OUTPUT
@@ -354,7 +381,7 @@ Resources:
                   head completedlaps.txt -n 10 >> $USAGE_OUTPUT 2>&1
                   
                   echo "=====Robomaker (main Worker) - OutputLog: =====" >> $USAGE_OUTPUT
-                  docker logs $(dr-find-robomaker) 2>&1 | egrep '^OutputLog' | tail -n 1000 > OutputLog.txt
+                  docker logs $(dr-find-robomaker) 2>&1 | tail -n 1000 > OutputLog.txt
                   tail OutputLog.txt -n 10 >> $USAGE_OUTPUT
                   rm $USAGE_OUTPUT.tmp  > /dev/null 2>&1
                   echo "###################" >> $USAGE_OUTPUT
@@ -368,6 +395,7 @@ Resources:
                   do
                     docker cp $USAGE_OUTPUT $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp nvidia-smi.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                    docker cp df.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp dockerstatus.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp completedlaps.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
                     docker cp OutputLog.txt $ID:/usr/share/nginx/html/ > /dev/null 2>&1
@@ -417,7 +445,7 @@ Resources:
             /home/ubuntu/bin/start_training.sh:
               content: |
                 #!/bin/bash
-                source etc/profile.d/dots_vars.sh
+                source /etc/profile.d/dots_vars.sh
                 aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated for on a new instance for $STACK_NAME in region $DEEPRACER_REGION.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 sed -i '/DR_AWS_APP_REGION=/d' /home/ubuntu/deepracer-for-cloud/system.env
@@ -441,8 +469,8 @@ Resources:
                 # We want to be able to monitor our EC2 training without needing to connect to console, so we upload all needed info to Public_IP:8100/menu.html using this script
                 nohup /bin/bash -lc 'source /home/ubuntu/bin/web_monitoring.sh >/dev/null 2>&1' &
                 sleep 180 > /dev/null
-                if [[ $DR_REGULAR_UPLOAD > 0 ]];then
-                  ./regular_upload.sh $DR_REGULAR_UPLOAD &
+                if [[ $DR_REGULAR_UPLOAD -gt 0 ]];then
+                  ./regular_upload.sh &
                 fi
                 while [ True ]; do
                     # if the EC2 started termination process upon interruption notification, this file should exist, hence we leave termination process to manage final uploads without conflict
@@ -476,7 +504,7 @@ Resources:
 
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
-                source etc/profile.d/dots_vars.sh
+                source /etc/profile.d/dots_vars.sh
                 sudo sed -i '/# Grafana options/a GF_AUTH_ANONYMOUS_ENABLED=true' docker/metrics/configuration.env
                 dr-start-metrics
 
@@ -1083,7 +1111,7 @@ Resources:
               except ClientError as e:
                   print(e.response['Error']['Message'])
               notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
-              sns_client.publish(TopicArn=notification_topic, Message=f'Termination notification instance: {instance_id} stack: ${AWS::StackName}')
+              sns_client.publish(TopicArn=notification_topic, Message=f'Termination notification instance: {instance_id} stack: ${AWS::StackName} region: ${AWS::Region}')
       Runtime: python3.11
       Timeout: 120
       Environment:

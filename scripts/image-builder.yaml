@@ -93,11 +93,40 @@ Resources:
         - !ImportValue
           Fn::Sub: ${ResourcesStackName}-SecurityGroup
       SnsTopicArn: !Ref 'ImageBuilderSNSTopic'
+  PreReqs:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: !Sub 'PreReqs-${AWS::StackName}'
+      Version: '0.0.2'
+      Description: Pre-requisites.
+      ChangeDescription: First version
+      Platform: Linux
+      Data: |
+        name: PreReqs
+        description: Expands root volume
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: PreReqs
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - |
+                      sudo apt-get update
+                      sudo apt install unzip -y
+                      curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip
+                      unzip awscliv2.zip
+                      sudo ./aws/install
+                      rm aws -rf
+                      rm awscliv2.zip -f
+                      sudo apt-get -y install python3-pip binutils jq zip
+                      sudo pip3 install --upgrade awscli
   InstallCFNInitComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'CFNInit-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.4'
       Description: Install the latest CFNInit.
       ChangeDescription: First version
       Platform: Linux
@@ -134,7 +163,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.5'
+      Version: '0.0.7'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -150,13 +179,6 @@ Resources:
                 inputs:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu && git clone https://github.com/aws-deepracer-community/deepracer-for-cloud.git'"
-                    - "sudo apt install unzip -y"
-                    - "curl https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip"
-                    - "unzip awscliv2.zip"
-                    - "sudo ./aws/install"
-                    - "rm aws -rf"
-                    - "rm awscliv2.zip -f"
-                    - "pip3 install --upgrade awscli"
                     - "pip3 install deepracer-utils"
                     - "python3 -m deepracer install-cli"
               - name: BuildFromCommunityRepo
@@ -312,7 +334,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'ExpandRootVolume-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.5'
       Description: Expand root volume.
       ChangeDescription: First version
       Platform: Linux
@@ -335,7 +357,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PullDeepracerDockerImages-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.3'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
       Platform: Linux
@@ -356,9 +378,6 @@ Resources:
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n telegraf -v -f 1.18-alpine'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n influxdb -v -f 1.8-alpine'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n grafana -v -f grafana:10.4.2'"
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -415,9 +434,10 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.5'
+      Version: '0.0.12'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
+        - ComponentArn: !Ref 'PreReqs'
         - ComponentArn: !Ref 'CreateLogsComponent'
         - ComponentArn: !Ref 'SafeTerminationComponent'
         - ComponentArn: !Ref 'ExpandRootVolumeComponent'

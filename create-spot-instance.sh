@@ -17,7 +17,8 @@ if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
     instanceTypeConfig="InstanceType=$DEEPRACER_INSTANCE_TYPE"
 fi
 BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName | jq '.Stacks | .[] | .Outputs | .[] | select(.OutputKey=="Bucket") | .OutputValue' | tr -d '"')
-amiId=$(aws ec2 describe-images --owners 747447086422 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
+#amiId=$(aws ec2 describe-images --owners 747447086422 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
+amiId=ami-06636ab6133141dfb
 set +xa
 
 #validate stack name meets DeepRacer import constraints
@@ -44,7 +45,7 @@ chmod +x ./validation.sh
 
 if [[ $? -ne 0 ]]; then
     while true; do
-        echo -e "\e[1;33m  ##########  Error found in reward_function.py, want to continue anyway? \e[0m"
+        echo -e "\e[1;33m  ##########  Error found in your custom files, want to continue anyway? \e[0m"
         read -p "[y / n]: " yn
         case $yn in
             [Yy]* ) break;;
@@ -56,9 +57,9 @@ fi
 
 set -x
 
-CUSTOM_FILE_LOCATION=$(cat custom-files/run.env | grep DR_LOCAL_S3_CUSTOM_FILES_PREFIX= | awk -F'=' '{print $2}')
-aws s3 cp custom-files s3://${BUCKET}/${CUSTOM_FILE_LOCATION} --recursive
-aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName DeepRacerImportName=$stackName Name= TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$CUSTOM_FILE_LOCATION --template-file spot-instance.yaml --capabilities CAPABILITY_IAM --s3-bucket $BUCKET --s3-prefix cf_templates
+source custom-files/run.env
+aws s3 cp custom-files s3://${BUCKET}/${DR_LOCAL_S3_CUSTOM_FILES_PREFIX} --recursive
+aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName DeepRacerImportName=$stackName Name= TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$DR_LOCAL_S3_CUSTOM_FILES_PREFIX --template-file spot-instance.yaml --capabilities CAPABILITY_IAM --s3-bucket $BUCKET --s3-prefix cf_templates
 ASG=$(aws cloudformation describe-stacks --stack-name ${stackName} --query "Stacks[].Outputs[].OutputValue" --output text)
 EC2_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)
 EC2_IP=$(aws ec2 describe-instances --instance-ids ${EC2_ID} --query 'Reservations[].Instances[].PublicIpAddress[]' --output text)
