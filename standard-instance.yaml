@@ -141,46 +141,6 @@ Resources:
               mode : "000755"
               owner: root
               group: root 
-            /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh:
-              content: |
-                incrementModel()
-                {
-                  [[ ${1} =~ ^(.*[^0-9])?([0-9]+)$ ]]  && \
-                    [[ ${#BASH_REMATCH[1]} -gt 0 ]] && \
-                      printf "%s%0${#BASH_REMATCH[2]}d" "${BASH_REMATCH[1]}" "$((10#${BASH_REMATCH[2]} + 1 ))" || \
-                      printf "${1}-1" || \
-                    printf "${1}"
-                }
-                date >> /tmp/interrupt.log
-                sudo su ubuntu
-                cd ~/deepracer-for-cloud
-                source bin/activate.sh
-                source /etc/profile.d/dots_vars.sh
-                dr-reload
-                dr-upload-model -bf
-                dr-stop-training
-                if [[ $DR_CONTINUE_ON_SPOT_INTERRUPTION == False ]];then
-                  aws sns publish --topic-arn $MY_SNS_TOPIC --message "Due to Spot instance interruption, training for $STACK_NAME in region $DEEPRACER_REGION has been cancelled.  If you want training to restart on Spot interruption in future set DR_CONTINUE_ON_SPOT_INTERRUPTION=True in run.env." --region $DEEPRACER_REGION
-                  aws cloudformation delete-stack --stack-name $STACK_NAME --region $DEEPRACER_REGION
-                else
-                  sed -i '/DR_LOCAL_S3_PRETRAINED/d' ~/deepracer-for-cloud/run.env
-                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED=True' ~/deepracer-for-cloud/run.env
-                  PRE_TRAINED_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
-                  sed -i 's|-continued-.*||' ~/deepracer-for-cloud/run.env
-                  TRAINING_LOCATION=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
-                  NEW_TRAINING_LOCATION=$(incrementModel $TRAINING_LOCATION)
-                  UPLOAD_LOCATION=$(cat run.env | grep DR_UPLOAD_S3_PREFIX= | awk -F'=' '{print $2}')
-                  NEW_UPLOAD_LOCATION=$(incrementModel $UPLOAD_LOCATION)
-                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER' ~/deepracer-for-cloud/run.env
-                  sed -i "s|DR_LOCAL_S3_PRETRAINED_PREFIX=PLACEHOLDER|DR_LOCAL_S3_PRETRAINED_PREFIX=$PRE_TRAINED_LOCATION|" ~/deepracer-for-cloud/run.env
-                  sed -i "s|DR_LOCAL_S3_MODEL_PREFIX=$TRAINING_LOCATION|DR_LOCAL_S3_MODEL_PREFIX=$NEW_TRAINING_LOCATION|" ~/deepracer-for-cloud/run.env
-                  sed -i "s|DR_UPLOAD_S3_PREFIX=$UPLOAD_LOCATION|DR_UPLOAD_S3_PREFIX=$NEW_UPLOAD_LOCATION|" ~/deepracer-for-cloud/run.env
-                  sed -i -e '$aDR_LOCAL_S3_PRETRAINED_CHECKPOINT=last' ~/deepracer-for-cloud/run.env
-                  aws s3 cp ~/deepracer-for-cloud/run.env s3://$DEEPRACER_S3_URI/$DR_LOCAL_S3_CUSTOM_FILES_PREFIX/
-                fi
-              mode : "000755"
-              owner: ubuntu
-              group: ubuntu
             /home/ubuntu/bin/menu.html:
               content: |
                 <!DOCTYPE html>
