@@ -39,9 +39,8 @@
 The following should be changed to enable OpenGL training with GPUs, to reduce CPU load: -
 
 * Set `DR_GUI_ENABLE=True`
-* Set `DR_DOCKER_STYLE=compose`'
 * Set `DR_HOST_X=True`
-* Ensure Robomaker and Sagemaker are running on gpu containers, e.g. `DR_ROBOMAKER_IMAGE=5.1.1-gpu` and `DR_SAGEMAKER_IMAGE=5.1.1-gpu` or newer
+* Ensure Robomaker and Sagemaker are running on later containers, e.g. `DR_ROBOMAKER_IMAGE=5.2.2-gpu` and `DR_SAGEMAKER_IMAGE=5.2.1-gpu` or newer
 * Uncomment out `DR_SAGEMAKER_CUDA_DEVICES=0`
 * Uncomment out `DR_ROBOMAKER_CUDA_DEVICES=0`
 * Uncomment out `DR_DISPLAY=:99`
