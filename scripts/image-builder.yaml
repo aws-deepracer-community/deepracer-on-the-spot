@@ -164,7 +164,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.7'
+      Version: '0.0.8'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -199,7 +199,6 @@ Resources:
                   commands:
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./bin/init.sh -c aws -a gpu'"
                     - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && source bin/activate.sh'"
-                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && ./utils/setup-xorg.sh'"
   CreateLogsComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -434,7 +433,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.12'
+      Version: '0.0.13'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'PreReqs'

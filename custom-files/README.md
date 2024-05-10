@@ -44,7 +44,7 @@ The following should be changed to enable OpenGL training with GPUs, to reduce C
 * Ensure Robomaker and Sagemaker are running on gpu containers, e.g. `DR_ROBOMAKER_IMAGE=5.1.1-gpu` and `DR_SAGEMAKER_IMAGE=5.1.1-gpu` or newer
 * Uncomment out `DR_SAGEMAKER_CUDA_DEVICES=0`
 * Uncomment out `DR_ROBOMAKER_CUDA_DEVICES=0`
-* Uncomment out `DR_DISPLAY=:0`
+* Uncomment out `DR_DISPLAY=:99`
 
 The following should be changed for SAC training_algorithm as it cannot use multiple workers: -
 * set `DR_WORKERS=1`

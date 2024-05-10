@@ -125,6 +125,7 @@ Resources:
                 source bin/activate.sh
                 source /etc/profile.d/dots_vars.sh
                 dr-reload
+                LAST_CHECKPOINT="training_just_started"
                 while [ true ]
                 do
                   if docker ps -a | grep -q Exited; then
@@ -429,6 +430,7 @@ Resources:
                 dr-reload
                 # Setup required config if using OpenGL training
                 if [[ $DR_HOST_X == True ]];then
+                  ./utils/setup-xorg.sh
                   ./utils/start-xorg.sh
                   sleep 15
                 fi
