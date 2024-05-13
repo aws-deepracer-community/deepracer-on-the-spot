@@ -26,6 +26,7 @@ then
     echo "or apply the following settings in system.env..."
     echo ""
     echo "DR_GUI_ENABLE=True"
+    echo "DR_DOCKER_STYLE=compose"
     echo "DR_SAGEMAKER_IMAGE=5.1.1-gpu, or latest version"
     echo "DR_SAGEMAKER_CUDA_DEVICES=0"
     echo "DR_ROBOMAKER_CUDA_DEVICES=0"
