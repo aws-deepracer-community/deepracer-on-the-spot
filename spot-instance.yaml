@@ -94,8 +94,9 @@ Resources:
                   export PUBLIC_IP=$(curl http://169.254.169.254/latest/meta-data/public-ipv4)
                   export MY_BUCKET=${BUCKET};export DR_S3_URI=${BUCKET};export DEEPRACER_S3_URI=${BUCKET}
                   export CUSTOM_FILE_LOCATION=${CUSTOMFILELOCATION}
-                  export DEEPRACER_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
+                  export DEEPRACER_REGION=${AWS::Region}
                   export STACK_NAME=${AWS::StackName}
+                  export AWS_DEFAULT_REGION=${AWS::Region}
                 - SNS:
                     Fn::ImportValue:
                         !Sub "${ResourcesStackName}-InterruptionNotification"
@@ -122,7 +123,6 @@ Resources:
                 source bin/activate.sh
                 source /etc/profile.d/dots_vars.sh
                 dr-reload
-                export AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/meta-data/placement/region)
                 UPLOAD_INTERVAL=$((60*$DR_REGULAR_UPLOAD))
                 while [ true ]
                 do

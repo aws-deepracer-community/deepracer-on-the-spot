@@ -7,8 +7,5 @@
   "loss_type": "mean squared error",
   "lr": 0.0003,
   "num_episodes_between_training": 1,
-  "sac_alpha": 0.2,
-  "stack_size": 1,
-  "term_cond_avg_score": 100000.0,
-  "term_cond_max_episodes": 100000
+  "sac_alpha": 0.2
 }
