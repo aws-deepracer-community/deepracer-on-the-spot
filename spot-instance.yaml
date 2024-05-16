@@ -484,6 +484,7 @@ Resources:
                 dr-reload
                 # Setup required config if using OpenGL training
                 if [[ $DR_HOST_X == True ]];then
+                  sudo apt-get update
                   ./utils/setup-xorg.sh
                   ./utils/start-xorg.sh
                   sleep 15
