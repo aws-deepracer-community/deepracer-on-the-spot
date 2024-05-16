@@ -17,7 +17,7 @@ Parameters:
     MaxValue: 1440 # 24 hours
   AmiId:
     Type: String
-    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 975050138619
+    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
   BUCKET:
     Type: String
   CUSTOMFILELOCATION:
