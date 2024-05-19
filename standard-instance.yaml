@@ -464,7 +464,7 @@ Resources:
                     if [ [ "$bestcheckpoint" != "$lastbestcheckpoint" ] && [ "$bestcheckpoint" != "" ] ];then
                       # update file timestamp just to avoid conflict with termination process
                       touch /home/ubuntu/bin/uploading_best_model.timestamp 2>&1
-                      dr-upload-model -bfw > /dev/null 2>&1
+                      dr-upload-model -bf > /dev/null 2>&1
                       lastbestcheckpoint=$bestcheckpoint
                     fi
                     sleep 120
