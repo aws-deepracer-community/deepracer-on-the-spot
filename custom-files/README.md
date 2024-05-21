@@ -30,6 +30,7 @@
 # run.env values
 
 * [Consult DeepRacer for Cloud Documentation](https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html)
+* `DR_REGULAR_UPLOAD`: DeepRacer on the Spot specific var.  Integer defining the number of minutes between regular uploads to your upload s3 location to get model checkpoints throughout your training.  Default is `0` (disabled).  WARNING - if you turn this setting on you'll be storing an additional ~75MB of model files in the upload folder at every internal of regular upload you define, e.g. 1.8GB over 24 hours with an interval of 60 minutes.  You may want to delete / tidy up after training finishes and you've kept the optimal checkpoints.
 
 # system.env values
 
@@ -38,12 +39,12 @@
 The following should be changed to enable OpenGL training with GPUs, to reduce CPU load: -
 
 * Set `DR_GUI_ENABLE=True`
-* Set `DR_DOCKER_STYLE=compose`'
+* Set `DR_DOCKER_STYLE=compose`
 * Set `DR_HOST_X=True`
-* Ensure Robomaker and Sagemaker are running on gpu containers, e.g. `DR_ROBOMAKER_IMAGE=5.1.1-gpu` and `DR_SAGEMAKER_IMAGE=5.1.1-gpu` or newer
+* Ensure Robomaker and Sagemaker are running on later containers, e.g. `DR_ROBOMAKER_IMAGE=5.2.2-gpu` and `DR_SAGEMAKER_IMAGE=5.2.1-gpu` or newer
 * Uncomment out `DR_SAGEMAKER_CUDA_DEVICES=0`
 * Uncomment out `DR_ROBOMAKER_CUDA_DEVICES=0`
-* Uncomment out `DR_DISPLAY=:0`
+* Uncomment out `DR_DISPLAY=:99`
 
 The following should be changed for SAC training_algorithm as it cannot use multiple workers: -
 * set `DR_WORKERS=1`

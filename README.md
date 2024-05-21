@@ -43,8 +43,6 @@ Example:
 
 The primary purpose of this template is to provide a simple single script to run that sets up all of the prerequisite AWS resources to allow deepracer-for-cloud to run on EC2 instances (https://aws-deepracer-community.github.io/deepracer-for-cloud/). **This should only be ran once per sandbox per region**. This is accomplished by creating the following:
 * S3 bucket
-* EFS filesystem
-* EFS Mount Targets on each of the subnets within the default VPC. (The template has a max of 6 subnets and automatically detects the number of subnets in the default VPC.)
 * SNS Topic that has messages published to it in the event of spot instance termination to stop training safely and upload model
 * EC2 quota limit increases to be able to run 2 x g4dn.2xlarge spot or on demand instances (See FAQs if AWS query the rationale for the quota request)
 * Role used to import finished model into the AWS DeepRacer console
