@@ -409,7 +409,7 @@ Resources:
                       if [[ $start_training_uploading -ge 1 ]];then
                         sleep 30
                       fi
-                      dr-upload-model -bfw
+                      dr-upload-model -bf
                       . /home/ubuntu/deepracer-for-cloud/import_model.sh
                       dr-stop-training
   DistributionConfiguration:
