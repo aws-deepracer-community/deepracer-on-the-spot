@@ -552,6 +552,10 @@ Resources:
                 S3_PREFIX_FOR_ANALYSIS=$(cat run.env | grep DR_LOCAL_S3_MODEL_PREFIX= | awk -F'=' '{print $2}')
                 DEEPRACER_TRACK=$(cat run.env | grep DR_WORLD_NAME= | awk -F'=' '{print $2}')
                 DEEPRACER_WORKERS=$(cat system.env | grep DR_WORKERS= | awk -F'=' '{print $2}')
+                echo $S3_PREFIX_FOR_ANALYSIS | grep -q \$DR_WORLD_NAME
+                if [[ $? -eq 0 ]];then
+                  S3_PREFIX_FOR_ANALYSIS=$(echo $S3_PREFIX_FOR_ANALYSIS | sed "s|\$DR_WORLD_NAME|${DEEPRACER_TRACK}|")
+                fi
                 sed -i "s|DR_LOCAL_S3_MODEL_PREFIX|${S3_PREFIX_FOR_ANALYSIS}|" import_from_s3.py
                 sed -i "s|DEEPRACER_S3_URI|${DEEPRACER_S3_URI}|" import_from_s3.py
                 sed -i "s|DEEPRACER_TRACK|${DEEPRACER_TRACK}|" import_from_s3.py
