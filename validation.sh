@@ -18,16 +18,16 @@ fi
 source custom-files/system.env
 if [ $DR_HOST_X == True ]
 then
-  if [ $DR_GUI_ENABLE != True ] || [[ $DR_SAGEMAKER_IMAGE != *"gpu"* ]] || [[ $DR_SAGEMAKER_CUDA_DEVICES != 0 ]] || [[ $DR_ROBOMAKER_CUDA_DEVICES != 0 ]] || [ $DR_DOCKER_STYLE != compose ]
+  if [ DR_DISPLAY == null ] || [[ $DR_SAGEMAKER_IMAGE != *"gpu"* ]] || [[ $DR_SAGEMAKER_CUDA_DEVICES != 0 ]] || [[ $DR_ROBOMAKER_CUDA_DEVICES != 0 ]] || [ $DR_DOCKER_STYLE != compose ]
   then
     echo "Incorrect settings for OpenGL, please update system.env"
     echo "either set DR_HOST_X=False to disabled OpenGL GPU training"
     echo ""
     echo "or apply the following settings in system.env..."
     echo ""
-    echo "DR_GUI_ENABLE=True"
+    echo "DR_DISPLAY=:99"
     echo "DR_DOCKER_STYLE=compose"
-    echo "DR_SAGEMAKER_IMAGE=5.1.1-gpu, or latest version"
+    echo "DR_SAGEMAKER_IMAGE=5.2.1-gpu, or latest version"
     echo "DR_SAGEMAKER_CUDA_DEVICES=0"
     echo "DR_ROBOMAKER_CUDA_DEVICES=0"
     exit 1
