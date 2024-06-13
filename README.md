@@ -57,7 +57,7 @@ This bash script utilizes the base.resources.yaml template file to provision the
 INPUTS:
 * baseResourcesStackName - stackName from create-base-resource.sh if you ever forget this, you can go to cloudformation and see old stacks
 * stackName - name of this stack that will provision an ec2 instance and automatically train deepracer training.  This is also the name used for your model when it's imported into the AWS DeepRacer console, and therefore must conform to that naming convention (Up to 64 characters. Valid characters: A-Z, a-z, 0-9, and hypens (-). No spaces or underscores (_).)
-* timeToLiveInMinutes - how long you want this ec2 instance to run for. after X minutes, the instance will be terminated. Default: 60, Min:0, Max: 1440 . If you want the instance to stay alive forever, set this value to 0 (caution: you will be charged per hour the instance is running, and you will need to stop/terminate the instance on your own). You can also increase the max time in standard-instance.yaml if you wish to have a model train more than 24 hours.
+* timeToLiveInMinutes - how long you want this ec2 instance to run for. after X minutes, the instance will be terminated. Default: 60, Min:0, Max: 1440 . If you want the instance to stay alive forever, set this value to 0 (caution: you will be charged per hour the instance is running, and you will need to stop/terminate the instance on your own). You can also increase the max time in standard-instance.yaml or spot-instacnce.yaml if you wish to have a model train more than 24 hours.
 
 Example:
 `./create-standard-instance.sh base firstmodelbase 30`
