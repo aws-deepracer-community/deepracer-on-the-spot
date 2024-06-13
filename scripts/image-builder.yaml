@@ -98,13 +98,13 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PreReqs-${AWS::StackName}'
-      Version: '0.0.2'
+      Version: '0.0.3'
       Description: Pre-requisites.
       ChangeDescription: First version
       Platform: Linux
       Data: |
         name: PreReqs
-        description: Expands root volume
+        description: Installs pre-reqs
         schemaVersion: 1.0
         phases:
           - name: build
@@ -123,6 +123,7 @@ Resources:
                       rm awscliv2.zip -f
                       sudo apt-get -y install python3-pip binutils jq zip
                       sudo pip3 install --upgrade awscli
+                      sudo apt install nvtop -y
   InstallCFNInitComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
@@ -433,7 +434,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.13'
+      Version: '0.0.14'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'PreReqs'
