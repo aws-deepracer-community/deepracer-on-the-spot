@@ -129,22 +129,21 @@ def process_action_space(file):
     print(f"{num_values} have been added to {key}.")
 
 def menu_picker(label,options,custom):
+    if custom==True:
+        options.append("Custom")
     while True:
         print(label)
         for i, option in enumerate(options, start=1):
             print(f"{i}. {option}")
-        if custom==True:
-            print(f"{len(options)+1}. Custom")
 
-        choice = input("Enter your choice (1-{}): ".format(len(options)+1))
-        if choice.isdigit() and 1 <= int(choice) <= len(options)+1:
+        choice = input("Enter your choice (1-{}): ".format(len(options)))
+        if choice.isdigit() and 1 <= int(choice) <= len(options):
             option = int(choice)
-            if option == len(options)+1:
-                value=input("Enter custom value:")
-                return value
+            if option == len(options) and custom:
+                value=input("Enter custom value: ")
             else:
                 value=options[option - 1]
-                return value
+            return value
         else:
             print("Invalid input. Please enter a valid number.")
 
@@ -189,7 +188,12 @@ def run_training(pretrained):
     print()
     stack=read_env_variable(OPTIONS['13']['file'], OPTIONS['13']['key'])
     print()
-    wait=input("Insert Time to live (Minutes):")
+    while True:
+        wait=input("Insert Time to live (Minutes): ")
+        if wait.isdigit() and 0 <= int(wait):
+            break
+        else:
+            print("Invalid input. Please enter a valid number.")
     print("./create-{}-instance.sh {} {} {}".format(standarspot,stack,modelname,wait))
     os.environ["DEEPRACER_INSTANCE_TYPE"] = machinetype
     os.system("./create-{}-instance.sh {} {} {}".format(standarspot,stack,modelname,wait))
