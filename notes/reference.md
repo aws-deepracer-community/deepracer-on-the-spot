@@ -1,4 +1,4 @@
-* REFERENCES
+# REFERENCES
 
 The purpose of this file is to keep track of the different versions of reward function (RF), action space (AS) and hyperparameters (HP)
 
@@ -10,3 +10,7 @@ So model name `team3-pablo-rf-C-as-B-hp-D` refers to a model trained with versio
 
 To know more about every component, use such versions to look up the details in the table below.
 
+| ver | Reward Function      | Action Space        | Hyperparams |
+|-----|----------------------|---------------------|-------------|
+| A   | centerline (default) | 5 actions (default) | default |
+| B   | circle (a.k.a. 15 min) original | 5 actions, increased speeds  | discount 0.5 |
