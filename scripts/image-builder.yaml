@@ -165,7 +165,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.9'
+      Version: '0.0.10'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -187,7 +187,7 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && git checkout combined-image && ./bin/prepare.sh'"
+                    - "sudo -u ubuntu -i bash -c 'cd /home/ubuntu/deepracer-for-cloud && git checkout dev && ./bin/prepare.sh'"
               - name: Reboot
                 action: Reboot
                 onFailure: Abort
@@ -358,7 +358,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PullDeepracerDockerImages-${AWS::StackName}'
-      Version: '0.0.4'
+      Version: '0.0.5'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
       Platform: Linux
@@ -373,7 +373,7 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-simapp -v -f -dev-gpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-simapp -v -f -rc0-gpu'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
@@ -431,7 +431,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.15'
+      Version: '0.0.16'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'PreReqs'
