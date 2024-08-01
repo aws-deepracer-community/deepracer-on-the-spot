@@ -17,7 +17,7 @@ def reward_function(params):
     reward = 1e-3
     
     if all_wheels_on_track and (0.5*track_width - distance_from_center) > 0.05:
-        reward += 0.5
+        reward += 0.4
     
     # Give higher reward if the car is closer to center line and vice versa
     if distance_from_center <= marker_1:
@@ -39,8 +39,8 @@ def reward_function(params):
     progress = params['progress']
     speed = params['speed']
     
-    reward += speed / 80
-    reward += progress/20
+    reward += speed / 40
+    reward += progress/10
     
     if params['is_offtrack'] or params['is_reversed']: return 1e-3
     
