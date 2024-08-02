@@ -18,5 +18,6 @@ To know more about every component, use such versions to look up the details in 
 | D   | self-motivator (github.com/scottpletcher)  | capstone provided; 1.3 to 5.0 m/s | df 0.5 en 0.03 |
 | E   |   | medium size (angles 25, 12, 0) slow & fast per angle |   |
 | F   |   | grand size (angles 30, 20, 10, 0) slow & fast per angle |   |
+| G   |   | grand size (angles 30, 20, 10, 0) slow & fast per angle, +0.5 in 0 & Left actions |   |
  
 
