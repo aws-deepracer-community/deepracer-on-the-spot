@@ -33,3 +33,8 @@ Steps = 1 / (1 - DF )
 | 0.8 | 5 |
 | 0.5 | 2 |
 
+## Candidate Models
+
+| Shortcut | Name | Best eval time | Comments |
+| --- | --- | --- |
+| M001 | team3-pablo-rf-D-as-F-hp-C-it03 | 19.01 | 3rd iteration using RF self-motivator, grand action space, and df=0.9 |
