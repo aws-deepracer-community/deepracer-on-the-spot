@@ -22,8 +22,8 @@ To know more about every component, use such versions to look up the details in 
  
 ## Discount Factor Formula & Values
 
-| Steps = 1 / (1 - DF ) |
-|-----------------------|
+Steps = 1 / (1 - DF )
+
 | DF | Steps involved |
 |----|----------------|
 | 0.999 | 1000 |
