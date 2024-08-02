@@ -20,4 +20,16 @@ To know more about every component, use such versions to look up the details in 
 | F   |   | grand size (angles 30, 20, 10, 0) slow & fast per angle |   |
 | G   |   | grand size (angles 30, 20, 10, 0) slow & fast per angle, +0.5 in 0 & Left actions |   |
  
+## Discount Factor Formula & Values
+
+| Steps = 1 / (1 - DF ) |
+|-----------------------|
+| DF | Steps involved |
+|----|----------------|
+| 0.999 | 1000 |
+| 0.99 | 100 |
+| 0.95 | 20 |
+| 0.9 | 10 |
+| 0.8 | 5 |
+| 0.5 | 2 |
 
