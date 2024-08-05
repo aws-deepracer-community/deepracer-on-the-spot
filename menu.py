@@ -268,7 +268,7 @@ OPTIONS = {
           "13":{ "label": "Modify Base Stack Name", "file": "custom-files/run.env", "key": "BASE_STACK_NAME", "dtype" : "string"},
           "14":{ "label": "Modify Round Robin Advance Dist (Workers/Episodes-Between-Training)", "file": "custom-files/run.env", "key": "DR_TRAIN_ROUND_ROBIN_ADVANCE_DIST", "dtype" : "float"},
           "15":{ "label": "Modify Minimum Training Amount", "file": "custom-files/run.env", "key": "DR_TRAIN_MIN_EVAL_TRIALS", "dtype" : "int"},
-          "16":{ "label": "Modify Checkpoint Priorizing Criteria", "file": "custom-files/run.env", "key": "DR_LOCAL_S3_PRETRAINED_CHECKPOINT", "dtype" : "string"},
+          "16":{ "label": "Modify Checkpoint Prioritizing Criteria", "file": "custom-files/run.env", "key": "DR_LOCAL_S3_PRETRAINED_CHECKPOINT", "dtype" : "string"},
           "17":{ "label": "Set New Reward Function", "func": set_new_reward},
           "18":{ "label": "Add IP Access", "func": add_ip},
           "19":{ "label": "Run New Training", "func": run_training, "args": (False,)},
