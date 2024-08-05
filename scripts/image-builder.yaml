@@ -82,6 +82,9 @@ Resources:
       Name: !Sub 'UbuntuServer22-Image-Infrastructure-Configuration-${AWS::StackName}'
       InstanceProfileName: !Ref 'InstanceProfile'
       InstanceTypes: !Ref 'BuildInstanceType'
+      InstanceMetadataOptions:
+        HttpTokens: optional
+        HttpPutResponseHopLimit: 2
       Logging:
         S3Logs:
           S3BucketName: !ImportValue
