@@ -29,4 +29,5 @@ vpc=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[*
 
 nacl=$(aws ec2 describe-network-acls --filters Name=vpc-id,Values=$vpc --query 'NetworkAcls[*].NetworkAclId' --output text)
 
+aws ec2 modify-instance-metadata-defaults --http-tokens optional
 aws cloudformation deploy --template ./base-resources.yaml --stack-name $stackName --parameter-overrides MyIPAddress=$ip NetworkAclId=$nacl RuleNumber=$ruleN --capabilities CAPABILITY_IAM

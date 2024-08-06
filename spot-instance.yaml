@@ -42,6 +42,9 @@ Resources:
         InstanceType: !Ref InstanceType
         InstanceMarketOptions:
           MarketType: spot
+        MetadataOptions:
+          HttpTokens: optional
+          HttpPutResponseHopLimit: 2
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:
