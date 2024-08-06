@@ -42,11 +42,14 @@ Resources:
         InstanceType: !Ref InstanceType
         InstanceMarketOptions:
           MarketType: spot
+        MetadataOptions:
+          HttpTokens: optional
+          HttpPutResponseHopLimit: 2
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:
               VolumeType: gp3
-              VolumeSize: 60
+              VolumeSize: 40
               DeleteOnTermination: 'true'
         UserData:
           Fn::Base64: !Sub |
