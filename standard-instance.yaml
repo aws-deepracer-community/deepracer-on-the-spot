@@ -49,11 +49,14 @@ Resources:
             'Fn::Sub': '${ResourcesStackName}-InstanceProfile'
         ImageId: !Ref AmiId
         InstanceType: !Ref InstanceType
+        MetadataOptions:
+          HttpTokens: optional
+          HttpPutResponseHopLimit: 2
         BlockDeviceMappings:
           - DeviceName: /dev/sda1
             Ebs:
               VolumeType: gp3
-              VolumeSize: 60
+              VolumeSize: 40
               DeleteOnTermination: 'true'
 
   Instance:
