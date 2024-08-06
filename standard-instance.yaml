@@ -53,7 +53,7 @@ Resources:
           - DeviceName: /dev/sda1
             Ebs:
               VolumeType: gp3
-              VolumeSize: 60
+              VolumeSize: 40
               DeleteOnTermination: 'true'
 
   Instance:
