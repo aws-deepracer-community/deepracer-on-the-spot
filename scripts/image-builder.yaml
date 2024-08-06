@@ -82,6 +82,9 @@ Resources:
       Name: !Sub 'UbuntuServer22-Image-Infrastructure-Configuration-${AWS::StackName}'
       InstanceProfileName: !Ref 'InstanceProfile'
       InstanceTypes: !Ref 'BuildInstanceType'
+      InstanceMetadataOptions:
+        HttpTokens: optional
+        HttpPutResponseHopLimit: 2
       Logging:
         S3Logs:
           S3BucketName: !ImportValue
@@ -165,7 +168,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'DeepRacer-${AWS::StackName}'
-      Version: '0.0.8'
+      Version: '0.0.11'
       Description: Install the latest DeepRacer config.
       ChangeDescription: First version
       Platform: Linux
@@ -335,7 +338,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'ExpandRootVolume-${AWS::StackName}'
-      Version: '0.0.5'
+      Version: '0.0.6'
       Description: Expand root volume.
       ChangeDescription: First version
       Platform: Linux
@@ -353,12 +356,12 @@ Resources:
                     - |
                       id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
                       vol_id=$(aws ec2 describe-instances --region $(curl http://169.254.169.254/latest/meta-data/placement/region) --instance-ids $id --query 'Reservations[0].Instances[0].BlockDeviceMappings[0].Ebs.VolumeId' --output text)
-                      aws ec2 modify-volume --size 60 --volume-id $vol_id --region $(curl http://169.254.169.254/latest/meta-data/placement/region)
+                      aws ec2 modify-volume --size 40 --volume-id $vol_id --region $(curl http://169.254.169.254/latest/meta-data/placement/region)
   PullDeepracerDockerImagesComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PullDeepracerDockerImages-${AWS::StackName}'
-      Version: '0.0.3'
+      Version: '0.0.6'
       Description: Pull newest deepracer docker images.
       ChangeDescription: First version
       Platform: Linux
@@ -373,10 +376,8 @@ Resources:
                 action: ExecuteBash
                 inputs:
                   commands:
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -gpu'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-robomaker -v -f -cpu'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-sagemaker -v -f -gpu'"
-                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-rlcoach -v'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-simapp -v -f -gpu'"
+                    - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-simapp -v -f -cpu'"
                     - "bash -c '/home/ubuntu/bin/pull-docker-images.sh -n awsdeepracercommunity/deepracer-analysis -v -f cpu'"
   SafeTerminationComponent:
     Type: AWS::ImageBuilder::Component
@@ -434,7 +435,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Sub 'UbuntuServerForDeepRacer-${AWS::StackName}'
-      Version: '0.0.14'
+      Version: '0.0.17'
       ParentImage: !Sub 'arn:${AWS::Partition}:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-22-lts-x86/x.x.x'
       Components:
         - ComponentArn: !Ref 'PreReqs'
