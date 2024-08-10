@@ -19,8 +19,8 @@ To know more about every component, use such versions to look up the details in 
 | E   | circle + square speed  | medium size (angles 25, 12, 0) slow & fast per angle | df 0.9 en 0.02  |
 | F   | circle + linear speed  | grand size (angles 30, 20, 10, 0) slow & fast per angle | df 0.9 episodes 20 epochs 5  |
 | G   | circle radius 1.5  | grand size (angles 30, 20, 10, 0) slow & fast per angle, +0.5 from F in 0 & Left actions | df 0.5 episodes 20 epochs 5  |
-| H   |   | medium size (angles 25, 12, 0 with slow & fast per angle, 4 speeds angle 0  | df 0.9 episodes 20 epochs 5 entropy 0.003  |
-| I   |   |   |   |
+| H   | self-motivator (based on D) speed ^ 2.5  | medium size (angles 25, 12, 0 with slow & fast per angle, 4 speeds angle 0  | df 0.9 episodes 20 epochs 5 entropy 0.003  |
+| I   |   | medium size (based on D) speedier  |   |
  
 ## Discount Factor Formula & Values
 
