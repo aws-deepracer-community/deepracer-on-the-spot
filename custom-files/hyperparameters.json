@@ -1,7 +1,4 @@
 {
-  // CHANGE HERE
-  // Not required, this is optional.
-  // Initially it is fine to leave as default.
   "batch_size": 64,
   "beta_entropy": 0.01,
   "discount_factor": 0.95,
