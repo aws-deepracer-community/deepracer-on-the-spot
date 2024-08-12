@@ -1,5 +1,6 @@
 {
     "action_space": [
+        // CHANGE HERE to redefine actionspace
         {
             "steering_angle": -30,
             "speed": 0.5
@@ -20,6 +21,7 @@
             "steering_angle": 30,
             "speed": 0.5
         }
+        // ^^^^^
     ],
     "sensor": ["FRONT_FACING_CAMERA"],
     "neural_network": "DEEP_CONVOLUTIONAL_NETWORK_SHALLOW",
