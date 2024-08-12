@@ -32,6 +32,7 @@
 * [Consult DeepRacer for Cloud Documentation](https://aws-deepracer-community.github.io/deepracer-for-cloud/reference.html)
 * `DR_REGULAR_UPLOAD`: DeepRacer on the Spot specific var.  Integer defining the number of minutes between regular uploads to your upload s3 location to get model checkpoints throughout your training.  Default is `0` (disabled).  WARNING - if you turn this setting on you'll be storing an additional ~75MB of model files in the upload folder at every internal of regular upload you define, e.g. 1.8GB over 24 hours with an interval of 60 minutes.  You may want to delete / tidy up after training finishes and you've kept the optimal checkpoints.
 * `DR_CONTINUE_ON_SPOT_INTERRUPTION`: DeepRacer on the Spot specific var.  Boolean defining whether to continue training or not after a spot interruption. Only has effect when using the create-spot-instance.sh script. 
+* `DR_IMPORT_MODEL_ON_COMPLETION`: DeepRacer on the Spot specific var.  Boolean defining whether to upload the model to the DeepRacer Console at the end of training or not.  Default is to upload it, set the variable to False to disable this.
 
 # system.env values
 
