@@ -98,7 +98,10 @@ Resources:
             /home/ubuntu/deepracer-for-cloud/import_model.sh: 
               content:
                 Fn::Sub:
-                - sudo aws deepracer import-model --name '${DeepRacerImportName}' --description "$DR_WORLD_NAME imported from s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX by DeepRacer on the Spot" --model-artifacts-s3-path s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX  --role-arn ${DR_IMPORT_ROLENAME} --type REINFORCEMENT_LEARNING --region us-east-1
+                - |
+                  if [[ $DR_IMPORT_MODEL_ON_COMPLETION != False ]];then
+                    sudo aws deepracer import-model --name '${DeepRacerImportName}' --description "$DR_WORLD_NAME imported from s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX by DeepRacer on the Spot" --model-artifacts-s3-path s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX  --role-arn ${DR_IMPORT_ROLENAME} --type REINFORCEMENT_LEARNING --region us-east-1
+                  fi
                 - DR_IMPORT_ROLENAME:
                        Fn::ImportValue:
                            !Sub "${ResourcesStackName}-DeepRacerServiceRole"
