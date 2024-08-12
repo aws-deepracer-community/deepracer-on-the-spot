@@ -65,4 +65,4 @@ EC2_IP=$(aws ec2 describe-instances --instance-ids ${EC2_ID} --query 'Reservatio
 echo "Logs will upload every 2 minutes to https://s3.console.aws.amazon.com/s3/buckets/${BUCKET}/${stackName}/logs/"
 echo "Training should start shortly on ${EC2_IP}:8080"
 echo "Once started, you should also be able to monitor training progress through ${EC2_IP}:8100/menu.html"
-echo "Once training is finished, you should see your imported model $stackName in the DeepRacer console"
+echo "Once training is finished, you should see your imported model $stackName in the DeepRacer console, unless you disable that functionality"
