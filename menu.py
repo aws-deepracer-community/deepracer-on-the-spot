@@ -270,6 +270,10 @@ OPTIONS = {
           "15":{ "label": "Add IP Access", "func": add_ip},
           "16":{ "label": "Run New Training", "func": run_training, "args": (False,)},
           "17":{ "label": "Continue A Training", "func": run_training, "args": (True,)},
+          "18":{ "label": "Modify Round Robin Advance Dist (Workers/Episodes-Between-Training)", "file": "custom-files/run.env", "key": "DR_TRAIN_ROUND_ROBIN_ADVANCE_DIST", "dtype" : "float"},
+          "19":{ "label": "Modify Minimum Training Amount", "file": "custom-files/run.env", "key": "DR_TRAIN_MIN_EVAL_TRIALS", "dtype" : "int"},
+          "20":{ "label": "Modify Checkpoint Prioritizing Criteria", "file": "custom-files/run.env", "key": "DR_LOCAL_S3_PRETRAINED_CHECKPOINT", "dtype" : "string"},
+          "21":{ "label": "Modify Checkpoint Prioritizing Metric", "file": "custom-files/run.env", "key": "DR_TRAIN_BEST_MODEL_METRIC", "dtype" : "string"},
           "0" :{ "label": "Quit"}
         }
 
