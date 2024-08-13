@@ -90,14 +90,20 @@ The script stop-training.sh executes 'safe termination' of training by updated t
 
 ### Adding additional IP addresses to security group ingress and NACLs
 
-The script add-access.sh adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  `./add-access.sh <base resources stack name> <stack name> <IP address>`.  This is useful if you have multiple locations where you'd want to monitor your training from.
+The script add-access.sh checks if the IP address given as parameter does not exist already in the Network ACLs and then, adds an additional IP address to the security group ingress, it also add an NACL entry. Use:  `./add-access.sh <base resources stack name> <stack name> <IP address>`.  This is useful if you have multiple locations where you'd want to monitor your training from.
 
 ### Subscribing email addresses to the 'spot instance interruption notification topic' (the topic is created by the base resources stack)
 
-The script add-interruption-notification-subscription.sh script adds an email address to the 'interruption notification topic.'
+The script add-interruption-notification-subscription.sh adds an email address to the 'interruption notification topic.'
 Use: `./add-interruption-notification-subscription.sh <base resources stack name> <stack name> <email address>`
 
 Note, it is also possible to interactively create a subscription on the SNS web console. Adding an email subscription results in an email, with a confirmation link in it, being sent to the email address. Not published message is forwarded to the email prior to the user having confirmed the subscription (by clicking on the link in the original subscription notification email).
+
+## Checking instances on same Sandbox
+
+The script check-instances.sh provides a list showing the recent instances, their current status and PUBLIC_IP. It is an eazy way where users don't need to track/save the PUBLIC_IP after starting each training ( PUBLIC_IP:8100/menu.html ). On the other hand, if the users have executed recently the script stop-training.sh my-instance-stack-name, this my-instance-stack-name instance will be displayed as terminated.
+
+Use. `./check-instances.sh`
 
 ## Image Builder
 
