@@ -36,7 +36,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip boto3 requests pandas
+          python -m pip install --upgrade pip boto3 requests pandas tabulate
 
       - name: Update spot prices
         run: |
