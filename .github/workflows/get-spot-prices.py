@@ -104,7 +104,7 @@ def filter_and_sort_table(frequency, sort_by):
         df_filtered = df
     df_sorted = df_filtered.sort_values(by=sort_by)
     
-    with open('../../spot_info.md', 'w') as file:
+    with open('spot_info.md', 'w') as file:
         file.write('# Spot Prices and Interruption Frequency\n\n')
         file.write('## This page provides: -\n')
         file.write('Region - the region of the instance (note - some regions would require you to bake your own AMI using the image builder script)\n')
