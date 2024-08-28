@@ -123,6 +123,14 @@ To use cd into scripts directory and run `./create-image-builder.sh <base resour
 
 This script can be used to delete the resources created by the create-base-resources.sh script (and associated template). Please be aware that the resource deletion will fail if the S3 bucket created is not empty. delete-base-resources.sh takes a single mandatory parameter, the stack-name, same value as above.
 
+## get-spot-prices.sh
+
+This script will check the prices of g4dn, g5, g6 and g6e instances of sizes 2xlarge, 4xlarge and 8xlarge in every AWS region and return the results.  By default it won't filter the results and will show them ordered by PricePerWorkerHour (i.e. instance price per hour divided by the suggested number of workers the instance can host).  Using the --help parameter will show supported values for optional parameters.--sort_order can change the order you sort the list by to alternative values, e.g. 'SpotPrice' and --interruption_filter allows you to filter the list, for example if you only want to see instances with an interruption frequency of '<5%'.  to learn more about interruption frequency visit the [AWS Spot Instance Advisor](https://aws.amazon.com/ec2/spot/instance-advisor/)
+
+To use cd into scripts directory and run `./get-spot-prices.sh --sort_order '<SORT_ORDER>' --interruption_filter '<INTERRUPTION_FILTER>'`
+
+This example will only show instance with less that 5% chance of being interrupted and ordered by Spot Price ` ./get-spot-prices.sh --sort_order 'SpotPrice' --interruption_filter '<5%'`
+
 ## Other useful links:
 
 <li>Track names for DR_WORLD_NAME: https://github.com/aws-deepracer-community/deepracer-race-data/tree/main/raw_data/tracks
