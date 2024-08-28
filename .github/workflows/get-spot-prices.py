@@ -113,7 +113,7 @@ def filter_and_sort_table(frequency, sort_by):
         file.write('InterruptionFrequency - the likelihood of your instance experiencing interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)\n\n')
         file.write('NumberOfWorkers - the number of robomaker workers the instance can support\n\n')
         file.write('PricePerWorkerHour - SpotPrice divided by the number of workers the InstanceType can support\n\n')
-        file.write('Data correct as of ' + str(datetime.datetime.utcnow()) + '\n\n')
+        file.write('Data correct as of ' + str(datetime.datetime.utcnow()) + ', the DeepRacer community provides no guarantee of accuracy and you should monitor your own spend\n\n')
         file.write(df_sorted.to_markdown(index=False))
 
 # Main function to parse arguments and call the filter_and_sort_table function
