@@ -110,7 +110,7 @@ def filter_and_sort_table(frequency, sort_by):
         file.write('Region - the region of the instance (note - some regions would require you to bake your own AMI using the image builder script)\n\n')
         file.write('InstanceType - instance family and size\n\n')
         file.write('SpotPrice - hourly price of the spot instance\n\n')
-        file.write('InterruptionFrequency - the likelihood of your instance experience interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)\n\n')
+        file.write('InterruptionFrequency - the likelihood of your instance experiencing interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)\n\n')
         file.write('NumberOfWorkers - the number of robomaker workers the instance can support\n\n')
         file.write('PricePerWorkerHour - SpotPrice divided by the number of workers the InstanceType can support\n\n')
         file.write('Data correct as of ' + str(datetime.datetime.utcnow()) + '\n\n')
