@@ -40,6 +40,7 @@ jobs:
 
       - name: Update spot prices
         run: |
+          ls
           python .github/workflows/get-spot-prices.py --sort_order SpotPrice
 
       - name: Commit updated spot prices
