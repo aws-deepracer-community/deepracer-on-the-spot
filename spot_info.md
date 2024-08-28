@@ -8,13 +8,13 @@ InstanceType - instance family and size
 
 SpotPrice - hourly price of the spot instance
 
-InterruptionFrequency - the likelihood of your instance experience interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)
+InterruptionFrequency - the likelihood of your instance experiencing interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)
 
 NumberOfWorkers - the number of robomaker workers the instance can support
 
 PricePerWorkerHour - SpotPrice divided by the number of workers the InstanceType can support
 
-Data correct as of 2024-08-28 17:35:52.607723
+Data correct as of 2024-08-28 17:54:02.138254, the DeepRacer community provides no guarantee of accuracy and you should monitor your own spend
 
 | Region         | InstanceType   |   SpotPrice | InterruptionFrequency   |   NumberOfWorkers |   PricePerWorkerHour |
 |:---------------|:---------------|------------:|:------------------------|------------------:|---------------------:|
@@ -29,8 +29,8 @@ Data correct as of 2024-08-28 17:35:52.607723
 | ap-northeast-2 | g5.4xlarge     |      0.2363 | <5%                     |                 5 |              0.04726 |
 | eu-north-1     | g4dn.2xlarge   |      0.2453 | 10-15%                  |                 2 |              0.12265 |
 | us-east-1      | g4dn.2xlarge   |      0.2459 | 10-15%                  |                 2 |              0.12295 |
-| eu-south-1     | g4dn.8xlarge   |      0.259  | >20%                    |                10 |              0.0259  |
-| us-east-2      | g4dn.2xlarge   |      0.2709 | <5%                     |                 2 |              0.13545 |
+| eu-south-1     | g4dn.8xlarge   |      0.2583 | >20%                    |                10 |              0.02583 |
+| us-east-2      | g4dn.2xlarge   |      0.2715 | <5%                     |                 2 |              0.13575 |
 | ap-south-1     | g4dn.2xlarge   |      0.2731 | <5%                     |                 2 |              0.13655 |
 | eu-central-1   | g4dn.2xlarge   |      0.2954 | <5%                     |                 2 |              0.1477  |
 | us-west-1      | g4dn.2xlarge   |      0.3063 | <5%                     |                 2 |              0.15315 |
@@ -58,8 +58,8 @@ Data correct as of 2024-08-28 17:35:52.607723
 | ap-northeast-3 | g4dn.4xlarge   |      0.4428 | <5%                     |                 5 |              0.08856 |
 | ap-northeast-2 | g4dn.8xlarge   |      0.4519 | >20%                    |                10 |              0.04519 |
 | us-east-1      | g6.4xlarge     |      0.4534 | 5-10%                   |                 5 |              0.09068 |
-| sa-east-1      | g5.8xlarge     |      0.4556 | 5-10%                   |                10 |              0.04556 |
 | us-west-2      | g6.2xlarge     |      0.4585 | 10-15%                  |                 2 |              0.22925 |
+| sa-east-1      | g5.8xlarge     |      0.4596 | 5-10%                   |                10 |              0.04596 |
 | ap-south-1     | g5.2xlarge     |      0.463  | 10-15%                  |                 2 |              0.2315  |
 | us-east-2      | g5.2xlarge     |      0.466  | >20%                    |                 2 |              0.233   |
 | us-west-2      | g5.4xlarge     |      0.469  | >20%                    |                 5 |              0.0938  |
@@ -83,7 +83,7 @@ Data correct as of 2024-08-28 17:35:52.607723
 | eu-west-1      | g5.2xlarge     |      0.5748 | >20%                    |                 2 |              0.2874  |
 | us-west-2      | g6.4xlarge     |      0.5796 | <5%                     |                 5 |              0.11592 |
 | ap-southeast-2 | g4dn.4xlarge   |      0.5816 | 5-10%                   |                 5 |              0.11632 |
-| ca-central-1   | g5.2xlarge     |      0.5881 | >20%                    |                 2 |              0.29405 |
+| ca-central-1   | g5.2xlarge     |      0.588  | >20%                    |                 2 |              0.294   |
 | eu-west-1      | g4dn.4xlarge   |      0.5893 | <5%                     |                 5 |              0.11786 |
 | eu-north-1     | g4dn.8xlarge   |      0.5966 | <5%                     |                10 |              0.05966 |
 | sa-east-1      | g5.4xlarge     |      0.5985 | >20%                    |                 5 |              0.1197  |
@@ -101,18 +101,18 @@ Data correct as of 2024-08-28 17:35:52.607723
 | us-east-1      | g6.8xlarge     |      0.7281 | <5%                     |                10 |              0.07281 |
 | us-east-2      | g6e.8xlarge    |      0.7386 | 10-15%                  |                10 |              0.07386 |
 | ap-northeast-1 | g5.2xlarge     |      0.7523 | >20%                    |                 2 |              0.37615 |
-| us-west-2      | g5.8xlarge     |      0.757  | >20%                    |                10 |              0.0757  |
+| us-west-2      | g5.8xlarge     |      0.7623 | >20%                    |                10 |              0.07623 |
 | us-west-2      | g6e.8xlarge    |      0.7641 | <5%                     |                10 |              0.07641 |
 | ap-southeast-1 | g4dn.8xlarge   |      0.7716 | 10-15%                  |                10 |              0.07716 |
 | us-east-1      | g4dn.8xlarge   |      0.7729 | 10-15%                  |                10 |              0.07729 |
-| eu-west-2      | g5.4xlarge     |      0.778  | >20%                    |                 5 |              0.1556  |
 | eu-north-1     | g5.8xlarge     |      0.7791 | 5-10%                   |                10 |              0.07791 |
+| eu-west-2      | g5.4xlarge     |      0.7817 | >20%                    |                 5 |              0.15634 |
 | eu-west-1      | g5.4xlarge     |      0.7942 | >20%                    |                 5 |              0.15884 |
 | ap-northeast-2 | g5.8xlarge     |      0.7988 | <5%                     |                10 |              0.07988 |
 | us-east-2      | g4dn.8xlarge   |      0.7994 | >20%                    |                10 |              0.07994 |
 | eu-west-3      | g4dn.8xlarge   |      0.8058 | 15-20%                  |                10 |              0.08058 |
-| ca-central-1   | g4dn.8xlarge   |      0.8189 | <5%                     |                10 |              0.08189 |
 | eu-central-1   | g4dn.8xlarge   |      0.8208 | 10-15%                  |                10 |              0.08208 |
+| ca-central-1   | g4dn.8xlarge   |      0.8215 | <5%                     |                10 |              0.08215 |
 | ap-southeast-3 | g5.8xlarge     |      0.8237 | <5%                     |                10 |              0.08237 |
 | us-west-2      | g6.8xlarge     |      0.8263 | <5%                     |                10 |              0.08263 |
 | ap-south-1     | g5.8xlarge     |      0.8749 | >20%                    |                10 |              0.08749 |
