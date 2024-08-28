@@ -1,0 +1,45 @@
+name: Spot Price and Interruption Frequency Checker
+
+# Controls when the action will run.
+on:
+  schedule:
+    # Daily 00:01 UTC
+    - cron: "1 0 * * *"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  update:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # Setup Python
+      - uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Update spot prices
+        run: |
+          python .github/workflows/get-spot-prices.py --sort_order SpotPrice
+
+      - name: Commit updated spot prices
+        run: |
+          git add .
+          git commit -m "Update Spot Prices" || echo "No changes to commit"
+          git push
