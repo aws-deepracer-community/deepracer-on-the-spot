@@ -1,14 +1,20 @@
 # Spot Prices and Interruption Frequency
 
 ## This page provides: -
+
 Region - the region of the instance (note - some regions would require you to bake your own AMI using the image builder script)
+
 InstanceType - instance family and size
+
 SpotPrice - hourly price of the spot instance
+
 InterruptionFrequency - the likelihood of your instance experience interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)
+
 NumberOfWorkers - the number of robomaker workers the instance can support
+
 PricePerWorkerHour - SpotPrice divided by the number of workers the InstanceType can support
 
-Data correct as of 2024-08-28 17:32:04.000906
+Data correct as of 2024-08-28 17:35:52.607723
 
 | Region         | InstanceType   |   SpotPrice | InterruptionFrequency   |   NumberOfWorkers |   PricePerWorkerHour |
 |:---------------|:---------------|------------:|:------------------------|------------------:|---------------------:|
@@ -75,7 +81,7 @@ Data correct as of 2024-08-28 17:32:04.000906
 | eu-west-2      | g5.2xlarge     |      0.5578 | >20%                    |                 2 |              0.2789  |
 | ap-southeast-3 | g5.2xlarge     |      0.5616 | <5%                     |                 2 |              0.2808  |
 | eu-west-1      | g5.2xlarge     |      0.5748 | >20%                    |                 2 |              0.2874  |
-| us-west-2      | g6.4xlarge     |      0.5787 | <5%                     |                 5 |              0.11574 |
+| us-west-2      | g6.4xlarge     |      0.5796 | <5%                     |                 5 |              0.11592 |
 | ap-southeast-2 | g4dn.4xlarge   |      0.5816 | 5-10%                   |                 5 |              0.11632 |
 | ca-central-1   | g5.2xlarge     |      0.5881 | >20%                    |                 2 |              0.29405 |
 | eu-west-1      | g4dn.4xlarge   |      0.5893 | <5%                     |                 5 |              0.11786 |
