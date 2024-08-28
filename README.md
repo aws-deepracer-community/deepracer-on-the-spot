@@ -7,7 +7,7 @@ Training on an EC2 has many advantages:
 <li>Ability to increment your training
 <li>Improved log analysis tools
 <li>Train as multiple models at once on different EC2 instances
-<li>Reduced cost: $0.22/hour (when using g4dn.2xlarge spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
+<li>Reduced cost: $0.22/hour (when using g4dn.2xlarge spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console [check here for latest prices](spot_info.md)
 
 ## Architectural Overview
 
