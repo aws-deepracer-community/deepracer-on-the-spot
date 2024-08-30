@@ -11,8 +11,7 @@ ec2_client_init = session.client('ec2')
 
 # Define the instance types and the sort order you are interested in
 instance_types = ['g4dn.2xlarge', 'g4dn.4xlarge', 'g4dn.8xlarge', 'g5.2xlarge', 'g5.4xlarge', 'g5.8xlarge', 'g6.2xlarge', 'g6.4xlarge', 'g6.8xlarge', 'g6e.2xlarge', 'g6e.4xlarge', 'g6e.8xlarge']
-#sort_order = 'PricePerWorkerHour' #Supported values are 'SpotPrice', 'PricePerWorkerHour', 'NumberOfWorkers', 'InterruptionFrequency', 'Region', 'InstanceType'
-#interruption_filter = 'N/A'  #Supported values are 'N/A' (i.e. no filtering), '<5%', '5-10%', , '10-15%', '15-20%', '>20%'
+
 
 #Collect data for all regions
 regions_details = ec2_client_init.describe_regions()
@@ -49,6 +48,36 @@ def get_ec2_spot_interruption(instance=None, os=None, region=None):
         result = ""
     return result
 
+# Function to extract the required information
+def extract_instance_details(instance_list):
+    extracted_details = []
+    for instance in instance_list:
+        instance_type = instance['InstanceType']
+        vcpus = instance['VCpuInfo']['DefaultVCpus']
+        memory = instance['MemoryInfo']['SizeInMiB']
+        gpu_memory = instance['GpuInfo']['Gpus'][0]['MemoryInfo']['SizeInMiB'] if 'GpuInfo' in instance else 0
+        extracted_details.append({
+            'InstanceType': instance_type,
+            'DefaultVCpus': vcpus,
+            'MemoryInMiB': memory,
+            'GpuMemoryInMiB': gpu_memory
+        })
+    return extracted_details
+
+# Extract details
+instance_data = extract_instance_details(ec2_client_init.describe_instance_types(InstanceTypes=instance_types)['InstanceTypes'])
+
+# Function to get details for a given InstanceType
+def get_instance_details(instance_list, instance_type):
+    for instance in instance_list:
+        if instance['InstanceType'] == instance_type:
+            return {
+                'DefaultVCpus': instance['DefaultVCpus'],
+                'MemoryInMiB': instance['MemoryInMiB'],
+                'GpuMemoryInMiB': instance['GpuMemoryInMiB']
+            }
+    return None
+
 # Create a list to store the results
 results = []
 
@@ -67,6 +96,10 @@ for region in regions:
 
     for price in spot_prices:
         instance_type = price['InstanceType']
+        instance_details = get_instance_details(instance_data, instance_type)
+        vcpu = instance_details['DefaultVCpus']
+        ram = instance_details['MemoryInMiB']
+        gpu_ram = instance_details['GpuMemoryInMiB']
         instance_size = instance_type.split('.')[1]
         worker_value = instance_worker_map.get(instance_size)
         spot_price = float(price['SpotPrice'])
@@ -78,6 +111,9 @@ for region in regions:
             cheapest_prices[instance_type] = {
                 'SpotPrice': spot_price,
                 'AvailabilityZone': availability_zone,
+                'vCPU': vcpu,
+                'RAM': ram,
+                'GPU_RAM': gpu_ram,
                 'InterruptionFrequency': interruption_frequency,
                 'NumberOfWorkers': worker_value,
                 'PricePerWorkerHour': price_per_worker_hour
@@ -88,6 +124,9 @@ for region in regions:
         results.append({
             'Region': details['AvailabilityZone'],
             'InstanceType': instance_type,
+            'vCPU':details['vCPU'],
+            'RAM (GB)': round(details['RAM']/1024),
+            'GPU RAM (GB)': round(details['GPU_RAM']/1024),
             'SpotPrice': details['SpotPrice'],
             'InterruptionFrequency': details['InterruptionFrequency'],
             'NumberOfWorkers': details['NumberOfWorkers'],
@@ -108,7 +147,9 @@ def filter_and_sort_table(frequency, sort_by):
         file.write('# Spot Prices and Interruption Frequency\n\n')
         file.write('## This page provides: -\n\n')
         file.write('Region - the region of the instance (note - some regions would require you to bake your own AMI using the image builder script)\n\n')
-        file.write('InstanceType - instance family and size\n\n')
+        file.write('vCPU - number of vCPUs\n\n')
+        file.write('RAM (GB) - amount of memory \n\n')
+        file.write('GPU RAM (GB) - amount of GPU memory\n\n')
         file.write('SpotPrice - hourly price of the spot instance\n\n')
         file.write('InterruptionFrequency - the likelihood of your instance experiencing interruption based on the [last month of data](https://aws.amazon.com/ec2/spot/instance-advisor/)\n\n')
         file.write('NumberOfWorkers - the number of robomaker workers the instance can support\n\n')
