@@ -901,7 +901,7 @@ Resources:
                 # ## Ten fastest complete laps from the start/finish line in training
 
                 # +
-                complete_ones_from_start = complete_ones[complete_ones['start_at']==1]
+                complete_ones_from_start = complete_ones[complete_ones['start_at'].isin([0, 1])]
                 complete_ones_from_start.nsmallest(10, 'time')
                 # -
 
