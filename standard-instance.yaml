@@ -972,6 +972,18 @@ Resources:
                   print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
                 # -
 
+                # ## Model stability - how often is the model completing full laps?
+
+                # +
+                try:
+                    _ = tm.plotProgress(method=['mean'],rolling_average=20,figsize=(20,5), 
+                                    series=[('eval_completed','Evaluation','orange'),('train_completed','Training','blue')], 
+                                    title="Percent completed laps ({}).", 
+                                    ylabel="Percent", completedLapsOnly=False, grid=True)
+                except Exception:
+                    print("Logs are not yet available.  It typically takes 25 minutes from the start of training for them to be available.")
+                # -
+
                 # ## Best Lap Progression - is your model getting faster?
                 
                 # +
