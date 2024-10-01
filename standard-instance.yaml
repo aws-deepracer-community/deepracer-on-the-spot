@@ -124,6 +124,28 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /home/ubuntu/deepracer-for-cloud/regular_physical_upload.sh: 
+              content:
+                Fn::Sub:
+                - |
+                  sudo su ubuntu
+                  cd ~/deepracer-for-cloud
+                  source bin/activate.sh
+                  source /etc/profile.d/dots_vars.sh
+                  dr-reload
+                  UPLOAD_INTERVAL=$((60*$DR_REGULAR_PHYSICAL_MODEL_UPLOAD))
+                  while [ true ]
+                  do
+                    sleep $UPLOAD_INTERVAL
+                    dr-upload-car-zip -fL
+                    CHECKPOINT=$(cat deepracer_checkpoints.json | awk -F'name' '{print $2}' | awk -F',' '{ print $1}' | awk -F '\"' '{ print $3}' | awk -F'_' '{ print $1 }')
+                    aws s3 mv s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/carfile.tar.gz s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/${DeepRacerImportName}-chk$CHECKPOINT.tar.gz
+                  done
+                - DeepRacerImportName:
+                    !Ref DeepRacerImportName
+              mode : "000755"
+              owner: root
+              group: root
             /home/ubuntu/deepracer-for-cloud/error_monitoring.sh: 
               content: |
                 sudo su ubuntu
@@ -449,6 +471,9 @@ Resources:
                 sleep 180 > /dev/null
                 if [[ $DR_REGULAR_UPLOAD -gt 0 ]];then
                   ./regular_upload.sh &
+                fi
+                if [[ $DR_REGULAR_PHYSICAL_MODEL_UPLOAD -gt 0 ]];then
+                  ./regular_physical_upload.sh &
                 fi
                 #start hourly error monitoring to notify on container exited or last checkpoint not progressing in the last hour
                 ./error_monitoring.sh &
