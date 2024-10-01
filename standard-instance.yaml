@@ -125,7 +125,9 @@ Resources:
               owner: root
               group: root
             /home/ubuntu/deepracer-for-cloud/regular_physical_upload.sh: 
-              content: |
+              content:
+                Fn::Sub:
+                - |
                 sudo su ubuntu
                 cd ~/deepracer-for-cloud
                 source bin/activate.sh
