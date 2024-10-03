@@ -5,8 +5,8 @@
       "low": -30.0
     },
     "speed": {
-      "high": 2.0,
-      "low": 0.5
+      "high": 4.0,
+      "low": 0.8
     }
   },
   "sensor": [
