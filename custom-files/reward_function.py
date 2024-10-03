@@ -1,4 +1,6 @@
 import math
+import numpy as np
+
 class PARAMS:
     prev_speed = None
     prev_steering_angle = None 
@@ -8,12 +10,13 @@ class PARAMS:
     unpardonable_action = False
     intermediate_progress = [0] * 11
 
+# Constants
+MAX_REWARD = 1e3
+TIME_PENALTY_FACTOR = 0.01  # Adjust this factor to control time penalty
+OFF_TRACK_PENALTY_MIN = 0.1
+OFF_TRACK_PENALTY_THRESHOLD = 0.5
+
 def reward_function(params):
-    # Constants
-    MAX_REWARD = 1e3
-    TIME_PENALTY_FACTOR = 0.01  # Adjust this factor to control time penalty
-    OFF_TRACK_PENALTY_MIN = 0.1
-    OFF_TRACK_PENALTY_THRESHOLD = 0.5
 
     # Read input parameters
     heading = params['heading']
@@ -39,7 +42,7 @@ def reward_function(params):
     speed_reward = calculate_adaptive_speed_reward(speed)
 
     # Lateral Distance Reward Scaling (Suggestion 2)
-    lateral_distance_reward = max(0, 1 - 2 * abs(distance_from_center) / track_width)
+    lateral_distance_reward = calculate_lateral_distance_reward(distance_from_center, track_width)
 
     # Off-Track Penalty
     off_track_penalty = max(OFF_TRACK_PENALTY_MIN, 1 - abs(normalized_car_distance_from_route))
@@ -57,9 +60,7 @@ def reward_function(params):
     steering_angle_bonus = calculate_steering_angle_bonus(steering_angle, speed)
 
     # Adaptive Time Penalty (Suggestion 6)
-    adaptive_time_penalty = TIME_PENALTY_FACTOR * steps
-    if distance_from_center > track_width / 4:
-        adaptive_time_penalty *= 2  # Increase penalty if car is far from track center
+    adaptive_time_penalty = calculate_adaptive_time_penalty(steps, distance_from_center, track_width)
 
     # Wheel-off-track Penalty Scaling (Suggestion 7)
     wheel_off_track_penalty = calculate_wheel_off_track_penalty(all_wheels_on_track, wheels_on_track)
@@ -75,7 +76,11 @@ def reward_function(params):
     ) * off_track_penalty - adaptive_time_penalty - wheel_off_track_penalty
 
     # Reward Normalization (Suggestion 8)
-    total_reward = normalize_reward(total_reward, progress, speed, track_width)
+    total_reward = normalize_reward(total_reward, progress, speed, track_width, steps)
+
+    # Unpardonable Action Penalty (Suggestion 9)
+    if PARAMS.unpardonable_action:
+        return -MAX_REWARD
 
     # Reward Clipping (Suggestion 10)
     total_reward = min(max(total_reward, -MAX_REWARD), MAX_REWARD)
@@ -84,20 +89,19 @@ def reward_function(params):
 
 
 def calculate_adaptive_speed_reward(speed):
-    # Adaptive Speed Reward with a piecewise function (Suggestion 1)
+    # Adaptive Speed Reward with a sigmoid function (Suggestion 1)
     min_speed = 1.0
-    optimal_speed_low = 2.0
-    optimal_speed_high = 3.5
+    optimal_speed = 3.5
     max_speed = 4.0
+    
+    speed_reward = 1 / (1 + np.exp(-(speed - optimal_speed) / 0.5))
+    speed_reward = np.clip(speed_reward, 0, 1)
+    return speed_reward
 
-    if speed < min_speed:
-        return 0
-    elif min_speed <= speed <= optimal_speed_low:
-        return (speed - min_speed) / (optimal_speed_low - min_speed)
-    elif optimal_speed_low < speed <= optimal_speed_high:
-        return 1.0  # Full reward in the optimal range
-    else:
-        return max(0, (max_speed - speed) / (max_speed - optimal_speed_high))
+
+def calculate_lateral_distance_reward(distance_from_center, track_width):
+    # Non-linear scaling for lateral distance reward (Suggestion 2)
+    return max(0, 1 - (2 * abs(distance_from_center) / track_width) ** 2)
 
 
 def calculate_curvature_reward(waypoints, closest_waypoints, speed):
@@ -108,13 +112,13 @@ def calculate_curvature_reward(waypoints, closest_waypoints, speed):
     dx = next_point[0] - prev_point[0]
     dy = next_point[1] - prev_point[1]
     curvature = math.atan2(dy, dx)
-
+    
     if abs(curvature) < math.pi / 8:
-        return 1.0  # Reward straight paths
+        return 1.0
     elif math.pi / 8 <= abs(curvature) < math.pi / 4:
-        return 1.5 if speed < 2.5 else 1.0  # Reward low-speed navigation on curves
+        return 1.5 if speed < 2.5 else 1.0
     else:
-        return max(0, 1 - abs(curvature) / (math.pi / 4))  # Penalize sharp turns at high speeds
+        return max(0, 1 - abs(curvature) / (math.pi / 4) * (speed / 4))
 
 
 def calculate_intermediate_progress_bonus(progress, steps, track_width):
@@ -122,13 +126,13 @@ def calculate_intermediate_progress_bonus(progress, steps, track_width):
     progress_reward = 10 * progress / steps
     if steps <= 5:
         progress_reward = 1  # Ignore progress in the first 5 steps
-
+    
     intermediate_progress_bonus = 0
     pi = int(progress // 10)
     if pi != 0 and PARAMS.intermediate_progress[pi] == 0:
-        intermediate_progress_bonus = progress_reward ** (1 + 0.5 * pi)
+        intermediate_progress_bonus = progress_reward ** (1 + 0.5 * pi / (steps / track_width))
         PARAMS.intermediate_progress[pi] = intermediate_progress_bonus
-
+    
     return intermediate_progress_bonus
 
 
@@ -137,12 +141,20 @@ def calculate_steering_angle_bonus(steering_angle, speed):
     if PARAMS.prev_steering_angle is not None:
         STEERING_ANGLE_MAINTAIN_BONUS_MULTIPLIER = 2
         angle_diff = abs(steering_angle - PARAMS.prev_steering_angle)
-        steering_angle_bonus = max(0, 1 - angle_diff / 10) * (STEERING_ANGLE_MAINTAIN_BONUS_MULTIPLIER * (speed / 3))
+        steering_angle_bonus = max(0, 1 - angle_diff / 10) * (STEERING_ANGLE_MAINTAIN_BONUS_MULTIPLIER * (speed / 4))
     else:
         steering_angle_bonus = 0
-
+    
     PARAMS.prev_steering_angle = steering_angle
     return steering_angle_bonus
+
+
+def calculate_adaptive_time_penalty(steps, distance_from_center, track_width):
+    # Adaptive time penalty based on distance from track center (Suggestion 6)
+    time_penalty = TIME_PENALTY_FACTOR * steps
+    if distance_from_center > track_width / 4:
+        time_penalty *= 1 + (distance_from_center - track_width / 4) / (track_width / 4)
+    return time_penalty
 
 
 def calculate_wheel_off_track_penalty(all_wheels_on_track, wheels_on_track):
@@ -159,13 +171,14 @@ def calculate_wheel_off_track_penalty(all_wheels_on_track, wheels_on_track):
         return 1.0  # Heavy penalty if all wheels are off the track
 
 
-def normalize_reward(total_reward, progress, speed, track_width):
+def normalize_reward(total_reward, progress, speed, track_width, steps):
     # Normalize reward based on various factors (Suggestion 8)
-    progress_factor = (progress + 1e-3)
-    speed_factor = (speed + 1e-3)
-    track_complexity_factor = max(0.5, track_width / 5)
-
+    progress_factor = (progress + 1e-3) ** 2
+    speed_factor = (speed + 1e-3) ** 2
+    track_complexity_factor = max(0.5, track_width / 5 + steps / 100)
+    
     return total_reward / (progress_factor * speed_factor * track_complexity_factor)
+
 
 def calculate_direction_diff(heading, vehicle_x, vehicle_y, next_point):
     next_point_x = next_point[0]
@@ -178,6 +191,7 @@ def calculate_direction_diff(heading, vehicle_x, vehicle_y, next_point):
     # Calculate the difference between the track direction and the heading direction of the car
     direction_diff = route_direction - heading
     return direction_diff
+
 
 def calculate_heading_reward(heading, vehicle_x, vehicle_y, next_point):
     next_point_x = next_point[0]
