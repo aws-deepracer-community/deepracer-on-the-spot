@@ -4,7 +4,8 @@
 "e_greedy_value": 0.1, 
 "epsilon_steps": 20000, 
 "exploration_type": "categorical",
-"loss_type": "huber", "lr": 0.0001, 
+"loss_type": "huber", 
+"lr": 0.0001, 
 "num_episodes_between_training": 20, 
 "num_epochs": 15 
 }
