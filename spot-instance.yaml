@@ -12,7 +12,7 @@ Parameters:
   TimeToLiveInMinutes:
     Type: Number
     Description: timeout in minutes after which training is stopped and this stack is deleted
-    Default: 300
+    Default: 60
     MinValue: 0
     MaxValue: 1440 # 24 hours
   AmiId:
