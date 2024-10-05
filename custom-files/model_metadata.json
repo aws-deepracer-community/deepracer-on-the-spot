@@ -35,7 +35,7 @@
         {"steering_angle": -3.0, "speed": 3.5},
         {"steering_angle": -2.0, "speed": 3.5},
         {"steering_angle": -1.0, "speed": 3.5},
-        {"steering_angle": 0.0, "speed": 3.5},
+        {"steering_angle": 0.0, "speed": 4.0},
         {"steering_angle": 1.0, "speed": 3.5},
         {"steering_angle": 2.0, "speed": 3.5},
         {"steering_angle": 3.0, "speed": 3.5},

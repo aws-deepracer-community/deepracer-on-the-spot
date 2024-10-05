@@ -40,7 +40,7 @@ def reward_function(params):
     track_section = get_track_section(waypoints, closest_waypoints)
 
     # Adaptive Speed Reward (Suggestion 1)
-    speed_reward = calculate_adaptive_speed_reward(speed, track_section)
+    speed_reward = calculate_adaptive_speed_reward(speed, track_section, waypoints, closest_waypoints)
 
     # Lateral Distance Reward Scaling (Suggestion 2)
     lateral_distance_reward = calculate_lateral_distance_reward(distance_from_center, track_width)
@@ -106,10 +106,18 @@ def get_track_section(waypoints, closest_waypoints):
         return 'curve'
 
 
-def calculate_adaptive_speed_reward(speed, track_section):
+def calculate_adaptive_speed_reward(speed, track_section, waypoints, closest_waypoints):
     # Adaptive Speed Reward with a refined sigmoid function (Suggestion 1)
     optimal_speeds = { 'straight': 4.0, 'curve': 3.0 }  # Example speeds for different track sections
     optimal_speed = optimal_speeds.get(track_section, 3.5)
+
+    # Adjust optimal speed based on upcoming curvature
+    next_point = waypoints[closest_waypoints[1]]
+    prev_point = waypoints[closest_waypoints[0]]
+    dx = next_point[0] - prev_point[0]
+    dy = next_point[1] - prev_point[1]
+    curvature = math.atan2(dy, dx)
+    optimal_speed -= abs(curvature) * 0.5  # Adjust optimal speed based on curvature
 
     speed_reward = 1 / (1 + math.exp(-(speed - optimal_speed) / 0.3))  # Adjusted parameter
     speed_reward = max(0, min(speed_reward, 1))  # Clipping between 0 and 1
