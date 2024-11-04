@@ -20,4 +20,3 @@ if [ $? -eq 0 ]; then
 else
     echo "Error trying to stop training"
 fi
-

@@ -32,7 +32,7 @@ function generate_rule_number() {
 }
 
 if [ "$(check_ip_exists)" == "False" ]; then
-	
+
 	ruleN=$(generate_rule_number)
 	aws cloudformation deploy --stack-name $stackName --parameter-overrides ResourcesStackName=$baseResourcesStackName MyIPAddress=$ipAddress RuleNumber=$ruleN --template-file add-access.yaml
 else

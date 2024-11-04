@@ -141,9 +141,10 @@ def menu_picker(label,options,custom):
             option = int(choice)
             if option == len(options) and custom:
                 value=input("Enter custom value: ")
+                return value
             else:
                 value=options[option - 1]
-            return value
+                return value
         else:
             print("Invalid input. Please enter a valid number.")
 

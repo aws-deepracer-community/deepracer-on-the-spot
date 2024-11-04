@@ -17,7 +17,7 @@ Parameters:
     MaxValue: 1440 # 24 hours
   AmiId:
     Type: String
-    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 747447086422 owned by Tyler Wooten
+    Description: the AMI we want to launch an ec2 instance against. By default this is the image created by central account 975050138619
   BUCKET:
     Type: String
   CUSTOMFILELOCATION:
@@ -122,6 +122,25 @@ Resources:
               mode : "000755"
               owner: root
               group: root 
+            /home/ubuntu/deepracer-for-cloud/regular_import_model.sh: 
+              content:
+                Fn::Sub:
+                - |
+                  sudo su ubuntu
+                  cd ~/deepracer-for-cloud
+                  source bin/activate.sh
+                  source /etc/profile.d/dots_vars.sh
+                  dr-reload
+                  if [[ $DR_IMPORT_MODEL_REGULAR_UPLOAD != False ]];then
+                    CHECKPOINT=$(jq -r '.last_checkpoint | [.name][]' deepracer_checkpoints.json | awk -F'_' '{print $1}')
+                    sudo aws deepracer import-model --name ${DeepRacerImportName}-chk$CHECKPOINT --description "$DR_WORLD_NAME imported from s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX by DeepRacer on the Spot" --model-artifacts-s3-path s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX  --role-arn ${DR_IMPORT_ROLENAME} --type REINFORCEMENT_LEARNING --region us-east-1
+                  fi
+                - DR_IMPORT_ROLENAME:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-DeepRacerServiceRole"
+              mode : "000755"
+              owner: root
+              group: root 
             /home/ubuntu/deepracer-for-cloud/regular_upload.sh: 
               content: |
                 sudo su ubuntu
@@ -134,6 +153,7 @@ Resources:
                 do
                   sleep $UPLOAD_INTERVAL
                   dr-upload-model -f
+                  ./regular_import_model.sh
                 done
               mode : "000755"
               owner: root
@@ -152,7 +172,7 @@ Resources:
                   do
                     sleep $UPLOAD_INTERVAL
                     dr-upload-car-zip -fL
-                    CHECKPOINT=$(cat deepracer_checkpoints.json | awk -F'name' '{print $2}' | awk -F',' '{ print $1}' | awk -F '\"' '{ print $3}' | awk -F'_' '{ print $1 }')
+                    CHECKPOINT=$(jq -r '.last_checkpoint | [.name][]' deepracer_checkpoints.json | awk -F'_' '{print $1}')
                     aws s3 mv s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/carfile.tar.gz s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/${DeepRacerImportName}-chk$CHECKPOINT.tar.gz
                   done
                 - DeepRacerImportName:

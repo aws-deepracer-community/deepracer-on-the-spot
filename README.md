@@ -7,9 +7,7 @@ Training on an EC2 has many advantages:
 <li>Ability to increment your training
 <li>Improved log analysis tools
 <li>Train as multiple models at once on different EC2 instances
-<li>Reduced cost: $0.22/hour (when using g4dn.2xlarge spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on the Amazon console.  
-
-Check the latest spot pricing for suitable GPU instances via this [automated price checker](spot_info.md)
+<li>Reduced cost: $0.22/hour (when using g4dn.2xlarge spot instance, or $0.75/hr when using on demand instance https://aws.amazon.com/ec2/pricing/on-demand/) cost of training versus $3.50/hour on amazon console
 
 ## Architectural Overview
 
@@ -49,7 +47,7 @@ The primary purpose of this template is to provide a simple single script to run
 * EC2 quota limit increases to be able to run 2 x g4dn.2xlarge spot or on demand instances (See FAQs if AWS query the rationale for the quota request)
 * Role used to import finished model into the AWS DeepRacer console
 
-This bash script utilizes the base.resources.yaml template file to provision the above resources. Note - if your public IP later changes (e.g. you reboot your router and your ISP changes your IP address) you can re-run this script with the same stack?Name with the updated ip parameter and the stack will just modify the appropriate config.
+This bash script utilizes the base.resources.yaml template file to provision the above resources. Note - if your public IP later changes (e.g. you reboot your router and your ISP changes your IP address) you can re-run this script with the same stackName with the updated ip parameter and the stack will just modify the appropriate config.
 
 ---
 ## Create Standard/Spot Instance
@@ -59,7 +57,7 @@ This bash script utilizes the base.resources.yaml template file to provision the
 INPUTS:
 * baseResourcesStackName - stackName from create-base-resource.sh if you ever forget this, you can go to cloudformation and see old stacks
 * stackName - name of this stack that will provision an ec2 instance and automatically train deepracer training.  This is also the name used for your model when it's imported into the AWS DeepRacer console, and therefore must conform to that naming convention (Up to 64 characters. Valid characters: A-Z, a-z, 0-9, and hypens (-). No spaces or underscores (_).)
-* timeToLiveInMinutes - how long you want this ec2 instance to run for. after X minutes, the instance will be terminated. Default: 60, Min:0, Max: 1440 . If you want the instance to stay alive forever, set this value to 0 (caution: you will be charged per hour the instance is running, and you will need to stop/terminate the instance on your own). You can also increase the max time in standard-instance.yaml or spot-instacnce.yaml if you wish to have a model train more than 24 hours.
+* timeToLiveInMinutes - how long you want this ec2 instance to run for. after X minutes, the instance will be terminated. Default: 60, Min:0, Max: 1440 . If you want the instance to stay alive forever, set this value to 0 (caution: you will be charged per hour the instance is running, and you will need to stop/terminate the instance on your own). You can also increase the max time in standard-instance.yaml or spot-instance.yaml if you wish to have a model train more than 24 hours.
 
 Example:
 `./create-standard-instance.sh base firstmodelbase 30`
