@@ -290,6 +290,12 @@ Resources:
               print(response_data)
               return response_data
 
+  FutureTimeCronExpressionLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/lambda/${FutureTimeCronExpressionLambda}'
+
   FutureTimeCronExpressionLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -379,6 +385,12 @@ Resources:
               return None
 
               notification_topic = os.environ['INTERRUPTION_NOTIFICATION']
+
+  TerminationLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/lambda/${TerminationLambda}'
 
   TerminationLambdaRole:
     Type: AWS::IAM::Role
@@ -500,9 +512,21 @@ Resources:
                   - servicequotas:*
                 Resource: '*'
 
+  QuotaLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/lambda/${QuotaLambda}'
+
   QuotaInvoke:
       Type: AWS::CloudFormation::CustomResource
       Version: "1.0"
       Properties:
         ServiceToken: !GetAtt QuotaLambda.Arn
         FunctionName: !Ref QuotaLambda
+
+  SSMShellScriptLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/ssm/AWS-RunShellScript'
