@@ -512,6 +512,10 @@ Resources:
                 Action:
                   - servicequotas:*
                 Resource: '*'
+              - Effect: Deny
+                Action: 
+                  - logs:CreateLogGroup
+                Resource: '*'
 
   QuotaLambdaLogGroup:
     Type: AWS::Logs::LogGroup
