@@ -1193,6 +1193,12 @@ Resources:
         Variables:
           INTERRUPTION_NOTIFICATION: !ImportValue
                                      'Fn::Sub': '${ResourcesStackName}-InterruptionNotification'
+
+  SpotInterruptionHandlerFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/lambda/${SpotInterruptionHandlerFunction}'
       
   LambdaFunctionRole:
     Type: AWS::IAM::Role
