@@ -424,6 +424,7 @@ Resources:
                   - events:*
                   - lambda:*
                   - cloudformation:DeleteStack
+                  - logs:DeleteLogGroup
                 Resource: '*'
 
   QuotaLambda:
