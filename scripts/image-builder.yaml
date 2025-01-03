@@ -632,3 +632,8 @@ Resources:
             Resource: '*'
       Topics:
         - !Ref 'ImageBuilderSNSTopic'
+  ImageBuilderLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/imagebuilder/UbuntuServerForDeepRacer-${AWS::StackName}'
