@@ -222,6 +222,10 @@ Resources:
                 <p><a href="Path_for_complete_laps.html">Path_for_complete_laps</a></p>
                 <p><a href="update_to_jupyter_url">Access Jupyter Notebook</a></p>
 
+                <h2>Need inspiration to create or improve your models?</h2>
+                <p><a href="https://partyrock.aws/u/markjross2/Rdjf1Rg9I/DeepRacer-Model-Builder" target="_blank">PartyRock powered DeepRacer Model Builder</a></p>
+                <p><a href="https://partyrock.aws/u/markjross2/qFmDwPD8x/AWS-DeepRacer-Optimiser" target="_blank">PartyRock powered DeepRacer Model Optimiser</a></p>
+                <p><a href="https://join.deepracing.io/" target="_blank">Join the AWS ML Community on Discord</a></p>
                 </body>
                 </html>
               mode : "000755"
