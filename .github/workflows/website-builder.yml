@@ -12,7 +12,8 @@ jobs:
           sudo apt install nodejs
       - name: Build website
         run: |
-          cd deepracer-on-the-spot/website
+          pwd
+          cd website
           npm ci
           npm install
           npm run build
