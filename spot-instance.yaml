@@ -351,7 +351,7 @@ Resources:
               mode : "000755"
               owner: ubuntu
               group: ubuntu
-            /home/ubuntu/deepracer-for-cloud/setup-website:
+            /home/ubuntu/deepracer-for-cloud/setup-website.sh:
               content: |
                 #!/bin/bash
                 cd ~/
@@ -359,6 +359,12 @@ Resources:
                 cd deepracer-on-the-spot
                 git checkout feature/new-website
                 cd website/dist
+                while [ "$TOKEN" == "" ]
+                do
+                  TOKEN=$(docker logs deepracer-analysis 2>&1 | grep -o -E "token=[0-9a-f]+" | head -n 1)
+                done
+                JUPYTER_URL=http://$PUBLIC_IP:8888/?$TOKEN
+                GRAFANA_URL="http://$PUBLIC_IP:3000/d/adke0lwv5zwg0e/deepracer-training-template?orgId=1&refresh=10s"
                 sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
                 sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
                 for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
@@ -372,6 +378,7 @@ Resources:
               content: |
                 #!/bin/bash
                 /home/ubuntu/bin/start_analysis.sh
+                /home/ubuntu/deepracer-for-cloud/setup-website.sh
                 USAGE_OUTPUT=output.txt
                 cd ~/deepracer-for-cloud
                 while [ true ]
