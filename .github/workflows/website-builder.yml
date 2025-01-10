@@ -17,4 +17,5 @@ jobs:
           npm ci
           npm install
           npm run build
-          npm test
+          cd dist
+          zip -r website.zip .
