@@ -1,0 +1,1 @@
+{"version":3,"file":"button-context.d.ts","sourceRoot":"","sources":["../../../../src/internal/context/button-context.ts"],"names":[],"mappings":";AAIA,OAAO,EAAE,mBAAmB,EAAE,MAAM,uBAAuB,CAAC;AAE5D,MAAM,WAAW,kBAAkB;IACjC,OAAO,EAAE,CAAC,EAAE,OAAO,EAAE,EAAE;QAAE,OAAO,EAAE,mBAAmB,CAAC,SAAS,CAAC,CAAA;KAAE,KAAK,IAAI,CAAC;CAC7E;AAED,eAAO,MAAM,aAAa,6CAExB,CAAC;AAEH,wBAAgB,gBAAgB,uBAE/B"}

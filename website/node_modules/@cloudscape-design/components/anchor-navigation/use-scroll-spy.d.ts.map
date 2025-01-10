@@ -1,0 +1,1 @@
+{"version":3,"file":"use-scroll-spy.d.ts","sourceRoot":"","sources":["../../../src/anchor-navigation/use-scroll-spy.tsx"],"names":[],"mappings":"AAMA;;;;;;;;;;;GAWG;AACH,MAAM,CAAC,OAAO,UAAU,YAAY,CAAC,EACnC,KAAK,EACL,eAAe,EACf,UAAU,GACX,EAAE;IACD,KAAK,EAAE,MAAM,EAAE,CAAC;IAChB,eAAe,EAAE,MAAM,CAAC;IACxB,UAAU,CAAC,EAAE,MAAM,CAAC;CACrB,GAAG,MAAM,GAAG,SAAS,CAgErB"}

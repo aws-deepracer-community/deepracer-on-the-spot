@@ -1,0 +1,16 @@
+/*
+ Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+*/
+/*
+ Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+*/
+.awsui_root_1ubbm_1iir1_9:not(#\9),
+.awsui_hints_1ubbm_1iir1_10:not(#\9) {
+  /* used in test-utils */
+}
+
+.awsui_hints_1ubbm_1iir1_10:not(#\9) {
+  margin-block-start: var(--space-static-xxs-82cdfi, 4px);
+}
