@@ -378,7 +378,6 @@ Resources:
               content: |
                 #!/bin/bash
                 /home/ubuntu/bin/start_analysis.sh
-                /home/ubuntu/deepracer-for-cloud/setup-website.sh
                 USAGE_OUTPUT=output.txt
                 cd ~/deepracer-for-cloud
                 while [ true ]

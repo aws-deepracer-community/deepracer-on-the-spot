@@ -67,14 +67,14 @@ export default function NavigationPanel() {
         type: "section",
         text: "Training Monitoring",
         items: [
-          { type: "link", text: "Grafana Dashboard", href: "/update_to_grafana_url", external: true},
+          { type: "link", text: "Grafana Dashboard", href: "update_to_grafana_url", external: true},
           { type: "link", text: "Training Overview", href: "/training_monitoring/training_overview" },
           { type: "link", text: "Training Progress", href: "/training_monitoring/training_progress" },
           { type: "link", text: "Training Quintiles", href: "/training_monitoring/training_quintiles" },
           { type: "link", text: "Training Reward Heatmap", href: "/training_monitoring/training_reward_heatmap" },
           { type: "link", text: "Training Data Tables", href: "/training_monitoring/training_data_tables" },
           { type: "link", text: "Training Complete Lap Paths", href: "/training_monitoring/training_complete_lap_paths" },
-          { type: "link", text: "Jupyter Notebook", href: "/update_to_jupyter_url", external: true},
+          { type: "link", text: "Jupyter Notebook", href: "update_to_jupyter_url", external: true},
         ],
       },
       {
