@@ -19,3 +19,8 @@ jobs:
           npm run build
           cd dist
           zip -r website.zip .
+      - name: Upload zip file
+        uses: actions/upload-artifact@v2
+        with:
+          name: website-zip
+          path: website/dist/website.zip
