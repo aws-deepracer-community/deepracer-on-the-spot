@@ -9,7 +9,7 @@ export default function TrainingOverviewPage() {
           <h1>Training Overview</h1>
           <p></p>
           <p>Training overview providing summary graphs and tables of training and evaluation episodes</p>
-          <iframe src="Training_and_Evaluation_Overview.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/Training_and_Evaluation_Overview.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

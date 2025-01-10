@@ -9,7 +9,7 @@ export default function RunEnvPage() {
           <h1>Run.env</h1>
           <p></p>
           <p>Contents of Run.env file used to define storage of models and training environment configuration</p>
-          <iframe src="run.env.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/run.env.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

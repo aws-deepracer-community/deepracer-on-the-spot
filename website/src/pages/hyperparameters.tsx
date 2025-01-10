@@ -9,7 +9,7 @@ export default function HyperparametersPage() {
           <h1>Hyperparameters</h1>
           <p></p>
           <p>Hyperparameters used to define the training</p>
-          <iframe src="hyperparameters.json" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/hyperparameters.json" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

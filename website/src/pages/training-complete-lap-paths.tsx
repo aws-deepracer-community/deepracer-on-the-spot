@@ -9,7 +9,7 @@ export default function TrainingCompleteLapPathsPage() {
           <h1>Training Complete Lap Paths</h1>
           <p></p>
           <p>Shows routes of complete lap paths for both the fastest and most rewarded laps.</p>
-          <iframe src="Path_for_complete_laps.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/Path_for_complete_laps.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

@@ -9,7 +9,7 @@ export default function SagemakerLogsPage() {
           <h1>SageMaker Logs</h1>
           <p></p>
           <p>Last 1000 lines of SageMaker logs</p>
-          <iframe src="sagemaker.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/sagemaker.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

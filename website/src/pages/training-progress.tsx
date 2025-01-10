@@ -9,7 +9,7 @@ export default function TrainingProgressPage() {
           <h1>Training Progress</h1>
           <p></p>
           <p>Training progress providing summary graphs</p>
-          <iframe src="Training_progress.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/Training_progress.html" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

@@ -9,7 +9,7 @@ export default function RewardFunctionPage() {
           <h1>Reward Function</h1>
           <p></p>
           <p>Reward function definition</p>
-          <iframe src="reward_function.py.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/reward_function.py.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

@@ -9,7 +9,7 @@ export default function InstanceStoragePage() {
           <h1>Storage Capacity</h1>
           <p></p>
           <p>Output of df command to give a summary of storage usage</p>
-          <iframe src="df.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/df.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

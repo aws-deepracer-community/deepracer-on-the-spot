@@ -74,7 +74,7 @@ export default function NavigationPanel() {
           { type: "link", text: "Training Reward Heatmap", href: "/training_monitoring/training_reward_heatmap" },
           { type: "link", text: "Training Data Tables", href: "/training_monitoring/training_data_tables" },
           { type: "link", text: "Training Complete Lap Paths", href: "/training_monitoring/training_complete_lap_paths" },
-          { type: "link", text: "Jupyter Notebook", href: "/update_to_grafana_url", external: true},
+          { type: "link", text: "Jupyter Notebook", href: "/update_to_jupyter_url", external: true},
         ],
       },
       {

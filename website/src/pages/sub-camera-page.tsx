@@ -10,7 +10,7 @@ export default function SubCameraPage() {
           <p></p>
           <p>Live sub camera feed from above the car.  Note - uses additional CPU so disable or increase instance size if it creates performance issues.</p>
           <p>Requires <i>DR_CAMERA_SUB_ENABLE=True</i> to enable camera</p>
-          <iframe src="http://www.example.com" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/?robo=all&camera=sub_camera&quality=75&width=480" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />

@@ -9,7 +9,7 @@ export default function DockerLogsPage() {
           <h1>Docker Logs</h1>
           <p></p>
           <p>Shows running and stopped docker containers. docker ps -a (command output): -</p>
-          <iframe src="dockerstatus.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
+          <iframe src="/dockerstatus.txt" style={{ width: "100%", height: "100vh", border: "none" }}></iframe>
         </TextContent>
       }
     />
