@@ -67,7 +67,7 @@ export default function App() {
             <Route index path="/video_feeds/kvs_camera" element={<KVSStreamPage />} />
             <Route index path="/video_feeds/main_camera" element={<MainCameraPage />} />
             <Route index path="/video_feeds/sub_camera" element={<SubCameraPage />} />
-            <Route index path="/" element={<HomePage />} />
+            <Route index path="/deepracer-menu" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

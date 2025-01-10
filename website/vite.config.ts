@@ -5,15 +5,20 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
+    port: 8101,
+    base: '/deepracer-menu/',
   },
   build: {
     rollupOptions: {
+      input: 'deepracer-menu.html',
       output: {
         entryFileNames: 'assets/[name].js',
         chunkFileNames: 'assets/[name].js',
         assetFileNames: 'assets/[name].[ext]',
       },
     },
+  },
+  preview: {
+    base: '/deepracer-menu/', // Change this to your desired base URL
   },
 });

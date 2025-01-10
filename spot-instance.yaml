@@ -351,6 +351,23 @@ Resources:
               mode : "000755"
               owner: ubuntu
               group: ubuntu
+            /home/ubuntu/deepracer-for-cloud/setup-website:
+              content: |
+                #!/bin/bash
+                cd ~/
+                git clone https://github.com/aws-deepracer-community/deepracer-on-the-spot.git
+                cd deepracer-on-the-spot
+                git checkout feature/new-website
+                cd website/dist
+                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
+                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
+                for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
+                  do
+                    docker cp . $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                  done
+              mode : "000755"
+              owner: ubuntu
+              group: ubuntu
             /home/ubuntu/bin/web_monitoring.sh:
               content: |
                 #!/bin/bash

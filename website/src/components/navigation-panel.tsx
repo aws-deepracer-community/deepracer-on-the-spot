@@ -19,7 +19,7 @@ export default function NavigationPanel() {
       {
         type: "link",
         text: "Home",
-        href: "/",
+        href: "/deepracer-menu",
       },
       {
         type: "section",
@@ -124,7 +124,7 @@ export default function NavigationPanel() {
     <SideNavigation
       onFollow={onFollow}
       onChange={onChange}
-      header={{ href: "/", text: APP_NAME }}
+      header={{ href: "/deepracer-menu", text: APP_NAME }}
       activeHref={location.pathname}
       items={items.map((value, idx) => {
         if (value.type === "section") {
