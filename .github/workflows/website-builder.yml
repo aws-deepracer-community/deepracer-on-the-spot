@@ -1,24 +1,33 @@
 name: Website Builder
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/website-builder.yml
+      - website/**
 jobs:
   update:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [18.x, 20.x, 22.x]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'      
+      - name: Install Node
+        run: |
+          sudo apt install nodejs
       - name: Build website
         run: |
-          cd deepracer-on-the-spot/website
+          pwd
+          cd website
           npm ci
           npm install
           npm run build
-          npm test
+          cd dist
+          zip -r website.zip .
+      - name: Commit updated website
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "Update website archive file" || echo "No changes to commit"
+          git push
+          

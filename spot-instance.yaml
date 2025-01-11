@@ -351,6 +351,34 @@ Resources:
               mode : "000755"
               owner: ubuntu
               group: ubuntu
+            /home/ubuntu/deepracer-for-cloud/setup-website.sh:
+              content: |
+                #!/bin/bash
+                source /etc/profile.d/dots_vars.sh
+                cd ~/
+                mkdir deepracer-on-the-spot/website/dist -p
+                aws s3 cp s3://$MY_BUCKET/website/dist/website.zip .
+                unzip website.zip
+                rm website.zip
+                while [ "$TOKEN" == "" ]
+                do
+                  TOKEN=$(docker logs deepracer-analysis 2>&1 | grep -o -E "token=[0-9a-f]+" | head -n 1)
+                done
+                JUPYTER_URL=http://$PUBLIC_IP:8888/?$TOKEN
+                GRAFANA_URL="http://$PUBLIC_IP:3000/d/adke0lwv5zwg0e/deepracer-training-template?orgId=1&refresh=10s"
+                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
+                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
+                while [ "$VIEWER_ID" == "" ]
+                do
+                  for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
+                    do
+                      VIEWER_ID=$ID
+                      docker cp . $ID:/usr/share/nginx/html/ > /dev/null 2>&1
+                    done
+                done
+              mode : "000755"
+              owner: ubuntu
+              group: ubuntu
             /home/ubuntu/bin/web_monitoring.sh:
               content: |
                 #!/bin/bash
@@ -502,7 +530,7 @@ Resources:
               content: |
                 #!/bin/bash
                 source /etc/profile.d/dots_vars.sh
-                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated for on a new instance for $STACK_NAME in region $DEEPRACER_REGION.  The new url to monitor progress is http://$PUBLIC_IP:8100/menu.html" --region $DEEPRACER_REGION
+                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated for on a new instance for $STACK_NAME in region $DEEPRACER_REGION.  The new url to monitor progress is http://$PUBLIC_IP:8100/deepracer-menu.html" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 sed -i '/DR_AWS_APP_REGION=/d' /home/ubuntu/deepracer-for-cloud/system.env
                 sed -i -e '$aDR_AWS_APP_REGION=$DEEPRACER_REGION' /home/ubuntu/deepracer-for-cloud/system.env
@@ -535,6 +563,8 @@ Resources:
                 fi
                 #start hourly error monitoring to notify on container exited or last checkpoint not progressing in the last hour
                 ./error_monitoring.sh &
+                #start new Cloudscape website
+                nohup /bin/bash -lc '/home/ubuntu/deepracer-for-cloud/setup-website.sh' &
                 while [ True ]; do
                     # if the EC2 started termination process upon interruption notification, this file should exist, hence we leave termination process to manage final uploads without conflict
                     if [[ -f /home/ubuntu/bin/termination.started ]];then

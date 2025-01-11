@@ -1,0 +1,1 @@
+{"version":3,"file":"interfaces.js","sourceRoot":"","sources":["../../../../src/internal/components/interfaces.ts"],"names":[],"mappings":"","sourcesContent":["// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\n// SPDX-License-Identifier: Apache-2.0\nexport type Offset = number | { x: number; y: number };\n"]}
