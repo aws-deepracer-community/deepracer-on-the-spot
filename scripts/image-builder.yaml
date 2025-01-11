@@ -101,7 +101,7 @@ Resources:
     Type: AWS::ImageBuilder::Component
     Properties:
       Name: !Sub 'PreReqs-${AWS::StackName}'
-      Version: '0.0.3'
+      Version: '0.0.4'
       Description: Pre-requisites.
       ChangeDescription: First version
       Platform: Linux
@@ -419,8 +419,139 @@ Resources:
     Properties:
       Name: !Sub 'DistributionConfiguration-${AWS::StackName}'
       Distributions:
-        - Region: !ImportValue
-            Fn::Sub: ${ResourcesStackName}-Region
+        - Region: eu-north-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: ca-central-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: ap-northeast-3
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: ap-south-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: us-east-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: us-east-2
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: eu-central-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: eu-west-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: us-west-2
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: eu-west-3
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: sa-east-1
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: ap-southeast-3
+          AmiDistributionConfiguration:
+            Name: !Join
+              - '-'
+              - - 'deepracer-ami-dist-config'
+                - '{{ imagebuilder:buildDate }}'
+            AmiTags:
+              Name: DeepRacer
+            LaunchPermissionConfiguration:
+              UserGroups:
+                - all
+        - Region: eu-south-1
           AmiDistributionConfiguration:
             Name: !Join
               - '-'
