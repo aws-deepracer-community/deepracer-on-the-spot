@@ -100,7 +100,7 @@ Resources:
                   export DEEPRACER_REGION=${AWS::Region}
                   export STACK_NAME=${AWS::StackName}
                   export AWS_DEFAULT_REGION=${AWS::Region}
-                  export INSTANCE_ID=$(http://169.254.169.254/latest/meta-data/instance-id)
+                  export INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
                 - SNS:
                     Fn::ImportValue:
                         !Sub "${ResourcesStackName}-InterruptionNotification"
