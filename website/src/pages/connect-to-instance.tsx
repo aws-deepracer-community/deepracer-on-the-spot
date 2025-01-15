@@ -9,6 +9,7 @@ export default function ConnectToInstancePage() {
           <h1>Connect to Instance Using AWS Systems Manager Session Manager</h1>
           <p></p>
           <p>Connect to your <a href="update_to_ssm_url" target="_blank"> Instance</a> to perform troubleshooting steps.  If you're not already authenticated to the AWS Console you'll be prompted to log in first.</p>
+          <p>Once logged in it's recommended you type 'sudo su ubuntu' to switch to the ubuntu user and then 'cd ~/deepracer-for-cloud' to get to the directory that holds the relevant data.</p>
           <p></p>
           <h2>Why use AWS Systems Manager?</h2>
           <p></p>
