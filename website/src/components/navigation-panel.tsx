@@ -79,6 +79,13 @@ export default function NavigationPanel() {
       },
       {
         type: "section",
+        text: "Troubleshooting",
+        items: [
+          { type: "link", text: "Connect to Instance", href: "/troubleshooting/connect_to_instance"},
+        ],
+      },
+      {
+        type: "section",
         text: "Inspiration and Useful Links",
         items: [
           { type: "link", text: "Improve your racing with GenAI", href: "/inspiration/genai"},

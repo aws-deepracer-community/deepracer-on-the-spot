@@ -86,6 +86,7 @@ Resources:
                   export DEEPRACER_REGION=${AWS::Region}
                   export STACK_NAME=${AWS::StackName}
                   export AWS_DEFAULT_REGION=${AWS::Region}
+                  export INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
                 - SNS:
                     Fn::ImportValue:
                         !Sub "${ResourcesStackName}-InterruptionNotification"
@@ -312,8 +313,10 @@ Resources:
                 done
                 JUPYTER_URL=http://$PUBLIC_IP:8888/?$TOKEN
                 GRAFANA_URL="http://$PUBLIC_IP:3000/d/adke0lwv5zwg0e/deepracer-training-template?orgId=1&refresh=10s"
+                SSM_URL="http://$DEEPRACER_REGION.console.aws.amazon.com/systems-manager/session-manager/$INSTANCE_ID?region=$DEEPRACER_REGION#:"
                 sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
                 sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
+                sed -i "s|update_to_ssm_url|${SSM_URL}|" assets/deepracer-menu.js
                 while [ "$VIEWER_ID" == "" ]
                 do
                   for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
