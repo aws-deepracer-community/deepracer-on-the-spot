@@ -81,7 +81,7 @@ export default function NavigationPanel() {
         type: "section",
         text: "Troubleshooting",
         items: [
-          { type: "link", text: "Connect to Instance", href: "update_to_ssm_url" , external: true},
+          { type: "link", text: "Connect to Instance", href: "/troubleshooting/connect_to_instance"},
         ],
       },
       {
