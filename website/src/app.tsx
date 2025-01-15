@@ -30,6 +30,7 @@ import TrainingQuintilesPage from "./pages/training-quintiles";
 import TrainingHeatmapPage from "./pages/training-heatmap";
 import TrainingDataTablesPage from "./pages/training-data-tables";
 import TrainingCompleteLapPathsPage from "./pages/training-complete-lap-paths";
+import ConnectToInstancePage from "./pages/connect-to-instance";
 
 export default function App() {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
@@ -41,6 +42,7 @@ export default function App() {
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
+            <Route index path="/troubleshooting/connect_to_instance" element={<ConnectToInstancePage />} />
             <Route index path="/training_monitoring/training_overview" element={<TrainingOverviewPage />} />
             <Route index path="/training_monitoring/training_progress" element={<TrainingProgressPage />} />
             <Route index path="/training_monitoring/training_quintiles" element={<TrainingQuintilesPage />} />
