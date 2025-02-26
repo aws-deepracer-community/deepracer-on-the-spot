@@ -31,6 +31,7 @@ import TrainingHeatmapPage from "./pages/training-heatmap";
 import TrainingDataTablesPage from "./pages/training-data-tables";
 import TrainingCompleteLapPathsPage from "./pages/training-complete-lap-paths";
 import ConnectToInstancePage from "./pages/connect-to-instance";
+import BaseResourcesPage from "./pages/base-resources";
 
 export default function App() {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
@@ -69,6 +70,7 @@ export default function App() {
             <Route index path="/video_feeds/kvs_camera" element={<KVSStreamPage />} />
             <Route index path="/video_feeds/main_camera" element={<MainCameraPage />} />
             <Route index path="/video_feeds/sub_camera" element={<SubCameraPage />} />
+            <Route index path="/understanding_dots/base_resources" element={<BaseResourcesPage />} />
             <Route index path="/deepracer-menu" element={<HomePage />} />
             <Route index path="/deepracer-menu.html" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />

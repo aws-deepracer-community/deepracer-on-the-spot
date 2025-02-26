@@ -92,6 +92,13 @@ export default function NavigationPanel() {
           { type: "link", text: "Useful Links", href: "/inspiration/useful_links"},
         ],
       },
+      {
+        type: "section",
+        text: "Understanding DeepRacer on the Spot",
+        items: [
+          { type: "link", text: "Base Resources", href: "/understanding_dots/base_resources"},
+        ],
+      },
     ];
 
     items.push(
