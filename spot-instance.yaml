@@ -357,8 +357,8 @@ Resources:
                 #!/bin/bash
                 source /etc/profile.d/dots_vars.sh
                 cd ~/
-                mkdir deepracer-on-the-spot/website/dist -p
-                aws s3 cp s3://$MY_BUCKET/website/dist/website.zip .
+                mkdir deepracer-on-the-spot/website -p
+                aws s3 cp s3://$MY_BUCKET/website/website.zip .
                 unzip website.zip
                 rm website.zip
                 while [ "$TOKEN" == "" ]

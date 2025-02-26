@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../../src/internal/hooks/container-queries/index.ts"],"names":[],"mappings":"AAAA,qEAAqE;AACrE,sCAAsC;AAEtC,cAAc,6BAA6B,CAAC","sourcesContent":["// Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.\n// SPDX-License-Identifier: Apache-2.0\n\nexport * from './use-container-breakpoints';\n"]}
