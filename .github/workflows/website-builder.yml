@@ -18,7 +18,6 @@ jobs:
         run: |
           pwd
           cd website
-          npm ci
           npm install
           npm run build
           cd dist
