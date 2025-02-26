@@ -58,7 +58,7 @@ set -x
 
 source custom-files/run.env
 aws s3 cp custom-files s3://${BUCKET}/${DR_LOCAL_S3_CUSTOM_FILES_PREFIX} --recursive
-aws s3 cp website/dist/website.zip s3://${BUCKET}/website/dist/website.zip
+aws s3 cp website/website.zip s3://${BUCKET}/website/website.zip
 aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName DeepRacerImportName=$stackName TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$DR_LOCAL_S3_CUSTOM_FILES_PREFIX --template-file standard-instance.yaml --s3-bucket $BUCKET --s3-prefix cf_templates
 EC2_IP=`aws cloudformation list-exports --query "Exports[?Name=='${stackName}-PublicIp'].Value" --no-paginate --output text`
 echo "Logs will upload every 2 minutes to https://s3.console.aws.amazon.com/s3/buckets/${BUCKET}/${stackName}/logs/"

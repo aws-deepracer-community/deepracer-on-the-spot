@@ -58,7 +58,7 @@ set -x
 
 source custom-files/run.env
 aws s3 cp custom-files s3://${BUCKET}/${DR_LOCAL_S3_CUSTOM_FILES_PREFIX} --recursive
-aws s3 cp website/dist/website.zip s3://${BUCKET}/website/dist/website.zip
+aws s3 cp website/website.zip s3://${BUCKET}/website/website.zip
 aws cloudformation deploy --stack-name $stackName --parameter-overrides ${instanceTypeConfig} ResourcesStackName=$baseResourcesStackName DeepRacerImportName=$stackName Name= TimeToLiveInMinutes=$timeToLiveInMinutes AmiId=$amiId BUCKET=$BUCKET CUSTOMFILELOCATION=$DR_LOCAL_S3_CUSTOM_FILES_PREFIX --template-file spot-instance.yaml --capabilities CAPABILITY_IAM --s3-bucket $BUCKET --s3-prefix cf_templates
 ASG=$(aws cloudformation describe-stacks --stack-name ${stackName} --query "Stacks[].Outputs[].OutputValue" --output text)
 EC2_ID=$(aws autoscaling describe-auto-scaling-groups --auto-scaling-group-names $ASG --query 'AutoScalingGroups[].Instances[].InstanceId' --output text)

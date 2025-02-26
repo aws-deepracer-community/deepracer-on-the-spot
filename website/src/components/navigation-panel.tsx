@@ -92,6 +92,18 @@ export default function NavigationPanel() {
           { type: "link", text: "Useful Links", href: "/inspiration/useful_links"},
         ],
       },
+      {
+        type: "section",
+        text: "Understanding DeepRacer on the Spot",
+        items: [
+          { type: "link", text: "Base Resources", href: "/understanding_dots/base_resources"},
+          { type: "link", text: "Add Access", href: "/understanding_dots/add_access"},
+          { type: "link", text: "Add Interruption Notification Subscription", href: "/understanding_dots/add_interruption_notification_subscription"},
+          { type: "link", text: "Create Standard Instance", href: "/understanding_dots/create_standard_instance"},
+          { type: "link", text: "Create Spot Instance", href: "/understanding_dots/create_spot_instance"},
+          { type: "link", text: "Image Builder", href: "/understanding_dots/image_builder"},
+        ],
+      },
     ];
 
     items.push(
