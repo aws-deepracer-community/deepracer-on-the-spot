@@ -32,6 +32,11 @@ import TrainingDataTablesPage from "./pages/training-data-tables";
 import TrainingCompleteLapPathsPage from "./pages/training-complete-lap-paths";
 import ConnectToInstancePage from "./pages/connect-to-instance";
 import BaseResourcesPage from "./pages/base-resources";
+import AddAccessPage from "./pages/add-access";
+import CreateSpotInstancePage from "./pages/create-spot-instance";
+import CreateStandardInstancePage from "./pages/create-standard-instance";
+import ImageBuilderPage from "./pages/image-builder";
+import AddInterruptionNotificationSubscriptionPage from "./pages/add-interruption-notification-subscription";
 
 export default function App() {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
@@ -71,6 +76,11 @@ export default function App() {
             <Route index path="/video_feeds/main_camera" element={<MainCameraPage />} />
             <Route index path="/video_feeds/sub_camera" element={<SubCameraPage />} />
             <Route index path="/understanding_dots/base_resources" element={<BaseResourcesPage />} />
+            <Route index path="/understanding_dots/add_access" element={<AddAccessPage />} />
+            <Route index path="/understanding_dots/add_interruption_notification_subscription" element={<AddInterruptionNotificationSubscriptionPage />} />
+            <Route index path="/understanding_dots/create_spot_instance" element={<CreateSpotInstancePage />} />
+            <Route index path="/understanding_dots/create_standard_instance" element={<CreateStandardInstancePage />} />
+            <Route index path="/understanding_dots/image_builder" element={<ImageBuilderPage />} />
             <Route index path="/deepracer-menu" element={<HomePage />} />
             <Route index path="/deepracer-menu.html" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
