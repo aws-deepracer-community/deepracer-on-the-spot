@@ -17,7 +17,9 @@ if [[ -n "$DEEPRACER_INSTANCE_TYPE" ]]; then
     instanceTypeConfig="InstanceType=$DEEPRACER_INSTANCE_TYPE"
 fi
 BUCKET=$(aws cloudformation describe-stacks --stack-name $baseResourcesStackName | jq '.Stacks | .[] | .Outputs | .[] | select(.OutputKey=="Bucket") | .OutputValue' | tr -d '"')
-amiId=$(aws ec2 describe-images --owners 747447086422 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
+#Original JPMC account
+#amiId=$(aws ec2 describe-images --owners 747447086422 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
+amiId=$(aws ec2 describe-images --owners 975050138619 --filters "Name=state,Values=available" "Name=is-public,Values=true" --query 'sort_by(Images, &CreationDate)[-1].ImageId' | tr -d '"')
 set +xa
 
 #validate stack name meets DeepRacer import constraints
