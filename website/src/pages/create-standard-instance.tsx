@@ -1,5 +1,6 @@
 import { TextContent } from "@cloudscape-design/components";
 import BaseAppLayout from "../components/base-app-layout";
+import { Link } from "react-router-dom";
 
 export default function CreateStandardInstancePage() {
   return (
@@ -10,7 +11,7 @@ export default function CreateStandardInstancePage() {
           <h2>Architecture Overview</h2>
           <img src="/images/standard-instance.png"></img>
           <p></p>
-          <p>The Create Standard Instance stack is used to create an EC2 instance in the specific region where you've deployed your <a href="/understanding_dots/base_resources">base resources stack</a>.
+          <p>The Create Standard Instance stack is used to create an EC2 instance in the specific region where you've deployed your <Link to="/understanding_dots/base_resources">base resources stack</Link>.
           The instance will have the <a href="https://aws-deepracer-community.github.io/deepracer-for-cloud/" target="_blank"> DeepRacer for Cloud</a> solution deployed to it and will undertake your training for the amount of time, in minutes, you specified when deploying the stack.</p>
           <p>The standard instance stack creates the following resources: -</p>
           <li>An <a href="https://docs.aws.amazon.com/ec2/" target="_blank"> EC2 Instance</a> that runs the training.  On to this instance a number of Docker Containers are deployed to run the training, as well as provide you this website to interact with and undertake training analysis.  Permissions required by this instance are provided using the EC2 Instance Profile that was created in the base stack.  The instance also communicates updates on training via the SNS Topic that was created in the base stack.</li>

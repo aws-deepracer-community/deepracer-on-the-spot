@@ -1,5 +1,6 @@
 import { TextContent } from "@cloudscape-design/components";
 import BaseAppLayout from "../components/base-app-layout";
+import { Link } from "react-router-dom";
 
 export default function CreateSpotInstancePage() {
   return (
@@ -10,7 +11,7 @@ export default function CreateSpotInstancePage() {
           <h2>Architecture Overview</h2>
           <img src="/images/spot-instance.png"></img>
           <p></p>
-          <p>The Create Spot Instance stack is used to create an EC2 Autoscaling Group which includes a single EC2 Spot instance in the specific region where you've deployed your <a href="/understanding_dots/base_resources">base resources stack</a>.
+          <p>The Create Spot Instance stack is used to create an EC2 Autoscaling Group which includes a single EC2 Spot instance in the specific region where you've deployed your <Link to="/understanding_dots/base_resources">base resources stack</Link>.
           The instance will have the <a href="https://aws-deepracer-community.github.io/deepracer-for-cloud/" target="_blank"> DeepRacer for Cloud</a> solution deployed to it and will undertake your training for the amount of time, in minutes, you specified when deploying the stack.  The main benefit over using the standard instance is that spot instances are significantly cheaper, however in return for them being cheaper AWS can terminate them at short notice.</p>
           <p>The spot instance stack creates the following resources: -</p>
           <li>An <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-groups.html" target="_blank"> EC2 Autoscaling Group</a>.  The autoscalign group is configured to run one EC2 Spot Instance, so if AWS terminate an existing instance a new one is automatically created. As we have a routine to handle interruptions training continues from where the previous instance finished.</li>

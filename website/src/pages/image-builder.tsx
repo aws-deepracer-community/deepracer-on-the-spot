@@ -1,5 +1,6 @@
 import { TextContent } from "@cloudscape-design/components";
 import BaseAppLayout from "../components/base-app-layout";
+import { Link } from "react-router-dom";
 
 export default function ImageBuilderPage() {
   return (
@@ -12,7 +13,7 @@ export default function ImageBuilderPage() {
           <p></p>
           <p><b>Note - for advanced users only</b></p>
           <p>The standard DeepRacer on the Spot set-up relies on an AMI being published centrally, that users can then utilise.  However there are certain circumstances where you may want to deploy your own AMI, for example perhaps the centralised solution doesn't provide an AMI in the region you want to deploy DeepRacer on the Spot into.</p>
-          <p>The image builder stack is used to create an AMI in the specific region where you've deployed your <a href="/understanding_dots/base_resources">base resources stack</a>.  If you want your own AMI in more than one region you should deploy this stack in each region where you've deployed your base stack.</p>
+          <p>The image builder stack is used to create an AMI in the specific region where you've deployed your <Link to="/understanding_dots/base_resources">base resources stack</Link>.  If you want your own AMI in more than one region you should deploy this stack in each region where you've deployed your base stack.</p>
           <p>The image builder stack creates the following resources: -</p>
           <li>An <a href="https://docs.aws.amazon.com/imagebuilder/latest/userguide/what-is-image-builder.html">EC2 Image Builder</a> configuration to create an Amazon Machine Image (AMI), which is a 'golden image' of an operating system, which includes: -</li>
           <ul>
