@@ -79,9 +79,10 @@ export default function NavigationPanel() {
       },
       {
         type: "section",
-        text: "Troubleshooting",
+        text: "Manage Training",
         items: [
-          { type: "link", text: "Connect to Instance", href: "/troubleshooting/connect_to_instance"},
+          { type: "link", text: "Connect to Instance", href: "/manage_training/connect_to_instance"},
+          { type: "link", text: "Update Training", href: "/manage_training/update_training"},
         ],
       },
       {

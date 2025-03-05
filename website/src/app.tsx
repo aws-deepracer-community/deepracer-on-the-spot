@@ -37,6 +37,7 @@ import CreateSpotInstancePage from "./pages/create-spot-instance";
 import CreateStandardInstancePage from "./pages/create-standard-instance";
 import ImageBuilderPage from "./pages/image-builder";
 import AddInterruptionNotificationSubscriptionPage from "./pages/add-interruption-notification-subscription";
+import UpdateTrainingPage from "./pages/update-training";
 
 export default function App() {
   const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
@@ -48,7 +49,8 @@ export default function App() {
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
-            <Route index path="/troubleshooting/connect_to_instance" element={<ConnectToInstancePage />} />
+            <Route index path="/manage_training/connect_to_instance" element={<ConnectToInstancePage />} />
+            <Route index path="/manage_training/update_training" element={<UpdateTrainingPage />} />
             <Route index path="/training_monitoring/training_overview" element={<TrainingOverviewPage />} />
             <Route index path="/training_monitoring/training_progress" element={<TrainingProgressPage />} />
             <Route index path="/training_monitoring/training_quintiles" element={<TrainingQuintilesPage />} />

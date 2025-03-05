@@ -139,6 +139,15 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /home/ubuntu/deepracer-for-cloud/update_stack.sh: 
+              content:
+                Fn::Sub:
+                - |
+                  timeToLiveInMinutes=$1
+                  aws cloudformation update-stack --stack-name ${AWS::StackName} --use-previous-template --parameters  ParameterKey=TimeToLiveInMinutes,ParameterValue=$timeToLiveInMinutes ParameterKey=BUCKET,UsePreviousValue=true ParameterKey=ResourcesStackName,UsePreviousValue=true ParameterKey=DeepRacerImportName,UsePreviousValue=true ParameterKey=CUSTOMFILELOCATION,UsePreviousValue=true ParameterKey=AmiId,UsePreviousValue=true --capabilities CAPABILITY_IAM
+              mode : "000755"
+              owner: root
+              group: root
             /home/ubuntu/deepracer-for-cloud/regular_physical_upload.sh: 
               content:
                 Fn::Sub:
@@ -361,6 +370,8 @@ Resources:
                 aws s3 cp s3://$MY_BUCKET/website/website.zip .
                 unzip website.zip
                 rm website.zip
+                pip install -r deepracer-on-the-spot/website/backend/requirements.txt
+                nohup python deepracer-on-the-spot/website/backend/app.py
                 while [ "$TOKEN" == "" ]
                 do
                   TOKEN=$(docker logs deepracer-analysis 2>&1 | grep -o -E "token=[0-9a-f]+" | head -n 1)
