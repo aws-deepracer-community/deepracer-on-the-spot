@@ -1,4 +1,4 @@
-import { TextContent, Button, Input } from "@cloudscape-design/components";
+import { TextContent, Button, Input, Flashbar, FlashbarProps } from "@cloudscape-design/components";
 import BaseAppLayout from "../components/base-app-layout";
 import { useState } from "react";
 
@@ -6,6 +6,7 @@ export default function UpdateTrainingPage() {
   const [loading, setLoading] = useState(false);
   const [extendTime, setExtendTime] = useState('');
   const [error, setError] = useState('');
+  const [flashMessages, setFlashMessages] = useState<ReadonlyArray<FlashbarProps.MessageDefinition>>([]);
 
   const handleEndTraining = async () => {
     setLoading(true);
@@ -20,9 +21,9 @@ export default function UpdateTrainingPage() {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      alert('Training ended successfully');
+      setFlashMessages([{ type: 'success', content: 'Training ended successfully', dismissible: true }]);
     } catch (error) {
-      alert('Failed to end training: ' + error.message);
+      setFlashMessages([{ type: 'error', content: 'Failed to end training', dismissible: true }]);
     } finally {
       setLoading(false);
     }
@@ -46,9 +47,9 @@ export default function UpdateTrainingPage() {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      alert('Training extended successfully');
+      setFlashMessages([{ type: 'success', content: 'Training extended successfully', dismissible: true }]);
     } catch (error) {
-      alert('Failed to extend training: ' + error.message);
+      setFlashMessages([{ type: 'error', content: 'Failed to extend training', dismissible: true }]);
     } finally {
       setLoading(false);
     }
@@ -58,6 +59,7 @@ export default function UpdateTrainingPage() {
     <BaseAppLayout
       content={
         <TextContent>
+          <Flashbar items={flashMessages} />
           <h1>Update your training finish time</h1>
           <h2>End Training</h2>
           <p>You may want to end your training earlier than you previously anticipated.  In order to do this you need to delete the CloudFormation stack that deployed your standard or spot instance.</p>
