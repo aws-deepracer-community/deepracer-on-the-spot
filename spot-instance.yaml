@@ -371,7 +371,7 @@ Resources:
                 unzip website.zip
                 rm website.zip
                 pip install -r deepracer-on-the-spot/website/backend/requirements.txt
-                nohup python deepracer-on-the-spot/website/backend/app.py
+                nohup python3 deepracer-on-the-spot/website/backend/app.py
                 while [ "$TOKEN" == "" ]
                 do
                   TOKEN=$(docker logs deepracer-analysis 2>&1 | grep -o -E "token=[0-9a-f]+" | head -n 1)
