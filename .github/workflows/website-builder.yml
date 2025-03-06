@@ -22,6 +22,7 @@ jobs:
           npm run build
           cd dist
           zip -r ../website.zip .
+          zip -r ../website.zip ../backend
       - name: Commit updated website
         run: |
           git config user.name github-actions
