@@ -497,7 +497,7 @@ Resources:
               content: |
                 #!/bin/bash
                 source /etc/profile.d/dots_vars.sh
-                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated for on a new instance for $STACK_NAME in region $DEEPRACER_REGION.  The new url to monitor progress is http://$PUBLIC_IP:8100/deepracer-menu.html" --region $DEEPRACER_REGION
+                aws sns publish --topic-arn $MY_SNS_TOPIC --message "Training has initiated for on a new instance for $STACK_NAME in region $DEEPRACER_REGION.  The new url to monitor progress is http://$PUBLIC_IP:8100/deepracer-menu.html#/deepracer-menu" --region $DEEPRACER_REGION
                 cd ~/deepracer-for-cloud
                 sed -i '/DR_AWS_APP_REGION=/d' /home/ubuntu/deepracer-for-cloud/system.env
                 sed -i -e '$aDR_AWS_APP_REGION=$DEEPRACER_REGION' /home/ubuntu/deepracer-for-cloud/system.env

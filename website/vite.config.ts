@@ -10,7 +10,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      input: 'deepracer-menu.html',
+      input: 'deepracer-menu.html#/deepracer-menu',
       output: {
         entryFileNames: 'assets/[name].js',
         chunkFileNames: 'assets/[name].js',

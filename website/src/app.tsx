@@ -1,5 +1,4 @@
-import { HashRouter, BrowserRouter, Routes, Route } from "react-router-dom";
-import { USE_BROWSER_ROUTER } from "./common/constants";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import GlobalHeader from "./components/global-header";
 import HomePage from "./pages/home";
 import "./styles/app.scss";
@@ -40,7 +39,7 @@ import AddInterruptionNotificationSubscriptionPage from "./pages/add-interruptio
 import UpdateTrainingPage from "./pages/update-training";
 
 export default function App() {
-  const Router = USE_BROWSER_ROUTER ? BrowserRouter : HashRouter;
+  const Router = HashRouter;
 
   return (
     <div style={{ height: "100%" }}>
@@ -84,7 +83,7 @@ export default function App() {
             <Route index path="/understanding_dots/create_standard_instance" element={<CreateStandardInstancePage />} />
             <Route index path="/understanding_dots/image_builder" element={<ImageBuilderPage />} />
             <Route index path="/deepracer-menu" element={<HomePage />} />
-            <Route index path="/deepracer-menu.html" element={<HomePage />} />
+            <Route index path="/deepracer-menu.html#/deepracer-menu" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
