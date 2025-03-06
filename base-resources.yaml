@@ -172,6 +172,8 @@ Resources:
                   - iam:DeleteRole
                   - events:DeleteRule
                   - events:RemoveTargets
+                  - events:PutRule
+                  - events:DescribeRule
                   - lambda:RemovePermission
                   - lambda:DeleteFunction
                   - lambda:InvokeFunction
@@ -179,6 +181,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - cloudformation:DeleteStack
+                  - cloudformation:UpdateStack
                 Resource: 
                   - !Sub "arn:${AWS::Partition}:cloudformation:${AWS::Region}:${AWS::AccountId}:stack/*"
               - Effect: Allow
