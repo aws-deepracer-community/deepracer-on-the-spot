@@ -83,7 +83,7 @@ export default function App() {
             <Route index path="/understanding_dots/create_standard_instance" element={<CreateStandardInstancePage />} />
             <Route index path="/understanding_dots/image_builder" element={<ImageBuilderPage />} />
             <Route index path="/deepracer-menu" element={<HomePage />} />
-            <Route index path="/deepracer-menu.html#/deepracer-menu" element={<HomePage />} />
+            <Route index path="/deepracer-menu.html" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
