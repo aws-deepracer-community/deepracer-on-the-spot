@@ -106,6 +106,16 @@ export default function NavigationPanel() {
           { type: "link", text: "Image Builder", href: "/understanding_dots/image_builder"},
         ],
       },
+      {
+        type: "section",
+        text: "Improving your training through analysis",
+        items: [
+          { type: "link", text: "Understanding Grafana Dashboards", href: "/understanding_training/grafana_dashboards"},
+          { type: "link", text: "Understanding Jupyter Notebooks", href: "/understanding_training/jupyter_notebooks"},
+          { type: "link", text: "Understanding Hyperparameters", href: "/understanding_training/hyperparameters"},
+          { type: "link", text: "Understanding Model Metadata", href: "/understanding_training/model_metadata"},
+        ],
+      },
     ];
 
     items.push(

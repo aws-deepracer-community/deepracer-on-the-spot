@@ -38,6 +38,10 @@ import ImageBuilderPage from "./pages/image-builder";
 import AddInterruptionNotificationSubscriptionPage from "./pages/add-interruption-notification-subscription";
 import UpdateTrainingPage from "./pages/update-training";
 import SaveModelPage from "./pages/save-model";
+import UnderstandingGrafanaDashboardsPage from "./pages/understanding-grafana-dashboards";
+import UnderstandingJupyterNotebooksPage from "./pages/understanding-jupyter-notebooks";
+import UnderstandingHyperparametersPage from "./pages/understanding-hyperparameters";
+import UnderstandingModelMetadata from "./pages/understanding-model-metadata";
 
 export default function App() {
   const Router = HashRouter;
@@ -49,6 +53,10 @@ export default function App() {
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
+            <Route index path="/understanding_training/model_metadata" element={< UnderstandingModelMetadata />} />
+            <Route index path="/understanding_training/hyperparameters" element={< UnderstandingHyperparametersPage />} />
+            <Route index path="/understanding_training/jupyter_notebooks" element={<UnderstandingJupyterNotebooksPage />} />
+            <Route index path="/understanding_training/grafana_dashboards" element={<UnderstandingGrafanaDashboardsPage />} />
             <Route index path="/manage_training/connect_to_instance" element={<ConnectToInstancePage />} />
             <Route index path="/manage_training/update_training" element={<UpdateTrainingPage />} />
             <Route index path="/manage_training/save_models" element={<SaveModelPage />} />
