@@ -37,6 +37,7 @@ import CreateStandardInstancePage from "./pages/create-standard-instance";
 import ImageBuilderPage from "./pages/image-builder";
 import AddInterruptionNotificationSubscriptionPage from "./pages/add-interruption-notification-subscription";
 import UpdateTrainingPage from "./pages/update-training";
+import SaveModelPage from "./pages/save-model";
 
 export default function App() {
   const Router = HashRouter;
@@ -50,6 +51,7 @@ export default function App() {
           <Routes>
             <Route index path="/manage_training/connect_to_instance" element={<ConnectToInstancePage />} />
             <Route index path="/manage_training/update_training" element={<UpdateTrainingPage />} />
+            <Route index path="/manage_training/save_models" element={<SaveModelPage />} />
             <Route index path="/training_monitoring/training_overview" element={<TrainingOverviewPage />} />
             <Route index path="/training_monitoring/training_progress" element={<TrainingProgressPage />} />
             <Route index path="/training_monitoring/training_quintiles" element={<TrainingQuintilesPage />} />

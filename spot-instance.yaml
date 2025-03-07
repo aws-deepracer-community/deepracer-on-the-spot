@@ -139,6 +139,45 @@ Resources:
               mode : "000755"
               owner: root
               group: root
+            /home/ubuntu/deepracer-for-cloud/save_virtual_model.sh: 
+              content: |
+                sudo su ubuntu
+                cd ~/deepracer-for-cloud
+                source bin/activate.sh
+                source /etc/profile.d/dots_vars.sh
+                dr-reload
+                dr-upload-model -f
+              mode : "000755"
+              owner: root
+              group: root
+            /home/ubuntu/deepracer-for-cloud/save_physical_model.sh: 
+              content:
+                Fn::Sub:
+                - |
+                  sudo su ubuntu
+                  cd ~/deepracer-for-cloud
+                  source bin/activate.sh
+                  source /etc/profile.d/dots_vars.sh
+                  dr-reload
+                  dr-upload-car-zip -fL
+                  CHECKPOINT=$(cat deepracer_checkpoints.json | awk -F'name' '{print $2}' | awk -F',' '{ print $1}' | awk -F '\"' '{ print $3}' | awk -F'_' '{ print $1 }')
+                  aws s3 mv s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/carfile.tar.gz s3://$DR_LOCAL_S3_BUCKET/$DR_UPLOAD_S3_PREFIX/${DeepRacerImportName}-chk$CHECKPOINT.tar.gz
+                - DeepRacerImportName:
+                    !Ref DeepRacerImportName
+              mode : "000755"
+              owner: root
+              group: root
+            /home/ubuntu/deepracer-for-cloud/save_console_model.sh: 
+              content:
+                Fn::Sub:
+                - |
+                  sudo aws deepracer import-model --name '${DeepRacerImportName}' --description "$DR_WORLD_NAME imported from s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX by DeepRacer on the Spot" --model-artifacts-s3-path s3://$DR_UPLOAD_S3_BUCKET/$DR_UPLOAD_S3_PREFIX  --role-arn ${DR_IMPORT_ROLENAME} --type REINFORCEMENT_LEARNING --region us-east-1
+                - DR_IMPORT_ROLENAME:
+                       Fn::ImportValue:
+                           !Sub "${ResourcesStackName}-DeepRacerServiceRole"
+              mode : "000755"
+              owner: root
+              group: root 
             /home/ubuntu/deepracer-for-cloud/update_stack.sh: 
               content:
                 Fn::Sub:
@@ -369,7 +408,9 @@ Resources:
             /home/ubuntu/deepracer-for-cloud/setup-website.sh:
               content: |
                 #!/bin/bash
+                source bin/activate.sh
                 source /etc/profile.d/dots_vars.sh
+                dr-reload
                 cd ~/
                 mkdir deepracer-on-the-spot/website -p
                 aws s3 cp s3://$MY_BUCKET/website/website.zip .
@@ -384,11 +425,15 @@ Resources:
                 GRAFANA_URL="http://$PUBLIC_IP:3000/d/adke0lwv5zwg0e/deepracer-training-template?orgId=1&refresh=10s"
                 SSM_URL="http://$DEEPRACER_REGION.console.aws.amazon.com/systems-manager/session-manager/$INSTANCE_ID?region=$DEEPRACER_REGION#:"
                 CF_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/cloudformation/home?region=$DEEPRACER_REGION#"
-                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_ssm_url|${SSM_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_publicip|${PUBLIC_IP}|" assets/deepracer-menu.js
-                sed -i "s|update_to_cf_url|${CF_URL}|" assets/deepracer-menu.js
+                S3_VIRTUAL_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/s3/buckets/$MY_BUCKET?region=$DEEPRACER_REGION&bucketType=general&prefix=$DR_UPLOAD_S3_PREFIX/&showversions=false"
+                S3_PHYSICAL_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/s3/buckets/$MY_BUCKET?region=$DEEPRACER_REGION&bucketType=general&prefix=$DR_UPLOAD_S3_PREFIX/&showversions=false"
+                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_ssm_url|${SSM_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_publicip|${PUBLIC_IP}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_cf_url|${CF_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_s3_virtual_url|${S3_VIRTUAL_URL//&/\\&}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_s3_physical_url|${S3_PHYSICAL_URL//&/\\&}|g" assets/deepracer-menu.js
                 while [ "$VIEWER_ID" == "" ]
                 do
                   for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`
