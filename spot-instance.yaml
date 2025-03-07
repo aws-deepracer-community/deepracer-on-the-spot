@@ -427,13 +427,13 @@ Resources:
                 CF_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/cloudformation/home?region=$DEEPRACER_REGION#"
                 S3_VIRTUAL_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/s3/buckets/$MY_BUCKET?region=$DEEPRACER_REGION&bucketType=general&prefix=$DR_UPLOAD_S3_PREFIX/&showversions=false"
                 S3_PHYSICAL_URL="https://$DEEPRACER_REGION.console.aws.amazon.com/s3/buckets/$MY_BUCKET?region=$DEEPRACER_REGION&bucketType=general&prefix=$DR_UPLOAD_S3_PREFIX/&showversions=false"
-                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_ssm_url|${SSM_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_publicip|${PUBLIC_IP}|" assets/deepracer-menu.js
-                sed -i "s|update_to_cf_url|${CF_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_s3_virtual_url|${S3_VIRTUAL_URL}|" assets/deepracer-menu.js
-                sed -i "s|update_to_s3_physical_url|${S3_PHYSICAL_URL}|" assets/deepracer-menu.js
+                sed -i "s|update_to_jupyter_url|${JUPYTER_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_grafana_url|${GRAFANA_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_ssm_url|${SSM_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_publicip|${PUBLIC_IP}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_cf_url|${CF_URL}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_s3_virtual_url|${S3_VIRTUAL_URL//&/\\&}|g" assets/deepracer-menu.js
+                sed -i "s|update_to_s3_physical_url|${S3_PHYSICAL_URL//&/\\&}|g" assets/deepracer-menu.js
                 while [ "$VIEWER_ID" == "" ]
                 do
                   for ID  in `docker ps --filter name=viewer --format "{{.ID}}"`

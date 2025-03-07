@@ -86,14 +86,14 @@ export default function SaveModelPage() {
           <p>You can set this to automatically happen on a schedule by setting <i>DR_REGULAR_UPLOAD=</i> and the number of minutes you want to pass between each checkpoint save, e.g. <i>DR_REGULAR_UPLOAD=60</i> will save a checkpoint every 60 minutes.</p>
           <p>However if you've forgot to set this variable or you simply want to save an ad-hoc checkpoint of your model you can use this button: -</p>
           <Button onClick={handleSaveVirtual} loading={loadingSaveModelEnd}>Save virtual model to S3</Button>
-          <p>Upon completion your model will be saved to your <a href={`${s3_virtual_url}`} target="_blank"> S3 Bucket</a></p>
+          <p>Upon completion your model will be saved to your <a href={`${s3_virtual_url}`} target="_blank"> S3 Bucket</a>, you can use this location to manual import into the DeepRacer Console, or by cloning to continue your training by ensuring the <i>model/.coach_checkpoint</i> and <i>model/deepracer_checkpoints.json</i> reference the checkpoint you want to use.</p>
           <p></p>
           <h2>Save Physical Model to S3</h2>
           <p>DeepRacer on the Spot allows you to save checkpoints of your physical model to take part in physical racing.</p>
           <p>You can set this to automatically happen on a schedule by setting <i>DR_REGULAR_PHYSICAL_MODEL_UPLOAD=</i> and the number of minutes you want to pass between each physical model save, e.g. <i>DR_REGULAR_PHYSICAL_MODEL_UPLOAD=60</i> will save a physical model every 60 minutes.</p>
           <p>However if you've forgot to set this variable or you simply want to save an ad-hoc checkpoint of your model you can use this button: -</p>
           <Button onClick={handleSavePhysical} loading={loadingSavePhysicalModelEnd}>Save physical model to S3</Button>
-          <p>Upon completion your model will be saved to your <a href={`${s3_physical_url}`} target="_blank"> S3 Bucket</a></p>
+          <p>Upon completion your model will be saved to your <a href={`${s3_physical_url}`} target="_blank"> S3 Bucket</a> in the name format <i>modelname</i>-chk<i>number</i>.tar.gz</p>
           <p></p>
           <h2>Import Model to DeepRacer Console</h2>
           <p>DeepRacer on the Spot allows you to import your model into the DeepRacer console to take part in virtual races against other people.</p>
