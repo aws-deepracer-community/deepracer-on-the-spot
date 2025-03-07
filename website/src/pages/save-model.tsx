@@ -67,7 +67,7 @@ export default function SaveModelPage() {
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      setFlashMessages([{ type: 'success', content: 'Model successfully imported tot he DeepRacer console.', dismissible: true }]);
+      setFlashMessages([{ type: 'success', content: 'Model successfully imported to the DeepRacer console.', dismissible: true }]);
     } catch (error) {
       setFlashMessages([{ type: 'error', content: 'Failed to import model to console.', dismissible: true }]);
     } finally {
