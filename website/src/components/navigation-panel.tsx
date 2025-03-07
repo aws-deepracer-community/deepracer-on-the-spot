@@ -83,6 +83,7 @@ export default function NavigationPanel() {
         items: [
           { type: "link", text: "Connect to Instance", href: "/manage_training/connect_to_instance"},
           { type: "link", text: "Update Training", href: "/manage_training/update_training"},
+          { type: "link", text: "Save Model", href: "/manage_training/save_models"},
         ],
       },
       {
