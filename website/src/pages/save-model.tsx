@@ -97,8 +97,8 @@ export default function SaveModelPage() {
           <p></p>
           <h2>Import Model to DeepRacer Console</h2>
           <p>DeepRacer on the Spot allows you to import your model into the DeepRacer console to take part in virtual races against other people.</p>
-          <p>You can set this to automatically happen at the end of training by setting <i>DR_IMPORT_MODEL_ON_COMPLETION=True</i>.</p>
-          <p>However if you'd like to import an ad-hoc checkpoint of your model you can use this button: -</p>
+          <p>This is set to automatically happen at the end of training using the default setting <i>DR_IMPORT_MODEL_ON_COMPLETION=True</i> in run.env.</p>
+          <p>However if you'd like to import an ad-hoc checkpoint of your model so yuo can see how it's progressing you can use this button: -</p>
           <Button onClick={handleSaveConsole} loading={loadingSaveConsoleModelEnd}>Import model to DeepRacer Console</Button>
           <p>Once imported your model will appear in the <a href={'https://us-east-1.console.aws.amazon.com/deepracer/home?region=us-east-1#models'} target="_blank"> DeepRacer Console</a></p>
           <p></p>
