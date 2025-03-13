@@ -53,6 +53,7 @@ export default function App() {
         <div style={{ height: "56px", backgroundColor: "#000716" }}>&nbsp;</div>
         <div>
           <Routes>
+            <Route path="/" element={<HomePage />} />
             <Route index path="/understanding_training/model_metadata" element={< UnderstandingModelMetadata />} />
             <Route index path="/understanding_training/hyperparameters" element={< UnderstandingHyperparametersPage />} />
             <Route index path="/understanding_training/jupyter_notebooks" element={<UnderstandingJupyterNotebooksPage />} />
@@ -92,8 +93,6 @@ export default function App() {
             <Route index path="/understanding_dots/create_spot_instance" element={<CreateSpotInstancePage />} />
             <Route index path="/understanding_dots/create_standard_instance" element={<CreateStandardInstancePage />} />
             <Route index path="/understanding_dots/image_builder" element={<ImageBuilderPage />} />
-            <Route index path="/deepracer-menu" element={<HomePage />} />
-            <Route index path="/deepracer-menu.html" element={<HomePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

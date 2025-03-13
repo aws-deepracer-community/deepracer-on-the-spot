@@ -66,7 +66,7 @@ Example:
 `./create-spot-instance.sh base firstmodelspot 30`
 **This will run for around 3 minutes. Viewing the training will starts 5-7 minutes after this completes**
 
-Once this script completes, two links will be printed to console that show the visual training of the model and the log links of the training model I.E. ( 3.87.87.207:8080 and http://3.87.87.207:8100/deepracer-menu.html#/deepracer-menu respectively ). Paste these into your browser and **wait 5-7 minutes for training to begin**. On the visual training page, the link "/racecar/main_camera/zed/rgb/" will look most similar to the DeepRacer Console.
+Once this script completes, two links will be printed to console that show the visual training of the model and the log links of the training model I.E. ( 3.87.87.207:8080 and http://3.87.87.207:8100/deepracer-menu respectively ). Paste these into your browser and **wait 5-7 minutes for training to begin**. On the visual training page, the link "/racecar/main_camera/zed/rgb/" will look most similar to the DeepRacer Console.
 
 create-standard-instance.sh creates a single on demand ec2 instance. The instance type used is configured as the default in the standard-instance.yaml cloudformation template file.
 create-spot-instance.sh creates an Autoscaling Group comprised of a desired capacity of a single spot ec2 instance if available. This is a fantastic way to save a lot of money on training DeepRacer models, as training on a g4dn.2xl spot instance can get you 4 workers at $0.22/hour (compared to $3.50/hour for 1 worker in console). Note, deployment may fail if there isn't any spot instances of this size available. Procuring a spot instance is most common outside of US work hours.  If training is interrupted by a spot termination, assuming new spot capacity becomes available during your defined training 'timeToLiveInMinutes' a new Spot instance will be created within the autoscaling group and the training will continue from where it terminated.  This will create additional files in your S3 bucket, as subsequent training will either add -1 to your folders or will increment the last number if your name ends with a number for both your training (DR_LOCAL_S3_MODEL_PREFIX) and upload (DR_UPLOAD_S3_PREFIX) locations. If you struggle to get spot capacity you could deploy in another region, but if you do this you need to create an AMI (using scripts/create-image-builder.sh).
@@ -103,7 +103,7 @@ Note, it is also possible to interactively create a subscription on the SNS web 
 
 ## Checking instances on same Sandbox
 
-The script check-instances.sh provides a list showing the recent instances, their current status and PUBLIC_IP. It is an eazy way where users don't need to track/save the PUBLIC_IP after starting each training ( PUBLIC_IP:8100/deepracer-menu.html#/deepracer-menu ). On the other hand, if the users have executed recently the script stop-training.sh my-instance-stack-name, this my-instance-stack-name instance will be displayed as terminated.
+The script check-instances.sh provides a list showing the recent instances, their current status and PUBLIC_IP. It is an eazy way where users don't need to track/save the PUBLIC_IP after starting each training ( PUBLIC_IP:8100/deepracer-menu ). On the other hand, if the users have executed recently the script stop-training.sh my-instance-stack-name, this my-instance-stack-name instance will be displayed as terminated.
 
 Use. `./check-instances.sh`
 
