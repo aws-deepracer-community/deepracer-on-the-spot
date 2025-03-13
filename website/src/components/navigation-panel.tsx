@@ -19,7 +19,7 @@ export default function NavigationPanel() {
       {
         type: "link",
         text: "Home",
-        href: "/deepracer-menu",
+        href: "/",
       },
       {
         type: "section",
