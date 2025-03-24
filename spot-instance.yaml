@@ -1276,7 +1276,7 @@ Resources:
               try:
                   response = ssm_client.send_command(
                       InstanceIds=[instance_id],
-                      DocumentName='AWS-RunShellScript',
+                      DocumentName='${AWS::StackName}AWS-RunShellScript',
                       Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/deepracer-for-cloud/interrupt_spot.sh']},
                       CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
                       TimeoutSeconds=90)

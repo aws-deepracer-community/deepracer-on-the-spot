@@ -356,7 +356,7 @@ Resources:
               try:
                   response = ssm_client.send_command(
                       InstanceIds=[instance],
-                      DocumentName='AWS-RunShellScript',
+                      DocumentName='${AWS::StackName}AWS-RunShellScript',
                       Parameters={'commands': ['su - ubuntu bash -lc /home/ubuntu/bin/safe_termination.sh']},
                       CloudWatchOutputConfig={'CloudWatchOutputEnabled': True},
                       TimeoutSeconds=60)
@@ -537,4 +537,4 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub '/aws/ssm/AWS-RunShellScript'
+      LogGroupName: !Sub '/aws/ssm/${AWS::StackName}AWS-RunShellScript'
