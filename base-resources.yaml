@@ -533,8 +533,10 @@ Resources:
         ServiceToken: !GetAtt QuotaLambda.Arn
         FunctionName: !Ref QuotaLambda
 
-  SSMShellScriptLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      RetentionInDays: 7
-      LogGroupName: !Sub '/aws/ssm/AWS-RunShellScript'
+  ##Temporaily disable to allow multip base resources to be created in same region
+  ## TODO - find a method to conditionally create this resource
+  #SSMShellScriptLogGroup:
+  #  Type: AWS::Logs::LogGroup
+  #  Properties:
+  #    RetentionInDays: 7
+  #    LogGroupName: !Sub '/aws/ssm/AWS-RunShellScript'
