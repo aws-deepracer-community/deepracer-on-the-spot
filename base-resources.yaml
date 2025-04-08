@@ -533,10 +533,120 @@ Resources:
         ServiceToken: !GetAtt QuotaLambda.Arn
         FunctionName: !Ref QuotaLambda
 
-  ##Temporaily disable to allow multip base resources to be created in same region
-  ## TODO - find a method to conditionally create this resource
-  #SSMShellScriptLogGroup:
-  #  Type: AWS::Logs::LogGroup
-  #  Properties:
-  #    RetentionInDays: 7
-  #    LogGroupName: !Sub '/aws/ssm/AWS-RunShellScript'
+  RetentionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: LogGroupRetention
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:PutRetentionPolicy
+                  - logs:DeleteLogGroup
+                  - logs:CreateLogGroup
+                  - logs:DescribeLogGroups
+                  - cloudformation:ListStacks
+                Resource: '*'
+              - Effect: Deny
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-RetentionLambda*'
+
+  RetentionLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt RetentionLambdaRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          
+          def handler(event, context):
+              try:
+                  if event['RequestType'] in ['Create', 'Update']:
+                      logs = boto3.client('logs')
+                      log_group_name = '/aws/ssm/AWS-RunShellScript'
+                      
+                      # Check if log group exists
+                      exists = False
+                      response = logs.describe_log_groups(logGroupNamePrefix=log_group_name)
+                      for log_group in response['logGroups']:
+                          if log_group['logGroupName'] == log_group_name:
+                              exists = True
+                              break
+                      
+                      # Create log group if it doesn't exist
+                      if not exists:
+                          logs.create_log_group(logGroupName=log_group_name)
+                      
+                      # Set retention policy
+                      logs.put_retention_policy(
+                          logGroupName=log_group_name,
+                          retentionInDays=7
+                      )
+                      response_data = {'Message': 'Log group created/updated with retention policy successfully'}
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+                  elif event['RequestType'] == 'Delete':
+                      # Get the stack ID that's being deleted
+                      stack_id = event['StackId']
+                      
+                      # Initialize CloudFormation client
+                      cf_client = boto3.client('cloudformation')
+                      
+                      # List all active stacks
+                      active_stacks = []
+                      paginator = cf_client.get_paginator('list_stacks')
+                      for page in paginator.paginate(StackStatusFilter=[
+                          'CREATE_IN_PROGRESS', 'CREATE_COMPLETE',
+                          'ROLLBACK_IN_PROGRESS', 'ROLLBACK_COMPLETE',
+                          'UPDATE_IN_PROGRESS', 'UPDATE_COMPLETE_CLEANUP_IN_PROGRESS',
+                          'UPDATE_COMPLETE', 'UPDATE_ROLLBACK_IN_PROGRESS',
+                          'UPDATE_ROLLBACK_COMPLETE_CLEANUP_IN_PROGRESS',
+                          'UPDATE_ROLLBACK_COMPLETE'
+                      ]):
+                          for stack in page['StackSummaries']:
+                              if stack['StackId'] != stack_id:  # Exclude the stack being deleted
+                                  active_stacks.append(stack['StackId'])
+                      
+                      # If this is the last stack, delete the log group
+                      if not active_stacks:
+                          logs = boto3.client('logs')
+                          try:
+                              logs.delete_log_group(
+                                  logGroupName='/aws/ssm/AWS-RunShellScript'
+                              )
+                              response_data = {'Message': 'Log group deleted successfully'}
+                          except logs.exceptions.ResourceNotFoundException:
+                              response_data = {'Message': 'Log group already deleted'}
+                      else:
+                          response_data = {'Message': 'Other stacks exist, keeping log group'}
+                      
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, response_data)
+              except Exception as e:
+                  response_data = {'Error': str(e)}
+                  cfnresponse.send(event, context, cfnresponse.FAILED, response_data)
+      Runtime: python3.11
+      Timeout: 30
+
+  RetentionLambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub '/aws/lambda/${RetentionLambda}'
+
+  SetRetentionCustomResource:
+    Type: Custom::SetRetention
+    Properties:
+      ServiceToken: !GetAtt RetentionLambda.Arn
