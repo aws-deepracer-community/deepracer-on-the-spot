@@ -1,33 +1,34 @@
 def reward_function(params):
     '''
-    Example of penalize steering, which helps mitigate zig-zag behaviors
+    Example of rewarding the agent to follow center line
     '''
     
     # Read input parameters
-    distance_from_center = params['distance_from_center']
-    track_width = params['track_width']
-    steering = abs(params['steering_angle']) # Only need the absolute steering angle
-
-    # Calculate 3 marks that are farther and father away from the center line
-    marker_1 = 0.1 * track_width
-    marker_2 = 0.25 * track_width
-    marker_3 = 0.5 * track_width
-
-    # Give higher reward if the car is closer to center line and vice versa
-    if distance_from_center <= marker_1:
-        reward = 1
-    elif distance_from_center <= marker_2:
-        reward = 0.5
-    elif distance_from_center <= marker_3:
-        reward = 0.1
+    is_offtrack = params['is_offtrack']
+    all_wheels_on_track = params['all_wheels_on_track']
+    speed = params['speed']
+    is_reversed = params['is_reversed']
+    steering_angle = params['steering_angle']
+    
+    if is_reversed:
+        reward += 1e-500000
     else:
-        reward = 1e-3  # likely crashed/ close to off track
-
-    # Steering penality threshold, change the number based on your action space setting
-    ABS_STEERING_THRESHOLD = 15
-
-    # Penalize reward if the car is steering too much
-    if steering > ABS_STEERING_THRESHOLD:
-        reward *= 0.8
+        reward += 2
+        
+    if all_wheels_on_track:
+        reward += 2
+    else:
+        reward += 1e-500000
+        
+    if is_offtrack: # off the track
+        reward += 1e-500000
+    else: # on the track
+        reward += 2
+        
+    reward = reward * 0.1
+    
+    reward += 31 - abs(steering_angle)
+    
+    reward += (speed + 1)
 
     return float(reward)
