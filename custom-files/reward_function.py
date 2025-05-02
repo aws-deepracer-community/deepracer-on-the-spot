@@ -9,6 +9,8 @@ def reward_function(params):
     speed = params['speed']
     is_reversed = params['is_reversed']
     steering_angle = params['steering_angle']
+    progress = params['progress']
+    steps = params['steps']
     
     if is_reversed:
         reward += 1e-500000
@@ -30,5 +32,10 @@ def reward_function(params):
     reward += 31 - abs(steering_angle)
     
     reward += (speed + 1)
+
+    progressInt = progress * 100
+    progressOverSteps = progress / steps
+
+    reward += progressOverSteps
 
     return float(reward)
