@@ -112,6 +112,22 @@ Resources:
                 - - 'arn:aws:s3:::'
                   - !Ref Bucket
                   - '/*'
+          - Effect: 'Deny'
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref Bucket
+              - !Join
+                - ''
+                - - 'arn:aws:s3:::'
+                  - !Ref Bucket
+                  - '/*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false          
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
